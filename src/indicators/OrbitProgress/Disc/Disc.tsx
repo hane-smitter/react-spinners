@@ -1,19 +1,21 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
 import "./Disc.scss";
 import { DiscProps } from "./Disc.types";
+import { defaultColor } from "../../variables";
 
 const Disc = (props: DiscProps) => {
+	const DEFAULT_COLOR: string = defaultColor;
 	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
-	const DEFAULT_ANIMATION_DURATION = "1.2s"; // Animation's default duration
+	const DEFAULT_ANIMATION_DURATION = "1.5s"; // Animation's default duration
 	const { animationPeriod } = useAnimationPacer(
 		props?.speedPlus,
 		DEFAULT_ANIMATION_DURATION
@@ -33,6 +35,29 @@ const Disc = (props: DiscProps) => {
 		colorProp,
 		colorReset
 	);
+
+	// Registering/giving types to css variables controlling color of spinner
+	useEffect(() => {
+		const colorVars = [
+			"--disc-color1",
+			"--disc-color2",
+			"--disc-color3",
+			"--disc-color4"
+		];
+
+		for (let i = 0; i < colorVars.length; i++) {
+			try {
+				window.CSS.registerProperty({
+					name: colorVars[i],
+					syntax: "<color>",
+					inherits: true,
+					initialValue: DEFAULT_COLOR
+				});
+			} catch (error) {
+				continue;
+			}
+		}
+	}, []);
 
 	return (
 		<span
@@ -55,7 +80,18 @@ const Disc = (props: DiscProps) => {
 				ref={elemRef}
 				style={{ ...discColorStyles, ...styles }}
 			>
-				<span className="rli-d-i-b disc-ring"></span>
+				<svg className="whirl" viewBox="25 25 50 50">
+					{/* 👇SVGGeometry length: 124.85393524169922 */}
+					<circle
+						className="path"
+						cx="50"
+						cy="50"
+						r="20"
+						fill="none"
+						strokeWidth="3"
+						strokeMiterlimit="10"
+					/>
+				</svg>
 
 				<Text
 					className="disc-text"
@@ -84,15 +120,23 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		// Pick first item as the color
-		const [color] = colorProp;
+		const arrLength = colorProp.length;
+		for (let idx = 0; idx < arrLength; idx++) {
+			if (idx >= 4) break;
+			let colorId: number = idx + 1;
 
-		stylesObject["color"] = color;
+			stylesObject[`--disc-color${colorId}`] = colorProp[idx];
+		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	// If color prop is not an array, set all coloring vars to the received prop
+	for (let idx: number = 0; idx <= 3; idx++) {
+		let colorId: number = idx + 1;
+
+		stylesObject[`--disc-color${colorId}`] = colorProp;
+	}
 
 	return stylesObject;
 }
