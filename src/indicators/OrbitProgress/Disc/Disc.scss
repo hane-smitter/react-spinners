@@ -55,26 +55,28 @@ $animationFn: var(--rli-animation-function, ease-in-out);
   }
 }
 
-@property --disc-color1 {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: defaults.$defaultColor;
-}
-@property --disc-color2 {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: defaults.$defaultColor;
-}
-@property --disc-color3 {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: defaults.$defaultColor;
-}
-@property --disc-color4 {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: defaults.$defaultColor;
-}
+// 👇 Added via JS for better cross-browser support
+//
+// @property --disc-color1 {
+//   syntax: "<color>";
+//   inherits: true;
+//   initial-value: defaults.$defaultColor;
+// }
+// @property --disc-color2 {
+//   syntax: "<color>";
+//   inherits: true;
+//   initial-value: defaults.$defaultColor;
+// }
+// @property --disc-color3 {
+//   syntax: "<color>";
+//   inherits: true;
+//   initial-value: defaults.$defaultColor;
+// }
+// @property --disc-color4 {
+//   syntax: "<color>";
+//   inherits: true;
+//   initial-value: defaults.$defaultColor;
+// }
 
 @keyframes rotate {
   100% {
