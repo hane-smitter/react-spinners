@@ -5,6 +5,7 @@ interface TextProps {
 	text?: string | boolean;
 	textColor?: string;
 	staticText?: boolean;
+	style?: React.CSSProperties;
 }
 
 const staticTextStyles: React.CSSProperties = {
@@ -16,7 +17,7 @@ const staticTextStyles: React.CSSProperties = {
 };
 
 const Text = (props: TextProps): JSX.Element | null => {
-	const { className, text, textColor, staticText } = props;
+	const { className, text, textColor, staticText, style } = props;
 	return text ? (
 		<span
 			className={`rli-d-i-b rli-text-format ${className || ""}`.trim()}
@@ -25,7 +26,8 @@ const Text = (props: TextProps): JSX.Element | null => {
 				...(textColor && {
 					color: textColor,
 					mixBlendMode: "unset"
-				})
+				}),
+				...(style && style)
 			}}
 		>
 			{typeof text === "string" && text.length ? text : "loading"}
