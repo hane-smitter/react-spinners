@@ -4,11 +4,13 @@ import typescript from "@rollup/plugin-typescript";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import dts from "rollup-plugin-dts";
 import postcss from "rollup-plugin-postcss";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import autoprefixer from "autoprefixer";
 import path from "path";
 import { globSync as glob } from "glob";
 
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 const packageJson = require("./package.json");
 
 export default [
