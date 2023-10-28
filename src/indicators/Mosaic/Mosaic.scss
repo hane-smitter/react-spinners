@@ -1,19 +1,21 @@
 @use "../../scss/variables" as defaults;
 
-$animationDuration: var(--rli-animation-duration, 1.3s);
+$animationDuration: var(--rli-animation-duration, 1.5s);
 $animationFn: var(--rli-animation-function, ease-in-out);
 $interval: var(--mosaic-skip-interval, 0.1s);
+$numClrVars: 4; // Number of coloring variables
 
 .mosaic-rli-bounding-box {
   box-sizing: border-box;
   font-size: defaults.$fontSizer;
-  color: defaults.$defaultColor;
+  color: var(--mosaic-color1, defaults.$defaultColor);
 
   .mosaic-throbber {
     width: 5em;
     height: 5em;
     color: currentColor;
     display: grid;
+    gap: 0.125em;
     grid-template-columns: repeat(3, 1fr);
     grid-template-areas:
       "a b c"
@@ -37,10 +39,10 @@ $interval: var(--mosaic-skip-interval, 0.1s);
     }
 
     .mosaic-cube {
-      background-color: currentColor;
+      background-color: var(--mosaic-color1);
 
-      animation-name: mosaicAnimate;
-      animation-duration: $animationDuration;
+      animation-name: mosaicAnimate, mosaicColoring;
+      animation-duration: $animationDuration, calc($animationDuration * $numClrVars);
       animation-timing-function: $animationFn;
       animation-iteration-count: infinite;
     }
@@ -86,13 +88,52 @@ $interval: var(--mosaic-skip-interval, 0.1s);
 
 @keyframes mosaicAnimate {
   0%,
-  70%,
+  60%,
   100% {
-    transform: scale(1, 1);
+    // transform: scale(1, 1);
     transform: scale3D(1, 1, 1);
   }
-  35% {
-    transform: scale(0, 0);
+  30% {
+    // transform: scale(0, 0);
     transform: scale3D(0, 0, 1);
+  }
+}
+
+// 👇 Added via JS for better cross-browser support
+//
+// @property --mosaic-color1 {
+//   syntax: "<color>";
+//   inherits: true;
+//   initial-value: defaults.$defaultColor;
+// }
+// @property --mosaic-color2 {
+//   syntax: "<color>";
+//   inherits: true;
+//   initial-value: defaults.$defaultColor;
+// }
+// @property --mosaic-color3 {
+//   syntax: "<color>";
+//   inherits: true;
+//   initial-value: defaults.$defaultColor;
+// }
+// @property --mosaic-color4 {
+//   syntax: "<color>";
+//   inherits: true;
+//   initial-value: defaults.$defaultColor;
+// }
+
+@keyframes mosaicColoring {
+  100%,
+  0% {
+    background-color: var(--mosaic-color1);
+  }
+  25% {
+    background-color: var(--mosaic-color2);
+  }
+  50% {
+    background-color: var(--mosaic-color3);
+  }
+  75% {
+    background-color: var(--mosaic-color4);
   }
 }
