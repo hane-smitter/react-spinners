@@ -3,12 +3,24 @@
 $animationDuration: var(--rli-animation-duration, 1.5s);
 $animationFn: var(--rli-animation-function, ease-in-out);
 $interval: var(--mosaic-skip-interval, 0.1s);
-$numClrVars: 4; // Number of coloring variables
+$colorVarsNum: 4; // Number of coloring variables
+
+@function mosaicColorVar($num: null) {
+	$cssVar: var(--mosaic-phase1-color);
+
+	@if ($num and $num != 1) {
+		$cssVar: var(--mosaic-phase#{$num}-color, $cssVar);
+	}
+
+	@return $cssVar;
+}
 
 .mosaic-rli-bounding-box {
+  --mosaic-phase1-color: #{defaults.$defaultColor};
+
   box-sizing: border-box;
   font-size: defaults.$fontSizer;
-  color: var(--mosaic-color1, defaults.$defaultColor);
+  color: mosaicColorVar();
 
   .mosaic-throbber {
     width: 5em;
@@ -39,10 +51,10 @@ $numClrVars: 4; // Number of coloring variables
     }
 
     .mosaic-cube {
-      background-color: var(--mosaic-color1);
+      background-color: mosaicColorVar();
 
       animation-name: mosaicAnimate, mosaicColoring;
-      animation-duration: $animationDuration, calc($animationDuration * $numClrVars);
+      animation-duration: $animationDuration, calc($animationDuration * $colorVarsNum);
       animation-timing-function: $animationFn;
       animation-iteration-count: infinite;
     }
@@ -101,22 +113,22 @@ $numClrVars: 4; // Number of coloring variables
 
 // 👇 Added via JS for better cross-browser support
 //
-// @property --mosaic-color1 {
+// @property mosaicColorVar(1) {
 //   syntax: "<color>";
 //   inherits: true;
 //   initial-value: defaults.$defaultColor;
 // }
-// @property --mosaic-color2 {
+// @property mosaicColorVar(2) {
 //   syntax: "<color>";
 //   inherits: true;
 //   initial-value: defaults.$defaultColor;
 // }
-// @property --mosaic-color3 {
+// @property mosaicColorVar(3) {
 //   syntax: "<color>";
 //   inherits: true;
 //   initial-value: defaults.$defaultColor;
 // }
-// @property --mosaic-color4 {
+// @property mosaicColorVar(4) {
 //   syntax: "<color>";
 //   inherits: true;
 //   initial-value: defaults.$defaultColor;
@@ -125,15 +137,15 @@ $numClrVars: 4; // Number of coloring variables
 @keyframes mosaicColoring {
   100%,
   0% {
-    background-color: var(--mosaic-color1);
+    background-color: mosaicColorVar(1);
   }
   25% {
-    background-color: var(--mosaic-color2);
+    background-color: mosaicColorVar(2);
   }
   50% {
-    background-color: var(--mosaic-color3);
+    background-color: mosaicColorVar(3);
   }
   75% {
-    background-color: var(--mosaic-color4);
+    background-color: mosaicColorVar(4);
   }
 }
