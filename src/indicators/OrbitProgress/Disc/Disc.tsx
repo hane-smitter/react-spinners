@@ -88,7 +88,7 @@ const Disc = (props: DiscProps) => {
 						cy="50"
 						r="20"
 						fill="none"
-						strokeWidth="3"
+						strokeWidth="4"
 						strokeMiterlimit="10"
 					/>
 				</svg>
