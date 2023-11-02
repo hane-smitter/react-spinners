@@ -5,10 +5,16 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
 import "./Disc.scss";
 import { DiscProps } from "./Disc.types";
-import { defaultColor } from "../../variables";
+import { defaultColor as DEFAULT_COLOR } from "../../variables";
+import arrayRepeat from "../../../utils/arrayRepeat";
+
+// CSS properties for switching colors
+const discColorSwitchVars: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--disc-phase${idx + 1}-color`
+);
 
 const Disc = (props: DiscProps) => {
-	const DEFAULT_COLOR: string = defaultColor;
 	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
@@ -25,12 +31,15 @@ const Disc = (props: DiscProps) => {
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
+				// elemRef.current?.style.removeProperty("color");
+				for (let i = 0; i < discColorSwitchVars.length; i++) {
+					elemRef.current?.style.removeProperty(discColorSwitchVars[i]);
+				}
 			}
 		},
 		[elemRef.current]
 	);
-	let colorProp: string | string[] = props?.color ?? "";
+	const colorProp: string | string[] = props?.color ?? "";
 	const discColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
@@ -38,17 +47,10 @@ const Disc = (props: DiscProps) => {
 
 	// Registering/giving types to css variables controlling color of spinner
 	useEffect(() => {
-		const colorVars = [
-			"--disc-color1",
-			"--disc-color2",
-			"--disc-color3",
-			"--disc-color4"
-		];
-
-		for (let i = 0; i < colorVars.length; i++) {
+		for (let i = 0; i < discColorSwitchVars.length; i++) {
 			try {
 				window.CSS.registerProperty({
-					name: colorVars[i],
+					name: discColorSwitchVars[i],
 					syntax: "<color>",
 					inherits: true,
 					initialValue: DEFAULT_COLOR
@@ -113,6 +115,7 @@ function stylesObjectFromColorProp(
 	resetToDefaultColors: () => void
 ): React.CSSProperties {
 	const stylesObject: any = {};
+	const switchersLength = discColorSwitchVars.length;
 
 	if (!colorProp) {
 		resetToDefaultColors();
@@ -120,22 +123,41 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const arrLength = colorProp.length;
-		for (let idx = 0; idx < arrLength; idx++) {
-			if (idx >= 4) break;
-			let colorId: number = idx + 1;
+		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);
 
-			stylesObject[`--disc-color${colorId}`] = colorProp[idx];
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
+
+			stylesObject[discColorSwitchVars[idx]] = colorArr[idx];
 		}
 
 		return stylesObject;
 	}
 
-	// If color prop is not an array, set all coloring vars to the received prop
-	for (let idx: number = 0; idx <= 3; idx++) {
-		let colorId: number = idx + 1;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
 
-		stylesObject[`--disc-color${colorId}`] = colorProp;
+		for (let i = 0; i < switchersLength; i++) {
+			stylesObject[discColorSwitchVars[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <OrbitProgress /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < switchersLength; i++) {
+			stylesObject[discColorSwitchVars[i]] = DEFAULT_COLOR;
+		}
 	}
 
 	return stylesObject;

@@ -3,56 +3,68 @@
 $animationDuration: var(--rli-animation-duration, 1.5s);
 $animationFn: var(--rli-animation-function, ease-in-out);
 
+@function discColorPhase($discNumber: null) {
+	$cssVar: var(--disc-phase1-color);
+
+	@if ($discNumber and $discNumber != 1) {
+		$cssVar: var(--disc-phase#{$discNumber}-color, $cssVar);
+	}
+
+	@return $cssVar;
+}
+
 .disc-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  display: inline-block;
+	--disc-phase1-color: #{defaults.$defaultColor};
 
-  .disc-throbber {
-    width: 5em;
-    height: 5em;
-    color: var(--disc-color1);
-    display: inline-block;
+	font-size: defaults.$fontSizer;
+	display: inline-block;
 
-    // create stacking context
-    position: relative;
-    z-index: 0;
+	.disc-throbber {
+		width: 5em;
+		height: 5em;
+		color: discColorPhase();
+		display: inline-block;
 
-    .whirl {
-      animation: rotate calc($animationDuration * 1.33) linear infinite;
-      height: 100%;
-      transform-origin: center center;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: auto;
-    }
+		// create stacking context
+		position: relative;
+		z-index: 0;
 
-    .path {
-      stroke-dasharray: 1, 125;
-      stroke-dashoffset: 0;
-      animation:
-        dash $animationDuration $animationFn infinite,
-        coloring calc($animationDuration * 4) $animationFn infinite;
-      stroke-linecap: round;
-    }
-  }
+		.whirl {
+			animation: rotate calc($animationDuration * 1.33) linear infinite;
+			height: 100%;
+			transform-origin: center center;
+			width: 100%;
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			margin: auto;
+		}
 
-  .disc-text {
-    mix-blend-mode: difference;
-    // filter: invert(3%);
+		.path {
+			stroke-dasharray: 1, 125;
+			stroke-dashoffset: 0;
+			animation:
+				dash $animationDuration $animationFn infinite,
+				coloring calc($animationDuration * 4) steps(4, end) infinite;
+			stroke-linecap: round;
+		}
+	}
 
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+	.disc-text {
+		mix-blend-mode: difference;
+		// filter: invert(3%);
 
-    z-index: -2;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
 
-    // background-color: blue;
-  }
+		z-index: -2;
+
+		// background-color: blue;
+	}
 }
 
 // 👇 Added via JS for better cross-browser support
@@ -79,24 +91,24 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 // }
 
 @keyframes rotate {
-  100% {
-    transform: rotate(360deg);
-  }
+	100% {
+		transform: rotate(360deg);
+	}
 }
 
 @keyframes dash {
-  0% {
-    stroke-dasharray: 1, 125;
-    stroke-dashoffset: 0;
-  }
-  50% {
-    stroke-dasharray: 89, 125;
-    stroke-dashoffset: -35px;
-  }
-  100% {
-    stroke-dasharray: 89, 125;
-    stroke-dashoffset: -124px;
-  }
+	0% {
+		stroke-dasharray: 1, 125;
+		stroke-dashoffset: 0;
+	}
+	50% {
+		stroke-dasharray: 89, 125;
+		stroke-dashoffset: -35px;
+	}
+	100% {
+		stroke-dasharray: 89, 125;
+		stroke-dashoffset: -124px;
+	}
 }
 
 // @keyframes color {
@@ -117,16 +129,29 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 // }
 
 @keyframes coloring {
-  100%,0% {
-    stroke: var(--disc-color1);
-  }
-  25% {
-    stroke: var(--disc-color2);
-  }
-  50% {
-    stroke: var(--disc-color3);
-  }
-  75% {
-    stroke: var(--disc-color4);
-  }
+	100%,
+	0% {
+		stroke: discColorPhase(1);
+	}
+	24% {
+		stroke: discColorPhase(1);
+	}
+	25% {
+		stroke: discColorPhase(2);
+	}
+	49% {
+		stroke: discColorPhase(2);
+	}
+	50% {
+		stroke: discColorPhase(3);
+	}
+	74% {
+		stroke: discColorPhase(3);
+	}
+	75% {
+		stroke: discColorPhase(4);
+	}
+  99% {
+		stroke: discColorPhase(4);
+	}
 }
