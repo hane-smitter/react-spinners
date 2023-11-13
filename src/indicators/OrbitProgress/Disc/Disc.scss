@@ -30,7 +30,7 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 		z-index: 0;
 
 		.whirl {
-			animation: rotate calc($animationDuration * 1.33) linear infinite;
+			animation: discProgressRotate calc($animationDuration * 1.33) linear infinite;
 			height: 100%;
 			transform-origin: center center;
 			width: 100%;
@@ -47,7 +47,7 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 			stroke-dashoffset: 0;
 			animation:
 				dash $animationDuration $animationFn infinite,
-				coloring calc($animationDuration * 4) steps(4, end) infinite;
+				discProgresscoloring calc($animationDuration * 4) steps(4, end) infinite;
 			stroke-linecap: round;
 		}
 	}
@@ -90,7 +90,7 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 //   initial-value: defaults.$defaultColor;
 // }
 
-@keyframes rotate {
+@keyframes discProgressRotate {
 	100% {
 		transform: rotate(360deg);
 	}
@@ -128,7 +128,7 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 //   }
 // }
 
-@keyframes coloring {
+@keyframes discProgresscoloring {
 	100%,
 	0% {
 		stroke: discColorPhase(1);

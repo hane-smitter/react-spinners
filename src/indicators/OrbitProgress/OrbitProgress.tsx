@@ -9,7 +9,7 @@ import { TrackDisc } from "./TrackDisc";
 
 const OrbitProgress = (props: OrbitProgressProps) => {
 	// let componentVariant: string = props?.variant || "disc";
-	let { variant: componentVariant = "disc" }: OrbitProgressProps =
+	const { variant: componentVariant = "disc" }: OrbitProgressProps =
 		Object(props);
 
 	return componentVariant === "dotted" ? (

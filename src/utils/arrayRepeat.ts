@@ -1,7 +1,7 @@
 /**
- * Repeat array items to `length`
+ * Repeat array items to `length`, otherwise truncate to `length`.
  * @example
- * arrayRepeat(["cyan", "red"], 4)
+ * arrayRepeat(["cyan", "red"], 4);
  * // returns ["cyan", "red", "cyan", "red"]
  */
 function arrayRepeat(array: string[], length: number = 0): Array<string> {

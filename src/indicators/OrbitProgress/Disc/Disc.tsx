@@ -45,7 +45,7 @@ const Disc = (props: DiscProps) => {
 		colorReset
 	);
 
-	// Registering/giving types to css variables controlling color of spinner
+	// Registering/giving types to css variables controlling color of indicator
 	useEffect(() => {
 		for (let i = 0; i < discColorSwitchVars.length; i++) {
 			try {
@@ -108,7 +108,7 @@ const Disc = (props: DiscProps) => {
 export { Disc };
 
 /**
- * Creates a style object with props that color the throbber/spinner
+ * Creates a style object with props that color the indicator
  */
 function stylesObjectFromColorProp(
 	colorProp: string | string[],
@@ -152,7 +152,7 @@ function stylesObjectFromColorProp(
 			: console.warn(
 					`${JSON.stringify(
 						colorProp
-					)} received in <OrbitProgress /> indicator cannot be processed. Using default instead!`
+					)} received in <OrbitProgress variant="disc" /> indicator cannot be processed. Using default instead!`
 			  );
 
 		for (let i = 0; i < switchersLength; i++) {
