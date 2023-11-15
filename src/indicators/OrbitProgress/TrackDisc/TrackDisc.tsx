@@ -1,10 +1,23 @@
 import React, { useCallback, useRef } from "react";
+import colorParse from "tinycolor2";
 
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
 import "./TrackDisc.scss";
 import { TrackDiscProps } from "./TrackDisc.types";
+import { defaultColor as DEFAULT_COLOR } from "../../variables";
+import arrayRepeat from "../../../utils/arrayRepeat";
+
+// CSS properties for switching colors
+const annulusTrackColorVars: Array<string[]> = Array.from(
+	{ length: 4 },
+	(_, idx) => [
+		`--annulus-track-phase${idx + 1}-color`,
+		`--annulus-piece-phase${idx + 1}-color`
+	]
+);
+const ANNULUS_TRACK_ALPHA: number = 0.25; // 0 - 1
 
 const TrackDisc = (props: TrackDiscProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -23,17 +36,22 @@ const TrackDisc = (props: TrackDiscProps) => {
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
-				elemRef.current?.style.removeProperty("--track-path-color");
+				// elemRef.current?.style.removeProperty("color");
+				// elemRef.current?.style.removeProperty("--annulus-track-color");
+
+				for (let i = 0; i < annulusTrackColorVars.length; i++) {
+					const varNamesArr = annulusTrackColorVars[i];
+					for (let idx = 0; idx < varNamesArr.length; idx++) {
+						elemRef.current?.style.removeProperty(varNamesArr[idx]);
+					}
+				}
 			}
 		},
 		[elemRef.current]
 	);
 	let colorProp: string | string[] = props?.color ?? "";
-	const trackDiscColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const annulusTrackColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp, colorReset);
 
 	return (
 		<span
@@ -52,11 +70,11 @@ const TrackDisc = (props: TrackDiscProps) => {
 			aria-label="Loading"
 		>
 			<span
-				className="rli-d-i-b track-disc-throbber"
+				className="rli-d-i-b annulus-track-indicator"
 				ref={elemRef}
-				style={{ ...trackDiscColorStyles, ...styles }}
+				style={{ ...annulusTrackColorStyles, ...styles }}
 			>
-				<span className="rli-d-i-b track-disc-ring"></span>
+				<span className="rli-d-i-b annulus-track-ring"></span>
 
 				<Text
 					className="track-disc-text"
@@ -78,6 +96,7 @@ function stylesObjectFromColorProp(
 	resetToDefaultColors: () => void
 ): React.CSSProperties {
 	const stylesObject: any = {};
+	const switchersLength = annulusTrackColorVars.length;
 
 	if (!colorProp) {
 		resetToDefaultColors();
@@ -85,16 +104,84 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		// Array with first item - disc color, second item - track color
-		const [color, trackColor] = colorProp;
+		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);
 
-		if (color) stylesObject["color"] = color;
-		if (trackColor) stylesObject["--track-path-color"] = trackColor;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
+			// For each other, generate it light opacity counterpart
+			// Then assign both the color and its opacity counterpart in object
+
+			const varNames: string[] = annulusTrackColorVars[idx];
+			try {
+				const parsedColor = colorParse(colorArr[idx]);
+				if (!parsedColor.isValid()) {
+					throw new Error(`Invalid Color: ${parsedColor.getOriginalInput()}`);
+				}
+
+				const nowColorLight: string = parsedColor.setAlpha(0.3).toRgbString();
+				const nowColor = colorArr[idx];
+
+				stylesObject[varNames[0]] = nowColorLight; // Track color
+				stylesObject[varNames[1]] = nowColor; // Annulus split color
+			} catch (error) {
+				const nowColor = DEFAULT_COLOR;
+				const nowColorLight = colorParse(DEFAULT_COLOR)
+					.setAlpha(0.3)
+					.toRgbString();
+
+				stylesObject[varNames[0]] = nowColorLight; // Track color
+				stylesObject[varNames[1]] = nowColor; // Annulus split piece color
+			}
+		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		const parsedColor = colorParse(colorProp); // Note: if `colorProp` is an invalid color, it is set to black
+		if (typeof colorProp !== "string") {
+			throw new Error("Color String expected");
+		} else if (!parsedColor.isValid()) {
+			throw new Error(`Invalid Color: ${parsedColor.getOriginalInput()}`);
+		}
+
+		const nowColor = colorProp;
+		const nowColorLight = parsedColor
+			.setAlpha(ANNULUS_TRACK_ALPHA)
+			.toRgbString();
+
+		for (let i = 0; i < switchersLength; i++) {
+			const varNames = annulusTrackColorVars[i];
+
+			stylesObject[varNames[0]] = nowColorLight; // Track color
+			stylesObject[varNames[1]] = nowColor; // Annulus split piece color
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <OrbitProgress variant="annulus-track" /> indicator cannot be processed. Using default instead!`
+			  );
+
+		const nowColor = DEFAULT_COLOR;
+		const nowColorLight = colorParse(DEFAULT_COLOR)
+			.setAlpha(ANNULUS_TRACK_ALPHA)
+			.toRgbString();
+
+		for (let i = 0; i < annulusTrackColorVars.length; i++) {
+			const varNames = annulusTrackColorVars[i];
+			stylesObject[varNames[0]] = nowColorLight; // Track color
+			stylesObject[varNames[1]] = nowColor; // Annulus split piece color
+		}
+	}
 
 	return stylesObject;
 }
