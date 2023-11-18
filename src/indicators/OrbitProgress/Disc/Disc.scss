@@ -102,11 +102,11 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 		stroke-dashoffset: 0;
 	}
 	50% {
-		stroke-dasharray: 89, 125;
+		stroke-dasharray: 92, 125;
 		stroke-dashoffset: -35px;
 	}
 	100% {
-		stroke-dasharray: 89, 125;
+		stroke-dasharray: 92, 125;
 		stroke-dashoffset: -124px;
 	}
 }
