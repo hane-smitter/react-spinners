@@ -3,7 +3,7 @@
 $animationDuration: var(--rli-animation-duration, 1.5s);
 $animationFn: var(--rli-animation-function, ease-in-out);
 
-@function discColorPhase($discNumber: null) {
+@function annulusColorPhase($discNumber: null) {
 	$cssVar: var(--disc-phase1-color);
 
 	@if ($discNumber and $discNumber != 1) {
@@ -22,7 +22,7 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 	.disc-throbber {
 		width: 5em;
 		height: 5em;
-		color: discColorPhase();
+		color: annulusColorPhase();
 		display: inline-block;
 
 		// create stacking context
@@ -30,7 +30,7 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 		z-index: 0;
 
 		.whirl {
-			animation: discProgressRotate calc($animationDuration * 1.33) linear infinite;
+			animation: annulusProgressRotate calc($animationDuration * 1.33) linear infinite;
 			height: 100%;
 			transform-origin: center center;
 			width: 100%;
@@ -46,8 +46,8 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 			stroke-dasharray: 1, 125;
 			stroke-dashoffset: 0;
 			animation:
-				dash $animationDuration $animationFn infinite,
-				discProgresscoloring calc($animationDuration * 4) steps(4, end) infinite;
+				$animationDuration $animationFn infinite annulusShrinkStretch,
+				calc($animationDuration * 4) $animationFn infinite annuluscoloring;
 			stroke-linecap: round;
 		}
 	}
@@ -90,13 +90,13 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 //   initial-value: defaults.$defaultColor;
 // }
 
-@keyframes discProgressRotate {
+@keyframes annulusProgressRotate {
 	100% {
 		transform: rotate(360deg);
 	}
 }
 
-@keyframes dash {
+@keyframes annulusShrinkStretch {
 	0% {
 		stroke-dasharray: 1, 125;
 		stroke-dashoffset: 0;
@@ -128,30 +128,30 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 //   }
 // }
 
-@keyframes discProgresscoloring {
+@keyframes annuluscoloring {
 	100%,
 	0% {
-		stroke: discColorPhase(1);
+		stroke: annulusColorPhase(1);
 	}
 	24% {
-		stroke: discColorPhase(1);
+		stroke: annulusColorPhase(1);
 	}
 	25% {
-		stroke: discColorPhase(2);
+		stroke: annulusColorPhase(2);
 	}
 	49% {
-		stroke: discColorPhase(2);
+		stroke: annulusColorPhase(2);
 	}
 	50% {
-		stroke: discColorPhase(3);
+		stroke: annulusColorPhase(3);
 	}
 	74% {
-		stroke: discColorPhase(3);
+		stroke: annulusColorPhase(3);
 	}
 	75% {
-		stroke: discColorPhase(4);
+		stroke: annulusColorPhase(4);
 	}
   99% {
-		stroke: discColorPhase(4);
+		stroke: annulusColorPhase(4);
 	}
 }

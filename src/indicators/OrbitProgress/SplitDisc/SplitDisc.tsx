@@ -5,11 +5,20 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
 import "./SplitDisc.scss";
 import { SplitDiscProps } from "./SplitDisc.types";
+import { defaultColor as DEFAULT_COLOR } from "../../variables";
+import arrayRepeat from "../../../utils/arrayRepeat";
+import useRegisterCssProps from "../../../hooks/useRegisterCssProps";
+
+// CSS properties for switching colors
+const annulusSplitsColorVars: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--annulus-split-phase${idx + 1}-color`
+);
 
 const SplitDisc = (props: SplitDiscProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
-	let { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
+	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
@@ -20,25 +29,24 @@ const SplitDisc = (props: SplitDiscProps) => {
 	);
 
 	/* Color SETTINGS */
-	// If Color property is a string, that is the color of all rings
-	// If color property is an array, that is color for each rings
+	useRegisterCssProps(annulusSplitsColorVars);
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
+				for (let i = 0; i < annulusSplitsColorVars.length; i++) {
+					elemRef.current?.style.removeProperty(annulusSplitsColorVars[i]);
+				}
 			}
 		},
 		[elemRef.current]
 	);
-	let colorProp: string | string[] = props?.color ?? "";
-	const discsColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const colorProp: string | string[] = props?.color ?? "";
+	const annulusSplitsColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp, colorReset);
 
 	return (
 		<span
-			className="rli-d-i-b split-disc-rli-bounding-box"
+			className="rli-d-i-b annulus-splits-rli-bounding-box"
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -53,16 +61,16 @@ const SplitDisc = (props: SplitDiscProps) => {
 			aria-label="Loading"
 		>
 			<span
-				className="rli-d-i-b split-disc-throbber"
+				className="rli-d-i-b annulus-splits-indicator"
 				ref={elemRef}
 				style={{
-					...discsColorStyles,
+					...annulusSplitsColorStyles,
 					...styles
 				}}
 			>
-				<span className="rli-d-i-b split-disc-ring"></span>
+				<span className="rli-d-i-b annulus-splits-ring"></span>
 				<Text
-					className="split-disc-text"
+					className="annulus-splits-text"
 					text={props?.text}
 					textColor={props?.textColor}
 				/>
@@ -81,6 +89,7 @@ function stylesObjectFromColorProp(
 	resetToDefaultColors: () => void
 ): React.CSSProperties {
 	const stylesObject: any = {};
+	const switchersLength = annulusSplitsColorVars.length;
 
 	if (!colorProp) {
 		resetToDefaultColors();
@@ -88,20 +97,56 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const arrLength = colorProp.length;
-		stylesObject["--splits-color"] = colorProp[0];
-		stylesObject["color"] = colorProp[0];
+		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);
 
-		for (let idx = 0; idx < arrLength; idx++) {
-			if (idx >= 2) break;
-			let currentItem = `split${idx + 1}`;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
 
-			stylesObject[`--${currentItem}-color`] = colorProp[idx];
+			stylesObject[annulusSplitsColorVars[idx]] = colorArr[idx];
 		}
+
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	// if (colorProp instanceof Array) {
+	// 	const arrLength = colorProp.length;
+	// 	stylesObject["--splits-color"] = colorProp[0];
+	// 	stylesObject["color"] = colorProp[0];
+
+	// 	for (let idx = 0; idx < arrLength; idx++) {
+	// 		if (idx >= 2) break;
+	// 		let currentItem = `split${idx + 1}`;
+
+	// 		stylesObject[`--${currentItem}-color`] = colorProp[idx];
+	// 	}
+	// 	return stylesObject;
+	// }
+
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < switchersLength; i++) {
+			stylesObject[annulusSplitsColorVars[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <OrbitProgress variant="annulus-splits" /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < switchersLength; i++) {
+			stylesObject[annulusSplitsColorVars[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }

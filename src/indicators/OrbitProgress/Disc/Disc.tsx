@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
@@ -7,6 +7,7 @@ import "./Disc.scss";
 import { DiscProps } from "./Disc.types";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
+import useRegisterCssProps from "../../../hooks/useRegisterCssProps";
 
 // CSS properties for switching colors
 const discColorSwitchVars: Array<string> = Array.from(
@@ -28,6 +29,7 @@ const Disc = (props: DiscProps) => {
 	);
 
 	/* Color SETTING */
+	useRegisterCssProps(discColorSwitchVars);
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {
@@ -44,22 +46,6 @@ const Disc = (props: DiscProps) => {
 		colorProp,
 		colorReset
 	);
-
-	// Registering/giving types to css variables controlling color of indicator
-	useEffect(() => {
-		for (let i = 0; i < discColorSwitchVars.length; i++) {
-			try {
-				window.CSS.registerProperty({
-					name: discColorSwitchVars[i],
-					syntax: "<color>",
-					inherits: true,
-					initialValue: DEFAULT_COLOR
-				});
-			} catch (error) {
-				continue;
-			}
-		}
-	}, []);
 
 	return (
 		<span

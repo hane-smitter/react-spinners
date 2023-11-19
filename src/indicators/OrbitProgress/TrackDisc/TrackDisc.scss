@@ -54,7 +54,7 @@ $annulusTrackOpacity: 0.25;
 
 			animation:
 				$animationDuration $animationFn infinite annulusTrackSpin,
-				calc($animationDuration * 4) steps(4, end) infinite annulusTrackColoring;
+				calc($animationDuration * 4) $animationFn infinite annulusTrackColoring;
 		}
 
 		.track-disc-text {

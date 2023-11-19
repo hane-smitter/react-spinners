@@ -8,6 +8,7 @@ import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
 import makeId from "../../../utils/makeId";
+import useRegisterCssProps from "../../../hooks/useRegisterCssProps";
 
 // CSS properties for switching colors
 const dottedColorSwitchVars: Array<string> = Array.from(
@@ -29,11 +30,10 @@ const Dotted = (props: DottedProps) => {
 	);
 
 	/* Color SETTINGS */
-	// Accept Array or String color prop and set all dots color
+	useRegisterCssProps(dottedColorSwitchVars);
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {
-				// elemRef.current?.style.removeProperty("color");
 				for (let i = 0; i < dottedColorSwitchVars.length; i++) {
 					elemRef.current?.style.removeProperty(dottedColorSwitchVars[i]);
 				}
@@ -41,27 +41,11 @@ const Dotted = (props: DottedProps) => {
 		},
 		[elemRef.current]
 	);
-	let colorProp: string | string[] = props?.color ?? "";
+	const colorProp: string | string[] = props?.color ?? "";
 	const dotsColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
 	);
-
-	// Registering/giving types to css variables controlling color of spinner
-	useEffect(() => {
-		for (let i = 0; i < dottedColorSwitchVars.length; i++) {
-			try {
-				window.CSS.registerProperty({
-					name: dottedColorSwitchVars[i],
-					syntax: "<color>",
-					inherits: true,
-					initialValue: DEFAULT_COLOR
-				});
-			} catch (error) {
-				continue;
-			}
-		}
-	}, []);
 
 	return (
 		<span
@@ -142,7 +126,7 @@ function stylesObjectFromColorProp(
 			? console.warn(
 					`[${
 						error.message
-					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+					}]: Received "${typeof colorProp}" with value, ${JSON.stringify(
 						colorProp
 					)}`
 			  )

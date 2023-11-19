@@ -3,56 +3,96 @@
 $animationDuration: var(--rli-animation-duration, 1.2s);
 $animationFn: var(--rli-animation-function, linear);
 
-.split-disc-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  box-sizing: border-box;
-  display: inline-block;
+@function annulusSplitColorPhase($num: null) {
+	$cssVar: var(--annulus-split-phase1-color);
 
-  .split-disc-throbber {
-    width: 5em;
-    height: 5em;
-    display: inline-block;
+	@if ($num and $num != 1) {
+		$cssVar: var(--annulus-split-phase#{$num}-color, $cssVar);
+	}
 
-    // create stacking context
-    position: relative;
-    z-index: 0;
-
-    color: defaults.$defaultColor;
-
-    .split-disc-ring {
-      box-sizing: border-box;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border-width: 0.38em;
-      border-style: solid;
-      border-color: var(--split1-color, var(--splits-color, currentColor)) transparent
-        var(--split2-color, var(--splits-color, currentColor)) transparent;
-      background-color: transparent;
-
-      animation-name: splitDiscSpin;
-      animation-duration: $animationDuration;
-      animation-timing-function: $animationFn;
-      animation-iteration-count: infinite;
-    }
-
-    .split-disc-text {
-      mix-blend-mode: difference;
-
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-
-      z-index: -2;
-    }
-  }
+	@return $cssVar;
 }
-@keyframes splitDiscSpin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+
+.annulus-splits-rli-bounding-box {
+	--annulus-split-phase1-color: #{defaults.$defaultColor};
+
+	font-size: defaults.$fontSizer;
+	box-sizing: border-box;
+	display: inline-block;
+
+	.annulus-splits-indicator {
+		width: 5em;
+		height: 5em;
+		display: inline-block;
+
+		// create stacking context
+		position: relative;
+		z-index: 0;
+
+		color: annulusSplitColorPhase();
+
+		.annulus-splits-ring {
+			box-sizing: border-box;
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			border-width: 0.38em;
+			border-style: solid;
+			border-color: annulusSplitColorPhase(1) transparent
+				annulusSplitColorPhase(1) transparent;
+			background-color: transparent;
+
+			animation:
+				$animationDuration $animationFn infinite annulusSplitsSpin,
+				calc($animationDuration * 4) $animationFn infinite
+					annulusSplitsColoring;
+		}
+
+		.annulus-splits-text {
+			mix-blend-mode: difference;
+
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+
+			z-index: -2;
+		}
+	}
+}
+@keyframes annulusSplitsSpin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes annulusSplitsColoring {
+	100%,
+	0% {
+		border-color: annulusSplitColorPhase(1) transparent;
+	}
+	20% {
+		border-color: annulusSplitColorPhase(1) transparent;
+	}
+	25% {
+		border-color: annulusSplitColorPhase(2) transparent;
+	}
+	45% {
+		border-color: annulusSplitColorPhase(2) transparent;
+	}
+	50% {
+		border-color: annulusSplitColorPhase(3) transparent;
+	}
+	70% {
+		border-color: annulusSplitColorPhase(3) transparent;
+	}
+	75% {
+		border-color: annulusSplitColorPhase(4) transparent;
+	}
+	95% {
+		border-color: annulusSplitColorPhase(4) transparent;
+	}
 }

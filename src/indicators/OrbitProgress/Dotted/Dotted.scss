@@ -69,7 +69,7 @@ $numberOfDots: 12;
 
 				animation:
 					$animationDuration $animationFn $animationDelay infinite both fadeDots,
-					calc($animationDuration * 4) $animationDelay steps(4, end) infinite
+					calc($animationDuration * 4) $animationDelay $animationFn infinite
 						dottedProgressColoring;
 			}
 		}
@@ -91,25 +91,25 @@ $numberOfDots: 12;
 	0% {
 		background-color: dottedColorPhase(1);
 	}
-	16% {
+	20% {
 		background-color: dottedColorPhase(1);
 	}
 	25% {
 		background-color: dottedColorPhase(2);
 	}
-	41% {
+	45% {
 		background-color: dottedColorPhase(2);
 	}
 	50% {
 		background-color: dottedColorPhase(3);
 	}
-	66% {
+	70% {
 		background-color: dottedColorPhase(3);
 	}
 	75% {
 		background-color: dottedColorPhase(4);
 	}
-	91% {
+	95% {
 		background-color: dottedColorPhase(4);
 	}
 }
