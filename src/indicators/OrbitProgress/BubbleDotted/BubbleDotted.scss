@@ -1,70 +1,64 @@
+@use "sass:string";
 @use "../../../scss/variables" as defaults;
 
 $animationDuration: var(--rli-animation-duration, 1.2s);
 $animationFn: var(--rli-animation-function, ease-in-out);
-$numberOfDots: 12; // HTML should likewise be 12 elems
+$numOfBars: 12;
+$numOfBarsVar: var(--orbit-progress-bars-count, $numOfBars);
+$degreesInterval: calc(360deg / $numOfBars);
+$delayInterval: calc($animationDuration / $numOfBarsVar);
+$barSize: 1em;
+// Animation names
+$barsSpinAnim: string.unique-id();
 
-.bubble-dotted-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  box-sizing: border-box;
-  display: inline-block;
+.OP-bars-rli-bounding-box {
+	font-size: defaults.$fontSizer;
 
-  .bubble-dotted-throbber {
-    width: 5em;
-    height: 5em;
-    position: relative;
-    z-index: 0;
-    display: inline-block;
-    color: defaults.$defaultColor;
+	.OP-bars-indicator {
+		width: calc($barSize * 4);
+		height: calc($barSize * 4);
+		display: block;
+		position: relative;
 
-    .bubble-dotted-text {
-      mix-blend-mode: difference;
+		// For debugging
+		background-color: aquamarine;
 
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+		.bar {
+			position: absolute;
 
-      z-index: -2;
-    }
+			// Dimensions + Centering technique
+			height: $barSize;
+			width: calc($barSize / 4);
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			margin: auto auto auto 50%;
+			background-color: #1d1d1d;
+			border-top-right-radius: calc($barSize / 4); // Same as width
+			opacity: 1;
+			animation: $animationDuration $animationFn infinite $barsSpinAnim;
 
-    .bubble-dot-matter {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
+			@for $j from 1 through $numOfBars {
+				$barIndex: calc($j - 1);
+				&:nth-of-type(#{$j}) {
+					$rotateInclination: calc(#{$barIndex} * 360deg / #{$numOfBarsVar});
+					$barsOffset: calc(($barSize + ($barSize * 0.4)) * -1);
 
-      transform: rotate(calc((var(--elem-pos) - 1) * calc(360deg / $numberOfDots)));
-
-      &::before {
-        content: "";
-        display: block;
-        margin: 0 auto;
-        width: 15%;
-        height: 15%;
-        background-color: currentColor;
-        border-radius: 50%;
-
-        animation-name: bubbleDots;
-        animation-duration: $animationDuration;
-        animation-timing-function: $animationFn;
-        animation-iteration-count: infinite;
-        animation-fill-mode: both;
-        // Algorithm: duration/total_dots * dot_pos
-        animation-delay: calc(($animationDuration / $numberOfDots) * ($numberOfDots - (var(--elem-pos) - 1)) * -1);
-      }
-    }
-  }
+					transform: rotate($rotateInclination) translateY($barsOffset);
+					animation-delay: calc(#{$j} * $delayInterval);
+					transform-origin: left center;
+				}
+			}
+		}
+	}
 }
 
-@keyframes bubbleDots {
-  0%,
-  80%,
-  100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
-  }
+@keyframes #{$barsSpinAnim} {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
 }

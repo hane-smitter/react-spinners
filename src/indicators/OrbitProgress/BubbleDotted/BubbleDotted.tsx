@@ -39,38 +39,18 @@ let BubbleDotted = (props: BubbleDottedProps) => {
 
 	return (
 		<span
-			className="rli-d-i-b bubble-dotted-rli-bounding-box"
-			style={
-				{
-					...(fontSize && { fontSize }),
-					...(animationPeriod && {
-						"--rli-animation-duration": animationPeriod
-					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
-				} as React.CSSProperties
-			}
+			className="rli-d-i-b OP-bars-rli-bounding-box"
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				className="rli-d-i-b bubble-dotted-throbber"
-				ref={elemRef}
-				style={{ ...dotsColorStyles, ...styles }}
-			>
-				{Array.from({ length: 12 }).map((item, i) => (
+			<span className="rli-d-i-b OP-bars-indicator">
+				{Array.from({ length: 12 }, (_, idx) => (
 					<span
-						key={i}
-						className="rli-d-i-b bubble-dot-matter"
-						style={{ "--elem-pos": `${i + 1}` } as React.CSSProperties}
+						key={`${(Math.random() * 1e12).toString(36)}${idx}`}
+						className="rli-d-i-b bar"
 					></span>
 				))}
-
-				<Text
-					className="bubble-dotted-text"
-					text={props?.text}
-					textColor={props?.textColor}
-				/>
 			</span>
 		</span>
 	);
