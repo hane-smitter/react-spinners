@@ -7,14 +7,14 @@ $numOfBars: 12;
 $numOfBarsVar: var(--orbit-progress-bars-count, $numOfBars);
 $degreesInterval: calc(360deg / $numOfBars);
 $delayInterval: calc($animationDuration / $numOfBarsVar);
-$barSize: 1em;
+$barSize: 1.2em;
 // Animation names
 $barsSpinAnim: string.unique-id();
 
-.OP-bars-rli-bounding-box {
+.OP-spokes-rli-bounding-box {
 	font-size: defaults.$fontSizer;
 
-	.OP-bars-indicator {
+	.OP-spokes-indicator {
 		width: calc($barSize * 4);
 		height: calc($barSize * 4);
 		display: block;
@@ -23,31 +23,35 @@ $barsSpinAnim: string.unique-id();
 		// For debugging
 		background-color: aquamarine;
 
-		.bar {
+		.spoke {
 			position: absolute;
 
 			// Dimensions + Centering technique
 			height: $barSize;
-			width: calc($barSize / 4);
+			width: calc($barSize / 3);
 			top: 0;
 			left: 0;
 			right: 0;
 			bottom: 0;
 			margin: auto auto auto 50%;
 			background-color: #1d1d1d;
-			border-top-right-radius: calc($barSize / 4); // Same as width
-			opacity: 1;
-			animation: $animationDuration $animationFn infinite $barsSpinAnim;
+			border-radius: calc($barSize / 5);
+			// border-top-right-radius: calc($barSize / 4); // Same as width
+			opacity: 0;
+			animation: $animationDuration $animationFn backwards infinite
+				$barsSpinAnim;
+			transform-origin: left center;
 
 			@for $j from 1 through $numOfBars {
+				$backwardsBarNum: calc($numOfBars - ($j - 1));
 				$barIndex: calc($j - 1);
+				// $barIndex2: calc($backwardsBarNum - 1);
 				&:nth-of-type(#{$j}) {
 					$rotateInclination: calc(#{$barIndex} * 360deg / #{$numOfBarsVar});
-					$barsOffset: calc(($barSize + ($barSize * 0.4)) * -1);
+					$barsOffset: calc(($barSize + ($barSize * 0.3)) * -1);
 
-					transform: rotate($rotateInclination) translateY($barsOffset);
-					animation-delay: calc(#{$j} * $delayInterval);
-					transform-origin: left center;
+					transform: rotate($rotateInclination) translate(-50%, $barsOffset);
+					animation-delay: calc(#{$backwardsBarNum} * $delayInterval * -1);
 				}
 			}
 		}

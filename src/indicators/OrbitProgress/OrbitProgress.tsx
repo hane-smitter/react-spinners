@@ -1,5 +1,5 @@
 import React from "react";
-import { BubbleDotted } from "./BubbleDotted";
+import { Spokes } from "./Spokes";
 import { OrbitProgressProps } from "./OrbitProgress.types";
 
 import { Disc } from "./Disc";
@@ -15,7 +15,7 @@ const OrbitProgress = (props: OrbitProgressProps) => {
 	return componentVariant === "dotted" ? (
 		<Dotted {...props} />
 	) : componentVariant === "bubble-dotted" ? (
-		<BubbleDotted {...props} />
+		<Spokes {...props} />
 	) : componentVariant === "disc" ? (
 		<Disc {...props} />
 	) : componentVariant === "split-disc" ? (
