@@ -12,7 +12,7 @@ import useRegisterCssProps from "../../../hooks/useRegisterCssProps";
 // CSS properties for switching colors
 const annulusSplitsColorVars: Array<string> = Array.from(
 	{ length: 4 },
-	(_, idx) => `--annulus-split-phase${idx + 1}-color`
+	(_, idx) => `--OP-annulus-dual-sectors-phase${idx + 1}-color`
 );
 
 const SplitDisc = (props: SplitDiscProps) => {
@@ -46,7 +46,7 @@ const SplitDisc = (props: SplitDiscProps) => {
 
 	return (
 		<span
-			className="rli-d-i-b annulus-splits-rli-bounding-box"
+			className="rli-d-i-b OP-annulus-dual-sectors-rli-bounding-box"
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -61,16 +61,16 @@ const SplitDisc = (props: SplitDiscProps) => {
 			aria-label="Loading"
 		>
 			<span
-				className="rli-d-i-b annulus-splits-indicator"
+				className="rli-d-i-b OP-annulus-dual-sectors-indicator"
 				ref={elemRef}
 				style={{
 					...annulusSplitsColorStyles,
 					...styles
 				}}
 			>
-				<span className="rli-d-i-b annulus-splits-ring"></span>
+				<span className="rli-d-i-b annulus-sectors"></span>
 				<Text
-					className="annulus-splits-text"
+					className="OP-annulus-dual-sectors-text"
 					text={props?.text}
 					textColor={props?.textColor}
 				/>

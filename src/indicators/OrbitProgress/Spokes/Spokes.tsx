@@ -29,7 +29,6 @@ const Spokes = (props: SpokesProps) => {
 	);
 
 	/* Color SETTINGS */
-	// Accept Array or String color prop and set all dots color
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {

@@ -1,13 +1,17 @@
+@use "sass:string";
 @use "../../../scss/variables" as defaults;
 
 $animationDuration: var(--rli-animation-duration, 1s);
 $animationFn: var(--rli-animation-function, linear);
 $annulusTrackOpacity: 0.25;
 
-@function annulusRingColorVars($num: null, $applyTo: "split") {
-	$prependText: --annulus-piece;
+$annulusTrackSpin: string.unique-id();
+$annulusTrackColoring: string.unique-id();
+
+@function annulusRingColorVars($num: null, $applyTo: "sector") {
+	$prependText: --OP-annulus-sector;
 	@if ($applyTo == "track") {
-		$prependText: --annulus-track;
+		$prependText: --OP-annulus-track;
 	}
 	$cssVar: var(#{$prependText}-phase1-color);
 
@@ -23,16 +27,16 @@ $annulusTrackOpacity: 0.25;
 	border-top-color: annulusRingColorVars($num);
 }
 
-.track-disc-rli-bounding-box {
+.OP-annulus-sector-track-rli-bounding-box {
 	font-size: defaults.$fontSizer;
 	display: inline-block;
 
-	.annulus-track-indicator {
-		--annulus-track-phase1-color: #{rgba(
+	.OP-annulus-sector-track-indicator {
+		--OP-annulus-track-phase1-color: #{rgba(
 				defaults.$defaultColor,
 				$annulusTrackOpacity
 			)}; // sass specific rgba
-		--annulus-piece-phase1-color: #{defaults.$defaultColor};
+		--OP-annulus-sector-phase1-color: #{defaults.$defaultColor};
 
 		width: 5em;
 		height: 5em;
@@ -53,11 +57,11 @@ $annulusTrackOpacity: 0.25;
 			@include applyColor(1);
 
 			animation:
-				$animationDuration $animationFn infinite annulusTrackSpin,
-				calc($animationDuration * 4) $animationFn infinite annulusTrackColoring;
+				$animationDuration $animationFn infinite $annulusTrackSpin,
+				calc($animationDuration * 4) $animationFn infinite $annulusTrackColoring;
 		}
 
-		.track-disc-text {
+		.OP-annulus-sector-text {
 			mix-blend-mode: difference;
 			// filter: invert(3%);
 
@@ -73,13 +77,13 @@ $annulusTrackOpacity: 0.25;
 	}
 }
 
-@keyframes annulusTrackSpin {
+@keyframes #{$annulusTrackSpin} {
 	to {
 		transform: rotate(1turn);
 	}
 }
 
-@keyframes annulusTrackColoring {
+@keyframes #{$annulusTrackColoring} {
 	100%,
 	0% {
 		@include applyColor(1);

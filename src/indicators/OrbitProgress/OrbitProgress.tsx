@@ -1,9 +1,9 @@
 import React from "react";
-import { Spokes } from "./Spokes";
-import { OrbitProgressProps } from "./OrbitProgress.types";
 
+import { OrbitProgressProps } from "./OrbitProgress.types";
 import { Disc } from "./Disc";
 import { Dotted } from "./Dotted";
+import { Spokes } from "./Spokes";
 import { SplitDisc } from "./SplitDisc";
 import { TrackDisc } from "./TrackDisc";
 

@@ -12,7 +12,7 @@ import useRegisterCssProps from "../../../hooks/useRegisterCssProps";
 // CSS properties for switching colors
 const discColorSwitchVars: Array<string> = Array.from(
 	{ length: 4 },
-	(_, idx) => `--disc-phase${idx + 1}-color`
+	(_, idx) => `--OP-annulus-phase${idx + 1}-color`
 );
 
 const Disc = (props: DiscProps) => {
@@ -49,7 +49,7 @@ const Disc = (props: DiscProps) => {
 
 	return (
 		<span
-			className="rli-d-i-b disc-rli-bounding-box"
+			className="rli-d-i-b OP-annulus-rli-bounding-box"
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -64,7 +64,7 @@ const Disc = (props: DiscProps) => {
 			aria-label="Loading"
 		>
 			<span
-				className="rli-d-i-b disc-throbber"
+				className="rli-d-i-b OP-annulus-indicator"
 				ref={elemRef}
 				style={{ ...discColorStyles, ...styles }}
 			>
@@ -82,7 +82,7 @@ const Disc = (props: DiscProps) => {
 				</svg>
 
 				<Text
-					className="disc-text"
+					className="OP-annulus-text"
 					text={props?.text}
 					textColor={props?.textColor}
 				/>

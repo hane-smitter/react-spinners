@@ -14,8 +14,8 @@ import useRegisterCssProps from "../../../hooks/useRegisterCssProps";
 const annulusTrackColorVars: Array<string[]> = Array.from(
 	{ length: 4 },
 	(_, idx) => [
-		`--annulus-track-phase${idx + 1}-color`,
-		`--annulus-piece-phase${idx + 1}-color`
+		`--OP-annulus-track-phase${idx + 1}-color`,
+		`--OP-annulus-sector-phase${idx + 1}-color`
 	]
 );
 const ANNULUS_TRACK_ALPHA: number = 0.25; // 0 - 1
@@ -65,7 +65,7 @@ const TrackDisc = (props: TrackDiscProps) => {
 
 	return (
 		<span
-			className="rli-d-i-b track-disc-rli-bounding-box"
+			className="rli-d-i-b OP-annulus-sector-track-rli-bounding-box"
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -80,14 +80,14 @@ const TrackDisc = (props: TrackDiscProps) => {
 			aria-label="Loading"
 		>
 			<span
-				className="rli-d-i-b annulus-track-indicator"
+				className="rli-d-i-b OP-annulus-sector-track-indicator"
 				ref={elemRef}
 				style={{ ...annulusTrackColorStyles, ...styles }}
 			>
 				<span className="rli-d-i-b annulus-track-ring"></span>
 
 				<Text
-					className="track-disc-text"
+					className="OP-annulus-sector-text"
 					text={props?.text}
 					textColor={props?.textColor}
 				/>

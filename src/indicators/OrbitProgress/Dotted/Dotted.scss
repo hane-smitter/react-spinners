@@ -1,27 +1,32 @@
+@use "sass:string";
 @use "../../../scss/variables" as defaults;
 
 $animationDuration: var(--rli-animation-duration, 1.2s);
 $animationFn: var(--rli-animation-function, ease-in-out);
 $numberOfDots: 12;
 
+// Animation names
+$fadeDots: string.unique-id();
+$dottedProgressColoring: string.unique-id();
+
 @function dottedColorPhase($num: null) {
-	$cssVar: var(--dotted-phase1-color);
+	$cssVar: var(--OP-dotted-phase1-color);
 
 	@if ($num and $num != 1) {
-		$cssVar: var(--dotted-phase#{$num}-color, $cssVar);
+		$cssVar: var(--OP-dotted-phase#{$num}-color, $cssVar);
 	}
 
 	@return $cssVar;
 }
 
-.dot-rli-bounding-box {
-	--dotted-phase1-color: #{defaults.$defaultColor};
+.OP-dotted-rli-bounding-box {
+	--OP-dotted-phase1-color: #{defaults.$defaultColor};
 
 	font-size: defaults.$fontSizer;
 	box-sizing: border-box;
 	display: inline-block;
 
-	.fading-dot-throbber {
+	.OP-dotted-indicator {
 		width: 5em;
 		height: 5em;
 		color: dottedColorPhase();
@@ -31,7 +36,7 @@ $numberOfDots: 12;
 		position: relative;
 		z-index: 0;
 
-		.fading-dot-text {
+		.OP-dotted-text {
 			mix-blend-mode: difference;
 
 			position: absolute;
@@ -68,15 +73,15 @@ $numberOfDots: 12;
 				border-radius: 50%;
 
 				animation:
-					$animationDuration $animationFn $animationDelay infinite both fadeDots,
+					$animationDuration $animationFn $animationDelay infinite both $fadeDots,
 					calc($animationDuration * 4) $animationDelay $animationFn infinite
-						dottedProgressColoring;
+						$dottedProgressColoring;
 			}
 		}
 	}
 }
 
-@keyframes fadeDots {
+@keyframes #{$fadeDots} {
 	0%,
 	39%,
 	100% {
@@ -86,7 +91,7 @@ $numberOfDots: 12;
 		opacity: 1;
 	}
 }
-@keyframes dottedProgressColoring {
+@keyframes #{$dottedProgressColoring} {
 	100%,
 	0% {
 		background-color: dottedColorPhase(1);

@@ -3,20 +3,21 @@
 
 $animationDuration: var(--rli-animation-duration, 1.2s);
 $animationFn: var(--rli-animation-function, ease-in-out);
-$numOfBars: 12;
-$numOfBarsVar: var(--orbit-progress-bars-count, $numOfBars);
-$degreesInterval: calc(360deg / $numOfBars);
-$delayInterval: calc($animationDuration / $numOfBarsVar);
-$barSize: 1.2em;
+$numOfSpokes: 12;
+$numOfSpokesVar: var(--orbit-progress-bars-count, $numOfSpokes);
+$degreesInterval: calc(360deg / $numOfSpokes);
+$delayInterval: calc($animationDuration / $numOfSpokesVar);
+$spokeSize: 1.2em;
+
 // Animation names
-$barsSpinAnim: string.unique-id();
+$spokesSpinAnim: string.unique-id();
 
 .OP-spokes-rli-bounding-box {
 	font-size: defaults.$fontSizer;
 
 	.OP-spokes-indicator {
-		width: calc($barSize * 4);
-		height: calc($barSize * 4);
+		width: calc($spokeSize * 4);
+		height: calc($spokeSize * 4);
 		display: block;
 		position: relative;
 
@@ -27,38 +28,38 @@ $barsSpinAnim: string.unique-id();
 			position: absolute;
 
 			// Dimensions + Centering technique
-			height: $barSize;
-			width: calc($barSize / 3);
+			height: $spokeSize;
+			width: calc($spokeSize / 3);
 			top: 0;
 			left: 0;
 			right: 0;
 			bottom: 0;
 			margin: auto auto auto 50%;
 			background-color: #1d1d1d;
-			border-radius: calc($barSize / 5);
-			// border-top-right-radius: calc($barSize / 4); // Same as width
+			border-radius: calc($spokeSize / 5);
+			// border-top-right-radius: calc($spokeSize / 4); // Same as width
 			opacity: 0;
 			animation: $animationDuration $animationFn backwards infinite
-				$barsSpinAnim;
+				$spokesSpinAnim;
 			transform-origin: left center;
 
-			@for $j from 1 through $numOfBars {
-				$backwardsBarNum: calc($numOfBars - ($j - 1));
-				$barIndex: calc($j - 1);
-				// $barIndex2: calc($backwardsBarNum - 1);
+			@for $j from 1 through $numOfSpokes {
+				$backwardsSpokeNum: calc($numOfSpokes - ($j - 1));
+				$spokeIndex: calc($j - 1);
+				// $spokeIndex2: calc($backwardsSpokeNum - 1);
 				&:nth-of-type(#{$j}) {
-					$rotateInclination: calc(#{$barIndex} * 360deg / #{$numOfBarsVar});
-					$barsOffset: calc(($barSize + ($barSize * 0.3)) * -1);
+					$rotateInclination: calc(#{$spokeIndex} * 360deg / #{$numOfSpokesVar});
+					$barsOffset: calc(($spokeSize + ($spokeSize * 0.3)) * -1);
 
 					transform: rotate($rotateInclination) translate(-50%, $barsOffset);
-					animation-delay: calc(#{$backwardsBarNum} * $delayInterval * -1);
+					animation-delay: calc(#{$backwardsSpokeNum} * $delayInterval * -1);
 				}
 			}
 		}
 	}
 }
 
-@keyframes #{$barsSpinAnim} {
+@keyframes #{$spokesSpinAnim} {
 	from {
 		opacity: 1;
 	}

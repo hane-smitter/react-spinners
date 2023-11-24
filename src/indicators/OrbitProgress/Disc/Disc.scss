@@ -1,25 +1,31 @@
+@use "sass:string";
 @use "../../../scss/variables" as defaults;
 
 $animationDuration: var(--rli-animation-duration, 1.5s);
 $animationFn: var(--rli-animation-function, ease-in-out);
 
-@function annulusColorPhase($discNumber: null) {
-	$cssVar: var(--disc-phase1-color);
+// Animation names
+$annulusProgressRotate: string.unique-id();
+$annulusShrinkStretch: string.unique-id();
+$annuluscoloring: string.unique-id();
 
-	@if ($discNumber and $discNumber != 1) {
-		$cssVar: var(--disc-phase#{$discNumber}-color, $cssVar);
+@function annulusColorPhase($num: null) {
+	$cssVar: var(--OP-annulus-phase1-color);
+
+	@if ($num and $num != 1) {
+		$cssVar: var(--OP-annulus-phase#{$num}-color, $cssVar);
 	}
 
 	@return $cssVar;
 }
 
-.disc-rli-bounding-box {
-	--disc-phase1-color: #{defaults.$defaultColor};
+.OP-annulus-rli-bounding-box {
+	--OP-annulus-phase1-color: #{defaults.$defaultColor};
 
 	font-size: defaults.$fontSizer;
 	display: inline-block;
 
-	.disc-throbber {
+	.OP-annulus-indicator {
 		width: 5em;
 		height: 5em;
 		color: annulusColorPhase();
@@ -30,7 +36,8 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 		z-index: 0;
 
 		.whirl {
-			animation: annulusProgressRotate calc($animationDuration * 1.33) linear infinite;
+			animation: $annulusProgressRotate calc($animationDuration * 1.33) linear
+				infinite;
 			height: 100%;
 			transform-origin: center center;
 			width: 100%;
@@ -46,13 +53,13 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 			stroke-dasharray: 1, 125;
 			stroke-dashoffset: 0;
 			animation:
-				$animationDuration $animationFn infinite annulusShrinkStretch,
-				calc($animationDuration * 4) $animationFn infinite annuluscoloring;
+				$animationDuration $animationFn infinite $annulusShrinkStretch,
+				calc($animationDuration * 4) $animationFn infinite $annuluscoloring;
 			stroke-linecap: round;
 		}
 	}
 
-	.disc-text {
+	.OP-annulus-text {
 		mix-blend-mode: difference;
 		// filter: invert(3%);
 
@@ -90,68 +97,51 @@ $animationFn: var(--rli-animation-function, ease-in-out);
 //   initial-value: defaults.$defaultColor;
 // }
 
-@keyframes annulusProgressRotate {
+@keyframes #{$annulusProgressRotate} {
 	100% {
 		transform: rotate(360deg);
 	}
 }
 
-@keyframes annulusShrinkStretch {
+@keyframes #{$annulusShrinkStretch} {
 	0% {
 		stroke-dasharray: 1, 125;
 		stroke-dashoffset: 0;
 	}
 	50% {
-		stroke-dasharray: 92, 125;
+		stroke-dasharray: 94, 125;
 		stroke-dashoffset: -35px;
 	}
 	100% {
-		stroke-dasharray: 92, 125;
+		stroke-dasharray: 94, 125;
 		stroke-dashoffset: -124px;
 	}
 }
 
-// @keyframes color {
-//   100%,
-//   0% {
-//     stroke: var(--disc-color1);
-//   }
-//   40% {
-//     stroke: var(--disc-color2);
-//   }
-//   66% {
-//     stroke: var(--disc-color3);
-//   }
-//   80%,
-//   90% {
-//     stroke: var(--disc-color4);
-//   }
-// }
-
-@keyframes annuluscoloring {
+@keyframes #{$annuluscoloring} {
 	100%,
 	0% {
 		stroke: annulusColorPhase(1);
 	}
-	24% {
+	22% {
 		stroke: annulusColorPhase(1);
 	}
 	25% {
 		stroke: annulusColorPhase(2);
 	}
-	49% {
+	42% {
 		stroke: annulusColorPhase(2);
 	}
 	50% {
 		stroke: annulusColorPhase(3);
 	}
-	74% {
+	72% {
 		stroke: annulusColorPhase(3);
 	}
 	75% {
 		stroke: annulusColorPhase(4);
 	}
-  99% {
+	97% {
 		stroke: annulusColorPhase(4);
 	}
 }

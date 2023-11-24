@@ -1,26 +1,31 @@
+@use "sass:string";
 @use "../../../scss/variables" as defaults;
 
 $animationDuration: var(--rli-animation-duration, 1.2s);
 $animationFn: var(--rli-animation-function, linear);
 
+// Animation names
+$annulusSplitsSpin: string.unique-id();
+$annulusSplitsColoring: string.unique-id();
+
 @function annulusSplitColorPhase($num: null) {
-	$cssVar: var(--annulus-split-phase1-color);
+	$cssVar: var(--OP-annulus-dual-sectors-phase1-color);
 
 	@if ($num and $num != 1) {
-		$cssVar: var(--annulus-split-phase#{$num}-color, $cssVar);
+		$cssVar: var(--OP-annulus-dual-sectors-phase#{$num}-color, $cssVar);
 	}
 
 	@return $cssVar;
 }
 
-.annulus-splits-rli-bounding-box {
-	--annulus-split-phase1-color: #{defaults.$defaultColor};
+.OP-annulus-dual-sectors-rli-bounding-box {
+	--OP-annulus-dual-sectors-phase1-color: #{defaults.$defaultColor};
 
 	font-size: defaults.$fontSizer;
 	box-sizing: border-box;
 	display: inline-block;
 
-	.annulus-splits-indicator {
+	.OP-annulus-dual-sectors-indicator {
 		width: 5em;
 		height: 5em;
 		display: inline-block;
@@ -31,7 +36,7 @@ $animationFn: var(--rli-animation-function, linear);
 
 		color: annulusSplitColorPhase();
 
-		.annulus-splits-ring {
+		.annulus-sectors {
 			box-sizing: border-box;
 			width: 100%;
 			height: 100%;
@@ -43,12 +48,12 @@ $animationFn: var(--rli-animation-function, linear);
 			background-color: transparent;
 
 			animation:
-				$animationDuration $animationFn infinite annulusSplitsSpin,
+				$animationDuration $animationFn infinite $annulusSplitsSpin,
 				calc($animationDuration * 4) $animationFn infinite
-					annulusSplitsColoring;
+					$annulusSplitsColoring;
 		}
 
-		.annulus-splits-text {
+		.OP-annulus-dual-sectors-text {
 			mix-blend-mode: difference;
 
 			position: absolute;
@@ -60,7 +65,7 @@ $animationFn: var(--rli-animation-function, linear);
 		}
 	}
 }
-@keyframes annulusSplitsSpin {
+@keyframes #{$annulusSplitsSpin} {
 	0% {
 		transform: rotate(0deg);
 	}
@@ -69,7 +74,7 @@ $animationFn: var(--rli-animation-function, linear);
 	}
 }
 
-@keyframes annulusSplitsColoring {
+@keyframes #{$annulusSplitsColoring} {
 	100%,
 	0% {
 		border-color: annulusSplitColorPhase(1) transparent;
