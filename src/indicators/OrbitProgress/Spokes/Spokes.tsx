@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useLayoutEffect } from "react";
 
 import { SpokesProps } from "./Spokes.types";
 import "./Spokes.scss";
@@ -14,9 +14,12 @@ const spokesColorSwitchVars = Array.from(
 	{ length: 4 },
 	(_, idx) => `--OP-spokes-phase${idx + 1}-color`
 );
+const spokeSize: number = 1.2; // Size of spoke for this indicator when dense prop is activated
 
 const Spokes = (props: SpokesProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
+	const spokesRef = useRef<HTMLSpanElement[]>([]);
+
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -43,6 +46,33 @@ const Spokes = (props: SpokesProps) => {
 		colorReset
 	);
 
+	const numOfSpokes = props?.dense ? 16 : 12; // specific to this indicator
+	useLayoutEffect(() => {
+		if (numOfSpokes === 16 && spokesRef.current) {
+			const spokesOffset: string = (spokeSize + spokeSize * 0.3) * -1 + "em";
+
+			for (let i = 0; i < spokesRef.current.length; i++) {
+				const viceversaSpokeNum: number = numOfSpokes - i;
+				const element = spokesRef.current[i];
+				const duration = Number.parseFloat(animationPeriod);
+				const delayInterval: number = duration / numOfSpokes;
+
+				const rotateInclination = (i * 360) / numOfSpokes;
+
+				element.style.transform = `rotate(${rotateInclination}deg) translate(-50%, ${spokesOffset})`;
+				element.style.animationDelay = `${
+					(viceversaSpokeNum - 1) * delayInterval * -1
+				}s`;
+			}
+		} else if (spokesRef.current) {
+			for (let i = 0; i < spokesRef.current.length; i++) {
+				const element = spokesRef.current[i];
+
+				element.removeAttribute("style");
+			}
+		}
+	}, [numOfSpokes, animationPeriod]);
+
 	return (
 		<span
 			className="rli-d-i-b OP-spokes-rli-bounding-box"
@@ -55,17 +85,34 @@ const Spokes = (props: SpokesProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b OP-spokes-indicator"
-				style={{ ...spokesColorStyles, ...styles }}
+				style={
+					{
+						...spokesColorStyles,
+						...styles
+					} as React.CSSProperties
+				}
 			>
-				{Array.from({ length: 12 }, (_, idx) => (
-					<span
-						key={`${(Math.random() * 1e12).toString(36)}${idx}`}
-						className="rli-d-i-b spoke"
-					></span>
-				))}
+				{(function () {
+					spokesRef.current = [];
+
+					return Array.from({ length: numOfSpokes }, (_, idx) => (
+						<span
+							key={`${(Math.random() * 1e12).toString(36)}${idx}`}
+							ref={elem => {
+								if (elem) {
+									spokesRef.current.push(elem);
+								}
+							}}
+							className="rli-d-i-b spoke"
+						></span>
+					));
+				})()}
 			</span>
 			<Text text={props?.text} textColor={props?.textColor} />
 		</span>

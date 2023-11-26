@@ -18,7 +18,11 @@ const annulusTrackColorVars: Array<string[]> = Array.from(
 		`--OP-annulus-sector-phase${idx + 1}-color`
 	]
 );
-const ANNULUS_TRACK_ALPHA: number = 0.25; // 0 - 1
+const ANNULUS_TRACK_ALPHA__: number = 0.25; // 0 - 1
+const alphaSetter: (num?: number) => number = (originalAlpha: number = 1) => {
+	const derived = originalAlpha * 0.25;
+	return derived;
+};
 
 const TrackDisc = (props: TrackDiscProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -36,8 +40,9 @@ const TrackDisc = (props: TrackDiscProps) => {
 	/* Color SETTING */
 	useRegisterCssProps(annulusTrackColorVars, (defaultColor, positionIndex) => {
 		if (positionIndex % 2 == 0) {
-			return colorParse(defaultColor)
-				.setAlpha(ANNULUS_TRACK_ALPHA)
+			const parsedColor = colorParse(defaultColor);
+			return parsedColor
+				.setAlpha(alphaSetter(parsedColor.getAlpha()))
 				.toRgbString();
 		}
 
@@ -129,7 +134,7 @@ function stylesObjectFromColorProp(
 				}
 
 				const nowColorLight: string = parsedColor
-					.setAlpha(ANNULUS_TRACK_ALPHA)
+					.setAlpha(alphaSetter(parsedColor.getAlpha()))
 					.toRgbString();
 				const nowColor = colorArr[idx];
 
@@ -137,8 +142,10 @@ function stylesObjectFromColorProp(
 				stylesObject[varNames[1]] = nowColor; // Annulus split color
 			} catch (error) {
 				const nowColor = DEFAULT_COLOR;
-				const nowColorLight = colorParse(DEFAULT_COLOR)
-					.setAlpha(ANNULUS_TRACK_ALPHA)
+				const parsedColor = colorParse(DEFAULT_COLOR);
+
+				const nowColorLight = parsedColor
+					.setAlpha(alphaSetter(parsedColor.getAlpha()))
 					.toRgbString();
 
 				stylesObject[varNames[0]] = nowColorLight; // Track color
@@ -159,7 +166,7 @@ function stylesObjectFromColorProp(
 
 		const nowColor = colorProp;
 		const nowColorLight = parsedColor
-			.setAlpha(ANNULUS_TRACK_ALPHA)
+			.setAlpha(alphaSetter(parsedColor.getAlpha()))
 			.toRgbString();
 
 		for (let i = 0; i < switchersLength; i++) {
@@ -184,8 +191,10 @@ function stylesObjectFromColorProp(
 			  );
 
 		const nowColor = DEFAULT_COLOR;
-		const nowColorLight = colorParse(DEFAULT_COLOR)
-			.setAlpha(ANNULUS_TRACK_ALPHA)
+		const parsedColor = colorParse(DEFAULT_COLOR);
+
+		const nowColorLight = parsedColor
+			.setAlpha(alphaSetter(parsedColor.getAlpha()))
 			.toRgbString();
 
 		for (let i = 0; i < annulusTrackColorVars.length; i++) {

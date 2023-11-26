@@ -4,9 +4,9 @@
 $animationDuration: var(--rli-animation-duration, 1.2s);
 $animationFn: var(--rli-animation-function, ease-in-out);
 $numOfSpokes: 12;
-$numOfSpokesVar: var(--orbit-progress-bars-count, $numOfSpokes);
+// $numOfSpokesVar: var(--orbit-progress-spokes-count, $numOfSpokes);
 $degreesInterval: calc(360deg / $numOfSpokes);
-$delayInterval: calc($animationDuration / $numOfSpokesVar);
+$delayInterval: calc($animationDuration / $numOfSpokes);
 $spokeSize: 1.2em;
 
 // Animation names
@@ -37,22 +37,23 @@ $spokesSpinAnim: string.unique-id();
 			margin: auto auto auto 50%;
 			background-color: #1d1d1d;
 			border-radius: calc($spokeSize / 5);
-			// border-top-right-radius: calc($spokeSize / 4); // Same as width
+			// border-top-right-radius: calc($spokeSize / 3); // Same as width
 			opacity: 0;
 			animation: $animationDuration $animationFn backwards infinite
 				$spokesSpinAnim;
 			transform-origin: left center;
 
 			@for $j from 1 through $numOfSpokes {
-				$backwardsSpokeNum: calc($numOfSpokes - ($j - 1));
+				$viceversaSpokeNum: calc($numOfSpokes - ($j - 1));
+				@debug $viceversaSpokeNum;
 				$spokeIndex: calc($j - 1);
-				// $spokeIndex2: calc($backwardsSpokeNum - 1);
+				// $spokeIndex2: calc($viceversaSpokeNum - 1);
 				&:nth-of-type(#{$j}) {
-					$rotateInclination: calc(#{$spokeIndex} * 360deg / #{$numOfSpokesVar});
-					$barsOffset: calc(($spokeSize + ($spokeSize * 0.3)) * -1);
+					$rotateInclination: calc(#{$spokeIndex} * 360deg / #{$numOfSpokes});
+					$spokesOffset: calc(($spokeSize + ($spokeSize * 0.3)) * -1);
 
-					transform: rotate($rotateInclination) translate(-50%, $barsOffset);
-					animation-delay: calc(#{$backwardsSpokeNum} * $delayInterval * -1);
+					transform: rotate($rotateInclination) translate(-50%, $spokesOffset);
+					animation-delay: calc(($viceversaSpokeNum - 1) * $delayInterval * -1);
 				}
 			}
 		}

@@ -1,35 +1,57 @@
 import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryFn, StoryObj } from "@storybook/react";
 import OrbitProgress from "./OrbitProgress";
+import { OrbitProgressProps } from "./OrbitProgress.types";
+import { devSecondaryColor } from "../variables";
+
+// extended OrbitProgress props
+interface xOPProps extends OrbitProgressProps {
+	dense?: boolean;
+}
 
 export default {
 	title: "rli/OrbitProgress",
 	component: OrbitProgress
-} as ComponentMeta<typeof OrbitProgress>;
+} as Meta<typeof OrbitProgress>;
 
-const Template: ComponentStory<typeof OrbitProgress> = args => (
-	<OrbitProgress {...args} />
-);
+// const Template: StoryFn<typeof OrbitProgress> = args => {
+// 	const CmpProps: xOPProps = { ...args };
+// 	if (CmpProps.variant === "bubble-dotted") {
+// 		CmpProps.dense = true;
+// 	}
+// 	return <OrbitProgress {...CmpProps} />;
+// };
 
-export const Primary = Template.bind({});
+type OPIndicatorStory = StoryObj<typeof OrbitProgress>;
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Primary: OPIndicatorStory = {};
+
+export const Secondary: OPIndicatorStory = {
+	args: {
+		color: devSecondaryColor,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const Small: OPIndicatorStory = {
+	args: {
+		size: "small"
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
+export const Medium: OPIndicatorStory = {
+	args: {
+		size: "medium"
+	}
 };
 
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const Large: OPIndicatorStory = {
+	args: {
+		size: "large"
+	}
 };
+
+// export const Large = Template.bind({});
+// Large.args = {
+// 	size: "large"
+// };

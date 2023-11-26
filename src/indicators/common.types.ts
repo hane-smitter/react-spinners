@@ -12,11 +12,13 @@ type Easing =
 
 export interface CommonProps {
 	/**
-	 * Sets color of the indicator/throbber
+	 * Sets color of the indicator.
+	 * 
+	 * When specifying alpha channel in **RGB** color format, it's recommended to explicitly use **RGBA**.
 	 */
 	color?: string | string[];
 	/**
-	 * Sets size of the indicator/throbber
+	 * Sets size of the indicator
 	 */
 	size?: "small" | "medium" | "large";
 	/**
