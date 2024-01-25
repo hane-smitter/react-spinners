@@ -7,7 +7,7 @@ import "./SplitDisc.scss";
 import { SplitDiscProps } from "./SplitDisc.types";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useRegisterCssProps from "../../../hooks/useRegisterCssProps";
+import useRegisterCssProps from "../../../hooks/useSetCSSColorTypes";
 
 // CSS properties for switching colors
 const annulusSplitsColorVars: Array<string> = Array.from(

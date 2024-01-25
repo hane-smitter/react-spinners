@@ -11,8 +11,21 @@ $spokeSize: 1.2em;
 
 // Animation names
 $spokesSpinAnim: string.unique-id();
+$spokesColoringAnim: string.unique-id();
+
+@function spokesColorPhase($num: null) {
+	$cssVar: var(--OP-spokes-phase1-color);
+
+	@if ($num and $num != 1) {
+		$cssVar: var(--OP-spokes-phase#{$num}-color, $cssVar);
+	}
+
+	@return $cssVar;
+}
 
 .OP-spokes-rli-bounding-box {
+	--OP-spokes-phase1-color: #{defaults.$defaultColor};
+
 	font-size: defaults.$fontSizer;
 
 	.OP-spokes-indicator {
@@ -22,7 +35,7 @@ $spokesSpinAnim: string.unique-id();
 		position: relative;
 
 		// For debugging
-		background-color: aquamarine;
+		// background-color: aquamarine;
 
 		.spoke {
 			position: absolute;
@@ -35,17 +48,19 @@ $spokesSpinAnim: string.unique-id();
 			right: 0;
 			bottom: 0;
 			margin: auto auto auto 50%;
-			background-color: #1d1d1d;
+			// background-color: #1d1d1d;
+			background-color: spokesColorPhase();
 			border-radius: calc($spokeSize / 5);
 			// border-top-right-radius: calc($spokeSize / 3); // Same as width
 			opacity: 0;
-			animation: $animationDuration $animationFn backwards infinite
-				$spokesSpinAnim;
+			animation:
+				$animationDuration $animationFn backwards infinite $spokesSpinAnim,
+				calc($animationDuration * 4) $animationFn infinite $spokesColoringAnim;
 			transform-origin: left center;
 
 			@for $j from 1 through $numOfSpokes {
 				$viceversaSpokeNum: calc($numOfSpokes - ($j - 1));
-				@debug $viceversaSpokeNum;
+				// @debug $viceversaSpokeNum;
 				$spokeIndex: calc($j - 1);
 				// $spokeIndex2: calc($viceversaSpokeNum - 1);
 				&:nth-of-type(#{$j}) {
@@ -66,5 +81,32 @@ $spokesSpinAnim: string.unique-id();
 	}
 	to {
 		opacity: 0;
+	}
+}
+@keyframes #{$spokesColoringAnim} {
+	100%,
+	0% {
+		background-color: spokesColorPhase(1);
+	}
+	22% {
+		background-color: spokesColorPhase(1);
+	}
+	25% {
+		background-color: spokesColorPhase(2);
+	}
+	42% {
+		background-color: spokesColorPhase(2);
+	}
+	50% {
+		background-color: spokesColorPhase(3);
+	}
+	72% {
+		background-color: spokesColorPhase(3);
+	}
+	75% {
+		background-color: spokesColorPhase(4);
+	}
+	97% {
+		background-color: spokesColorPhase(4);
 	}
 }

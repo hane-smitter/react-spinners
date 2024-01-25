@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useCallback, useRef, useLayoutEffect } from "react";
+import React, { useCallback, useRef } from "react";
 
 import { SpokesProps } from "./Spokes.types";
 import "./Spokes.scss";
@@ -9,6 +9,7 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
+import useSetCSSColorTypes from "../../../hooks/useSetCSSColorTypes";
 
 const spokesColorSwitchVars = Array.from(
 	{ length: 4 },
@@ -18,7 +19,6 @@ const spokeSize: number = 1.2; // Size of spoke for this indicator when dense pr
 
 const Spokes = (props: SpokesProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
-	const spokesRef = useRef<HTMLSpanElement[]>([]);
 
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
@@ -32,46 +32,46 @@ const Spokes = (props: SpokesProps) => {
 	);
 
 	/* Color SETTINGS */
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
-			}
-		},
-		[elemRef.current]
-	);
+	useSetCSSColorTypes(spokesColorSwitchVars);
+	const colorReset = useCallback(function () {
+		if (elemRef.current) {
+			elemRef.current?.style.removeProperty("color");
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const spokesColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
 	);
 
-	const numOfSpokes = props?.dense ? 16 : 12; // specific to this indicator
-	useLayoutEffect(() => {
-		if (numOfSpokes === 16 && spokesRef.current) {
-			const spokesOffset: string = (spokeSize + spokeSize * 0.3) * -1 + "em";
+	const numOfSpokes: 16 | 12 = props?.dense ? 16 : 12; // specific to this indicator
 
-			for (let i = 0; i < spokesRef.current.length; i++) {
-				const viceversaSpokeNum: number = numOfSpokes - i;
-				const element = spokesRef.current[i];
+	const createStyles = useCallback(
+		/**
+		 * Calculates styles for compact variant of indicator when `spokesCount = 16`, i.e `dense` prop is `true`.
+		 * @param {number} i Index position in array
+		 * @param {number} spokesCount Number of spokes/bars
+		 */
+		(i: number, spokesCount: 16 | 12): React.CSSProperties | undefined => {
+			if (spokesCount === 16) {
+				const spokesOffset: string = (spokeSize + spokeSize * 0.3) * -1 + "em";
+
+				const reverseSpokeNum: number = spokesCount - i;
 				const duration = Number.parseFloat(animationPeriod);
-				const delayInterval: number = duration / numOfSpokes;
+				const delayInterval: number = duration / spokesCount;
 
-				const rotateInclination = (i * 360) / numOfSpokes;
+				const rotateInclination = (i * 360) / spokesCount;
 
-				element.style.transform = `rotate(${rotateInclination}deg) translate(-50%, ${spokesOffset})`;
-				element.style.animationDelay = `${
-					(viceversaSpokeNum - 1) * delayInterval * -1
-				}s`;
+				return {
+					transform: `rotate(${rotateInclination}deg) translate(-50%, ${spokesOffset})`,
+					animationDelay: `${(reverseSpokeNum - 1) * delayInterval * -1}s`
+				};
+			} else {
+				return undefined;
 			}
-		} else if (spokesRef.current) {
-			for (let i = 0; i < spokesRef.current.length; i++) {
-				const element = spokesRef.current[i];
-
-				element.removeAttribute("style");
-			}
-		}
-	}, [numOfSpokes, animationPeriod]);
+		},
+		[animationPeriod]
+	);
 
 	return (
 		<span
@@ -98,21 +98,13 @@ const Spokes = (props: SpokesProps) => {
 					} as React.CSSProperties
 				}
 			>
-				{(function () {
-					spokesRef.current = [];
-
-					return Array.from({ length: numOfSpokes }, (_, idx) => (
-						<span
-							key={`${(Math.random() * 1e12).toString(36)}${idx}`}
-							ref={elem => {
-								if (elem) {
-									spokesRef.current.push(elem);
-								}
-							}}
-							className="rli-d-i-b spoke"
-						></span>
-					));
-				})()}
+				{Array.from({ length: numOfSpokes }, (_, idx) => (
+					<span
+						key={`${(Math.random() * 1e12).toString(36)}${idx}`}
+						className="rli-d-i-b spoke"
+						style={createStyles(idx, numOfSpokes)}
+					></span>
+				))}
 			</span>
 			<Text text={props?.text} textColor={props?.textColor} />
 		</span>

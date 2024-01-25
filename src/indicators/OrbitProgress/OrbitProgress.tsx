@@ -14,7 +14,7 @@ const OrbitProgress = (props: OrbitProgressProps) => {
 
 	return componentVariant === "dotted" ? (
 		<Dotted {...props} />
-	) : componentVariant === "bubble-dotted" ? (
+	) : componentVariant === "spokes" ? (
 		<Spokes {...props} />
 	) : componentVariant === "disc" ? (
 		<Disc {...props} />
