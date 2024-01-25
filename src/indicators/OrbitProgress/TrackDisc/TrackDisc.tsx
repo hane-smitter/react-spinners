@@ -8,7 +8,7 @@ import "./TrackDisc.scss";
 import { TrackDiscProps } from "./TrackDisc.types";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useSetCSSColorTypes from "../../../hooks/useSetCSSColorTypes";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const annulusTrackColorVars: Array<string[]> = Array.from(
@@ -38,7 +38,7 @@ const TrackDisc = (props: TrackDiscProps) => {
 	);
 
 	/* Color SETTING */
-	useSetCSSColorTypes(annulusTrackColorVars, (defaultColor, positionIndex) => {
+	useRegisterCssColors(annulusTrackColorVars, (defaultColor, positionIndex) => {
 		if (positionIndex % 2 == 0) {
 			const parsedColor = colorParse(defaultColor);
 			return parsedColor

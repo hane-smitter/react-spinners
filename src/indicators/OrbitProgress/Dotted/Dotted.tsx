@@ -8,7 +8,7 @@ import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
 import makeId from "../../../utils/makeId";
-import useSetCSSColorTypes from "../../../hooks/useSetCSSColorTypes";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const dottedColorSwitchVars: Array<string> = Array.from(
@@ -30,7 +30,7 @@ const Dotted = (props: DottedProps) => {
 	);
 
 	/* Color SETTINGS */
-	useSetCSSColorTypes(dottedColorSwitchVars);
+	useRegisterCssColors(dottedColorSwitchVars);
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {

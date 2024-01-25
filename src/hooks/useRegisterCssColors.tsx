@@ -19,7 +19,7 @@ type initColorFn = (
  * @param CssProperties - Pass css property names in an array or nested array of depth 1
  * @param {setInitialColorCb} setInitialColor -  A callback that allows to customize a default color to be set
  */
-function useRegisterCssProps(
+function useRegisterCssColors(
 	CssProperties: Array<string | Array<string>>,
 	setInitialColor: initColorFn = (defaultColor: string) => defaultColor
 ): void {
@@ -81,4 +81,4 @@ function useRegisterCssProps(
 	}, []);
 }
 
-export default useRegisterCssProps;
+export default useRegisterCssColors;

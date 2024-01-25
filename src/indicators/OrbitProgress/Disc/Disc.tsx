@@ -7,7 +7,7 @@ import "./Disc.scss";
 import { DiscProps } from "./Disc.types";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useSetCSSColorTypes from "../../../hooks/useSetCSSColorTypes";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const discColorSwitchVars: Array<string> = Array.from(
@@ -29,7 +29,7 @@ const Disc = (props: DiscProps) => {
 	);
 
 	/* Color SETTING */
-	useSetCSSColorTypes(discColorSwitchVars);
+	useRegisterCssColors(discColorSwitchVars);
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {

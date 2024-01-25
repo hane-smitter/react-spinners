@@ -9,7 +9,7 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useSetCSSColorTypes from "../../../hooks/useSetCSSColorTypes";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 const spokesColorSwitchVars = Array.from(
 	{ length: 4 },
@@ -32,7 +32,7 @@ const Spokes = (props: SpokesProps) => {
 	);
 
 	/* Color SETTINGS */
-	useSetCSSColorTypes(spokesColorSwitchVars);
+	useRegisterCssColors(spokesColorSwitchVars);
 	const colorReset = useCallback(function () {
 		if (elemRef.current) {
 			elemRef.current?.style.removeProperty("color");
