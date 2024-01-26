@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback, useRef } from "react";
 
 import "./Dotted.scss";
 import { DottedProps } from "./Dotted.types";

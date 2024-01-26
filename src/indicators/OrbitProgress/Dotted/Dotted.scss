@@ -53,21 +53,6 @@ $dottedProgressColoring: string.unique-id();
 			bottom: 0;
 			right: 0;
 
-			// &::before {
-			// 	content: "";
-			// 	display: block;
-			// 	margin: 0 auto;
-			// 	width: 15%;
-			// 	height: 15%;
-			// 	background-color: currentColor;
-			// 	border-radius: 50%;
-
-			// 	animation:
-			// 		$animationDuration $animationFn infinite $fadeDots,
-			// 		calc($animationDuration * 4) $animationFn infinite
-			// 			$dottedProgressColoring;
-			// }
-
 			& .dot {
 				display: block;
 				margin: 0 auto;
@@ -91,39 +76,10 @@ $dottedProgressColoring: string.unique-id();
 				&:nth-of-type(#{$j}) {
 					transform: rotate($rotationDeg);
 				}
-				// &:nth-of-type(#{$j})::before {
-				// 	animation-delay: $animationDelay;
-				// }
 				&:nth-of-type(#{$j}) .dot {
 					animation-delay: $animationDelay;
 				}
 			}
-
-			// transform: rotate(
-			// 	calc((var(--elem-pos) - 1) * calc(360deg / $numberOfDots))
-			// );
-
-			// &::before {
-			// 	// Algorithm: duration/total_dots * dot_pos
-			// 	$animationDelay: calc(
-			// 		($animationDuration / $numberOfDots) *
-			// 			($numberOfDots - (var(--elem-pos) - 1)) * -1
-			// 	);
-
-			// 	content: "";
-			// 	display: block;
-			// 	margin: 0 auto;
-			// 	width: 15%;
-			// 	height: 15%;
-			// 	background-color: currentColor;
-			// 	border-radius: 50%;
-
-			// 	animation:
-			// 		$animationDuration $animationFn $animationDelay infinite both
-			// 			$fadeDots,
-			// 		calc($animationDuration * 4) $animationDelay $animationFn infinite
-			// 			$dottedProgressColoring;
-			// }
 		}
 	}
 }
