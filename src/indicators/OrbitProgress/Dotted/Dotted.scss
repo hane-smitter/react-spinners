@@ -53,18 +53,22 @@ $dottedProgressColoring: string.unique-id();
 			bottom: 0;
 			right: 0;
 
-			transform: rotate(
-				calc((var(--elem-pos) - 1) * calc(360deg / $numberOfDots))
-			);
+			// &::before {
+			// 	content: "";
+			// 	display: block;
+			// 	margin: 0 auto;
+			// 	width: 15%;
+			// 	height: 15%;
+			// 	background-color: currentColor;
+			// 	border-radius: 50%;
 
-			&::before {
-				// Algorithm: duration/total_dots * dot_pos
-				$animationDelay: calc(
-					($animationDuration / $numberOfDots) *
-						($numberOfDots - (var(--elem-pos) - 1)) * -1
-				);
+			// 	animation:
+			// 		$animationDuration $animationFn infinite $fadeDots,
+			// 		calc($animationDuration * 4) $animationFn infinite
+			// 			$dottedProgressColoring;
+			// }
 
-				content: "";
+			& .dot {
 				display: block;
 				margin: 0 auto;
 				width: 15%;
@@ -73,10 +77,53 @@ $dottedProgressColoring: string.unique-id();
 				border-radius: 50%;
 
 				animation:
-					$animationDuration $animationFn $animationDelay infinite both $fadeDots,
-					calc($animationDuration * 4) $animationDelay $animationFn infinite
+					$animationDuration $animationFn infinite $fadeDots,
+					calc($animationDuration * 4) $animationFn infinite
 						$dottedProgressColoring;
 			}
+
+			@for $j from 1 through $numberOfDots {
+				$rotationDeg: calc($j - 1) * calc(360deg / $numberOfDots);
+				$animationDelay: calc(
+					($animationDuration / $numberOfDots) * ($numberOfDots - ($j - 1)) * -1
+				);
+
+				&:nth-of-type(#{$j}) {
+					transform: rotate($rotationDeg);
+				}
+				// &:nth-of-type(#{$j})::before {
+				// 	animation-delay: $animationDelay;
+				// }
+				&:nth-of-type(#{$j}) .dot {
+					animation-delay: $animationDelay;
+				}
+			}
+
+			// transform: rotate(
+			// 	calc((var(--elem-pos) - 1) * calc(360deg / $numberOfDots))
+			// );
+
+			// &::before {
+			// 	// Algorithm: duration/total_dots * dot_pos
+			// 	$animationDelay: calc(
+			// 		($animationDuration / $numberOfDots) *
+			// 			($numberOfDots - (var(--elem-pos) - 1)) * -1
+			// 	);
+
+			// 	content: "";
+			// 	display: block;
+			// 	margin: 0 auto;
+			// 	width: 15%;
+			// 	height: 15%;
+			// 	background-color: currentColor;
+			// 	border-radius: 50%;
+
+			// 	animation:
+			// 		$animationDuration $animationFn $animationDelay infinite both
+			// 			$fadeDots,
+			// 		calc($animationDuration * 4) $animationDelay $animationFn infinite
+			// 			$dottedProgressColoring;
+			// }
 		}
 	}
 }
@@ -96,25 +143,25 @@ $dottedProgressColoring: string.unique-id();
 	0% {
 		background-color: dottedColorPhase(1);
 	}
-	20% {
+	22% {
 		background-color: dottedColorPhase(1);
 	}
 	25% {
 		background-color: dottedColorPhase(2);
 	}
-	45% {
+	47% {
 		background-color: dottedColorPhase(2);
 	}
 	50% {
 		background-color: dottedColorPhase(3);
 	}
-	70% {
+	72% {
 		background-color: dottedColorPhase(3);
 	}
 	75% {
 		background-color: dottedColorPhase(4);
 	}
-	95% {
+	97% {
 		background-color: dottedColorPhase(4);
 	}
 }

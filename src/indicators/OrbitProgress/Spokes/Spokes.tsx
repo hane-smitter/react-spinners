@@ -10,6 +10,7 @@ import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
 import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
+import makeId from "../../../utils/makeId";
 
 const spokesColorSwitchVars = Array.from(
 	{ length: 4 },
@@ -100,7 +101,7 @@ const Spokes = (props: SpokesProps) => {
 			>
 				{Array.from({ length: numOfSpokes }, (_, idx) => (
 					<span
-						key={`${(Math.random() * 1e12).toString(36)}${idx}`}
+						key={makeId()}
 						className="rli-d-i-b spoke"
 						style={createStyles(idx, numOfSpokes)}
 					></span>

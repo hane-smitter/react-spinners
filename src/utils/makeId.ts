@@ -1,18 +1,13 @@
 function makeId(): string {
+	let id: string = "";
 	if (self?.crypto?.randomUUID) {
-		const uid = self.crypto.randomUUID();
-		return uid;
+		id = self.crypto.randomUUID();
 	} else if (self?.btoa?.name) {
-		const unique = self.btoa(
-			new Date(Math.ceil(Math.random() * 1e13)).getTime() + ""
-		);
-
-		return unique;
+		id = self.btoa(new Date(Math.ceil(Math.random() * 1e13)).getTime() + "");
 	} else {
-		const uid =
-			Date.now().toString(36) + Math.random().toString(36).substring(0);
-		return uid;
+		id = Date.now().toString(36) + Math.random().toString(36).substring(0);
 	}
+	return id;
 }
 
 export default makeId;

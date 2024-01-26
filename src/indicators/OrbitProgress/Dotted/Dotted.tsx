@@ -47,6 +47,36 @@ const Dotted = (props: DottedProps) => {
 		colorReset
 	);
 
+	const numOfDots: 16 | 12 = props?.dense ? 16 : 12; // dense prop logic
+
+	const createStyles = useCallback(
+		/**
+		 * Calculates styles for compact variant of indicator when `dotsCount = 16`, i.e `dense` prop is `true`.
+		 * @param {number} i Index position in array
+		 * @param {number} dotsCount Number of dots
+		 */
+		(
+			i: number,
+			dotsCount: 16 | 12
+		): { transform: string; animationDelay: string } => {
+			if (dotsCount === 16) {
+				const rotationDeg = (i * 360) / dotsCount;
+				const reverseDotNum: number = dotsCount - i;
+				const duration: number = Number.parseFloat(animationPeriod);
+				const animationDelay: number =
+					(duration / dotsCount) * reverseDotNum * -1;
+
+				return {
+					transform: `rotate(${rotationDeg}deg)`,
+					animationDelay: `${animationDelay}s`
+				};
+			} else {
+				return { transform: "", animationDelay: "" };
+			}
+		},
+		[animationPeriod]
+	);
+
 	return (
 		<span
 			className="rli-d-i-b OP-dotted-rli-bounding-box"
@@ -68,13 +98,22 @@ const Dotted = (props: DottedProps) => {
 				ref={elemRef}
 				style={{ ...dotsColorStyles, ...styles }}
 			>
-				{Array.from({ length: 12 }).map((_, i) => (
-					<span
-						key={makeId()}
-						className={`rli-d-i-b dot-shape-holder`}
-						style={{ "--elem-pos": `${i + 1}` } as React.CSSProperties}
-					></span>
-				))}
+				{Array.from({ length: numOfDots }).map((_, idx) => {
+					const { animationDelay, transform } = createStyles(idx, numOfDots);
+
+					return (
+						<span
+							key={makeId()}
+							className="rli-d-i-b dot-shape-holder"
+							style={transform ? { transform } : undefined}
+						>
+							<span
+								className="dot"
+								style={animationDelay ? { animationDelay } : undefined}
+							></span>
+						</span>
+					);
+				})}
 
 				<Text
 					className="OP-dotted-text"
