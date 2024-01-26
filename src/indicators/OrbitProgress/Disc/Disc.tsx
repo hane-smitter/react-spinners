@@ -46,6 +46,7 @@ const Disc = (props: DiscProps) => {
 		colorProp,
 		colorReset
 	);
+	const bolderWidth: number = props?.dense ? 4.3 : 2.9;
 
 	return (
 		<span
@@ -76,7 +77,7 @@ const Disc = (props: DiscProps) => {
 						cy="50"
 						r="20"
 						fill="none"
-						strokeWidth="4"
+						strokeWidth={bolderWidth}
 						strokeMiterlimit="10"
 					/>
 				</svg>
