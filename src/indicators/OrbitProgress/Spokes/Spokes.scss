@@ -27,6 +27,8 @@ $spokesColoringAnim: string.unique-id();
 	--OP-spokes-phase1-color: #{defaults.$defaultColor};
 
 	font-size: defaults.$fontSizer;
+	position: relative;
+	color: var(--OP-spokes-phase1-color);
 
 	.OP-spokes-indicator {
 		width: calc($spokeSize * 4);
@@ -72,6 +74,21 @@ $spokesColoringAnim: string.unique-id();
 				}
 			}
 		}
+	}
+
+	.OP-spokes-indicator-text {
+		mix-blend-mode: difference;
+		// filter: invert(3%);
+
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		color: spokesColorPhase();
+
+		z-index: -2;
+
+		// background-color: blue;
 	}
 }
 

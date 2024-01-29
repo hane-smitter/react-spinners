@@ -21,7 +21,6 @@ const annulusTrackColorVars: Array<string[]> = Array.from(
 const ANNULUS_TRACK_ALPHA__: number = 0.25; // 0 - 1
 const alphaSetter: (num?: number) => number = (originalAlpha: number = 1) => {
 	const derived = originalAlpha * ANNULUS_TRACK_ALPHA__;
-	console.log({ originalAlpha, "derived-Alpha": derived });
 	return derived;
 };
 
