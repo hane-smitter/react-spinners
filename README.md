@@ -112,15 +112,15 @@ Each of these components will accept the following _optional props_.
 - `speedPlus` - Controls speed of animation. _Negative_ values slows down. _Positive_ numbers speeds up animation. `0` is normal speed.
 - `easing` - Controls the smoothness of the animation, altered with values such as `linear`, `ease-in`.
 
-Some components accept a `variant` prop, Specifically `<OrbitProgress />` and `<ThreeDot />`. This lets you choose a variation of a loading indicator that you want.
+`<OrbitProgress />` and `<ThreeDot />` have more than one variant of loading animation. You can pick an alternative animation using a `variant` prop.
 
 |  Name   | DataType |
 | :-----: | :------: |
 | variant | `string` |
 
-`<OrbitProgress />` has the following variants: **`dotted`**, **`bubble-dotted`**, **`disc`**, **`split-disc`**, **`track-disc`**. Defaults to `disc`.<br />
+`<OrbitProgress />` supports the following variants: **`dotted`**, **`spokes`**, **`disc`**, **`split-disc`**, **`track-disc`**. Defaults to `disc`.<br />
 `<ThreeDot />` has the following variants: **`pulsate`**, **`windmill`**, **`bob`**, **`brick-stack`**. Defaults to `pulsate`.<br />
-See [DEMO](https://react-loading-indicators.netlify.app/) to visualize.
+You can have an interactive run-through of the variants in the [DEMO](https://react-loading-indicators.netlify.app/) site.
 
 ### How to resize
 
