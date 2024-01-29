@@ -7,7 +7,7 @@ import "./SplitDisc.scss";
 import { SplitDiscProps } from "./SplitDisc.types";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useRegisterCssProps from "../../../hooks/useRegisterCssColors";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const annulusSplitsColorVars: Array<string> = Array.from(
@@ -29,7 +29,7 @@ const SplitDisc = (props: SplitDiscProps) => {
 	);
 
 	/* Color SETTINGS */
-	useRegisterCssProps(annulusSplitsColorVars);
+	useRegisterCssColors(annulusSplitsColorVars);
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {
@@ -43,6 +43,7 @@ const SplitDisc = (props: SplitDiscProps) => {
 	const colorProp: string | string[] = props?.color ?? "";
 	const annulusSplitsColorStyles: React.CSSProperties =
 		stylesObjectFromColorProp(colorProp, colorReset);
+	const boldSector: string = props.dense ? "0.45em" : "";
 
 	return (
 		<span
@@ -68,7 +69,10 @@ const SplitDisc = (props: SplitDiscProps) => {
 					...styles
 				}}
 			>
-				<span className="rli-d-i-b annulus-sectors"></span>
+				<span
+					className="rli-d-i-b annulus-sectors"
+					style={{ ...(boldSector && { borderWidth: boldSector }) }}
+				></span>
 				<Text
 					className="OP-annulus-dual-sectors-text"
 					text={props?.text}
