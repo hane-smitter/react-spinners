@@ -37,12 +37,8 @@ export interface CommonProps {
 	 */
 	speedPlus?: -5 | -4 | -3 | -2 | -1 | 0 | 1 | 2 | 3 | 4 | 5;
 	/**  
-	 CSS easing function, e.g `linear`, `ease-in`
+	 Animation easing function, e.g `linear`, `ease-in`
 	 *	@see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function | MDN Docs}
 	 */
 	easing?: Easing;
-	/**
-	 * Make the animation more compact/bold.
-	 */
-	dense?: boolean;
 }

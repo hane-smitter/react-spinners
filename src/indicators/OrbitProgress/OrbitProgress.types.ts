@@ -6,7 +6,7 @@ export interface OrbitProgressProps extends CommonProps {
 	 */
 	variant?: "dotted" | "spokes" | "disc" | "split-disc" | "track-disc";
 	/**
-	 * When used with variant `spokes` it sets a more compact animation.
+	 * Make the animation more bold/compact.
 	 */
 	dense?: boolean;
 }

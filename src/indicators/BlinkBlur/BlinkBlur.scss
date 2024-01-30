@@ -1,3 +1,4 @@
+@use "sass:string";
 @use "../../scss/variables" as defaults;
 
 $animationDuration: var(--rli-animation-duration, 2s);
@@ -6,6 +7,9 @@ $animationFn: var(--rli-animation-function, linear);
 $numOfShapes: 6;
 $shapeWidth: 2em;
 $shapeSpacing: 0.4em;
+
+$shiftingBlinkBlur: string.unique-id();
+$blinkBlurColoring: string.unique-id();
 
 @function shapeColorPhase($shapeNumber: null) {
 	$cssVar: var(--shape-phase1-color);
@@ -43,7 +47,7 @@ $shapeSpacing: 0.4em;
 			transform: skewX(var(--x-deg));
 			background-color: shapeColorPhase();
 
-			animation-name: shiftingBlinkBlur, blinkBlurColoring;
+			animation-name: $shiftingBlinkBlur, $blinkBlurColoring;
 			animation-duration: $animationDuration, calc($animationDuration * 4);
 			animation-timing-function: $animationFn;
 			animation-iteration-count: infinite;
@@ -70,7 +74,7 @@ $shapeSpacing: 0.4em;
 	}
 }
 
-@keyframes shiftingBlinkBlur {
+@keyframes #{$shiftingBlinkBlur} {
 	100%,
 	0% {
 		opacity: 0.4;
@@ -101,7 +105,7 @@ $shapeSpacing: 0.4em;
 
 // Firefox has a bug: setting variables in @keyframe rule (does not take effect): https://bugzilla.mozilla.org/show_bug.cgi?id=1763376
 // Switched approach to a different way that doesn't require setting var in @keyframes
-@keyframes blinkBlurColoring {
+@keyframes #{$blinkBlurColoring} {
 	100%,
 	0% {
 		// --color-base: var(--shape1-color-base);

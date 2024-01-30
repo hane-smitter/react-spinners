@@ -2,11 +2,20 @@
 
 import React, { useCallback, useRef } from "react";
 
-import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
+import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useRegisterCssColors from "../../hooks/useRegisterCssColors";
 import Text from "../../utils/Text";
 import "./Riple.scss";
 import { RipleProps } from "./Riple.types";
+import arrayRepeat from "../../utils/arrayRepeat";
+import { defaultColor as DEFAULT_COLOR } from "../variables";
+
+// CSS properties for switching colors
+const ripleColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--riple-phase${idx + 1}-color`
+);
 
 const Riple = (props: RipleProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -22,8 +31,7 @@ const Riple = (props: RipleProps) => {
 	);
 
 	/* Color SETTINGS */
-	// If Color property is a string, that is the color of all rings
-	// If color property is an array, that is color for each rings
+	useRegisterCssColors(ripleColorPhases);
 	const colorReset: () => void = useCallback(
 		function () {
 			if (elemRef.current) {
@@ -47,7 +55,8 @@ const Riple = (props: RipleProps) => {
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...ripleColorStyles
 				} as React.CSSProperties
 			}
 			role="status"
@@ -55,9 +64,9 @@ const Riple = (props: RipleProps) => {
 			aria-label="Loading"
 		>
 			<span
-				className="rli-d-i-b riple-throbber"
+				className="rli-d-i-b riple-indicator"
 				ref={elemRef}
-				style={{ ...ripleColorStyles, ...styles }}
+				style={{ ...styles }}
 			>
 				<span className="rli-d-i-b riple"></span>
 				<span className="rli-d-i-b riple"></span>
@@ -89,14 +98,42 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const [color] = colorProp;
+		const colorArr: string[] = arrayRepeat(colorProp, ripleColorPhases.length);
 
-		stylesObject["color"] = color;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
+
+			stylesObject[ripleColorPhases[idx]] = colorArr[idx];
+		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < ripleColorPhases.length; i++) {
+			stylesObject[ripleColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <Riple /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < ripleColorPhases.length; i++) {
+			stylesObject[ripleColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }

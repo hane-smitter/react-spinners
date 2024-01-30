@@ -1,9 +1,13 @@
+@use "sass:string";
 @use "../../scss/variables" as defaults;
 
 $animationDuration: var(--rli-animation-duration, 1.5s);
 $animationFn: var(--rli-animation-function, ease-in-out);
 $interval: var(--mosaic-skip-interval, 0.1s);
 $colorVarsNum: 4; // Number of coloring variables
+
+$mosaicAnimate: string.unique-id();
+$mosaicColoring: string.unique-id();
 
 @function mosaicColorVar($num: null) {
 	$cssVar: var(--mosaic-phase1-color);
@@ -53,7 +57,7 @@ $colorVarsNum: 4; // Number of coloring variables
     .mosaic-cube {
       background-color: mosaicColorVar();
 
-      animation-name: mosaicAnimate, mosaicColoring;
+      animation-name: $mosaicAnimate, $mosaicColoring;
       animation-duration: $animationDuration, calc($animationDuration * $colorVarsNum);
       animation-timing-function: $animationFn;
       animation-iteration-count: infinite;
@@ -98,7 +102,7 @@ $colorVarsNum: 4; // Number of coloring variables
   }
 }
 
-@keyframes mosaicAnimate {
+@keyframes #{$mosaicAnimate} {
   0%,
   60%,
   100% {
@@ -134,7 +138,7 @@ $colorVarsNum: 4; // Number of coloring variables
 //   initial-value: defaults.$defaultColor;
 // }
 
-@keyframes mosaicColoring {
+@keyframes #{$mosaicColoring} {
   100%,
   0% {
     background-color: mosaicColorVar(1);

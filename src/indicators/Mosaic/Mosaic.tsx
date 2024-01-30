@@ -9,13 +9,7 @@ import "./Mosaic.scss";
 import { MosaicProps } from "./Mosaic.types";
 import { defaultColor as DEFAULT_COLOR } from "../variables";
 import arrayRepeat from "../../utils/arrayRepeat";
-
-// const colorVars = [
-// 	"--mosaic-color1",
-// 	"--mosaic-color2",
-// 	"--mosaic-color3",
-// 	"--mosaic-color4"
-// ];
+import useRegisterCssColors from "../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const mosaicColorPhases: Array<string> = Array.from(
@@ -43,6 +37,7 @@ const Mosaic = (props: MosaicProps) => {
 	tesseractAnimationInterval = tesseractAnimationInterval + "s"; // Convert to CSS time unit
 
 	/* Color SETTINGS - Sets colors of all tesserae boxes*/
+	useRegisterCssColors(mosaicColorPhases);
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {
@@ -56,25 +51,6 @@ const Mosaic = (props: MosaicProps) => {
 		colorProp,
 		colorReset
 	);
-
-	// Registering/giving types to css variables controlling color of loading indicator
-	useEffect(() => {
-		for (let i = 0; i < mosaicColorPhases.length; i++) {
-			try {
-				window.CSS.registerProperty({
-					name: mosaicColorPhases[i],
-					syntax: "<color>",
-					inherits: true,
-					initialValue: DEFAULT_COLOR
-				});
-			} catch (error) {
-				// console.group("--mosaic-phaseX-color var ERR");
-				// console.log(error);
-				// console.groupEnd();
-				continue;
-			}
-		}
-	}, []);
 
 	return (
 		<span
@@ -179,7 +155,7 @@ function stylesObjectFromColorProp(
 			: console.warn(
 					`${JSON.stringify(
 						colorProp
-					)} received in <BlinkBlur /> indicator cannot be processed. Using default instead!`
+					)} received in <Mosaic /> indicator cannot be processed. Using default instead!`
 			  );
 
 		for (let i = 0; i < mosaicColorPhases.length; i++) {
