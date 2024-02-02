@@ -36,7 +36,10 @@ const Spokes = (props: SpokesProps) => {
 	useRegisterCssColors(spokesColorSwitchVars);
 	const colorReset = useCallback(function () {
 		if (elemRef.current) {
-			elemRef.current?.style.removeProperty("color");
+			// elemRef.current?.style.removeProperty("color");
+			for (let i = 0; i < spokesColorSwitchVars.length; i++) {
+				elemRef.current?.style.removeProperty(spokesColorSwitchVars[i]);
+			}
 		}
 	}, []);
 	const colorProp: string | string[] = props?.color ?? "";

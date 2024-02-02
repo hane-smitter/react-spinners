@@ -1,123 +1,178 @@
+@use "sass:string";
 @use "../../scss/variables" as defaults;
 
 $trophyAnimDuration: var(--rli-animation-duration, 2.5s);
+// $trophyAnimDuration: 4.5s;
 $animationFn: var(--rli-animation-function, linear);
 
 $trophyBladeWidth: 4em;
 $bladePlayDuration: $trophyAnimDuration;
 $bladeBgPlayDuration: calc($trophyAnimDuration * 0.5);
 
+$trophyBladeAnim: string.unique-id();
+$shadowAnim: string.unique-id();
+$trophySpinColoring: string.unique-id();
+
+@function trophySpinColorPhase($num: null) {
+	$cssVar: var(--trophySpin-phase1-color);
+
+	@if ($num and $num != 1) {
+		$cssVar: var(--trophySpin-phase#{$num}-color, $cssVar);
+	}
+
+	@return $cssVar;
+}
+
 .trophy-spin-rli-bounding-box {
-  box-sizing: border-box;
-  font-size: defaults.$fontSizer;
-  position: relative;
-  isolation: isolate;
-  color: defaults.$defaultColor;
+	--trophySpin-phase1-color: #{defaults.$defaultColor};
 
-  .trophy-spin-indicator {
-    width: $trophyBladeWidth;
-    perspective: 1000px;
-    display: block;
-    margin: 0 auto;
-    // animation: trophyRotate360 $trophyAnimDuration $animationFn infinite;
+	box-sizing: border-box;
+	font-size: defaults.$fontSizer;
+	position: relative;
+	isolation: isolate;
+	color: trophySpinColorPhase();
 
-    .blade {
-      display: block;
-      width: $trophyBladeWidth;
-      height: calc($trophyBladeWidth / 8);
-      background: currentColor;
-      animation: trophyBlade $bladePlayDuration $animationFn infinite, bgPlay $bladeBgPlayDuration $animationFn infinite;
+	.trophy-spin-indicator {
+		width: $trophyBladeWidth;
+		perspective: 1000px;
+		display: block;
+		margin: 0 auto;
 
-      &:not(:last-of-type) {
-        margin-bottom: 0.06em;
-      }
+		.blade {
+			display: block;
+			width: $trophyBladeWidth;
+			// box-shadow: 0 0 0.8px;
+			height: calc($trophyBladeWidth / 8);
+			background: trophySpinColorPhase();
+			animation:
+				$trophyBladeAnim $bladePlayDuration $animationFn infinite,
+				$shadowAnim $bladeBgPlayDuration $animationFn infinite,
+				$trophySpinColoring calc($bladePlayDuration * 4) $animationFn infinite;
 
-      &:nth-child(8) {
-        // animation-delay: 0s;
-        animation-delay: calc(($bladePlayDuration / 2) / 8 * 0 * -1);
-      }
-      &:nth-child(7) {
-        // animation-delay: -0.25s;
-        animation-delay: calc(($bladePlayDuration / 2) / 8 * 1 * -1);
-      }
-      &:nth-child(6) {
-        // animation-delay: -0.5s;
-        animation-delay: calc(($bladePlayDuration / 2) / 8 * 2 * -1);
-      }
-      &:nth-child(5) {
-        // animation-delay: -0.75s;
-        animation-delay: calc(($bladePlayDuration / 2) / 8 * 3 * -1);
-      }
-      &:nth-child(4) {
-        // animation-delay: -1s;
-        animation-delay: calc(($bladePlayDuration / 2) / 8 * 4 * -1);
-      }
-      &:nth-child(3) {
-        // animation-delay: -1.25s;
-        animation-delay: calc(($bladePlayDuration / 2) / 8 * 5 * -1);
-      }
-      &:nth-child(2) {
-        // animation-delay: -1.5s;
-        animation-delay: calc(($bladePlayDuration / 2) / 8 * 6 * -1);
-      }
-      &:nth-child(1) {
-        // animation-delay: -1.75s;
-        animation-delay: calc(($bladePlayDuration / 2) / 8 * 7 * -1);
-      }
-    }
-  }
+			// &:not(:last-of-type) {
+			// 	margin-bottom: 0.01em;
+			// }
 
-  .trophy-spin-text {
-    color: currentColor;
-    mix-blend-mode: difference;
+			@for $j from 0 through 7 {
+				$viceversaSpokeNum: calc(7 - ($j - 1));
 
-    position: absolute;
-    top: 105%;
-    left: 50%;
-    transform: translateX(-50%);
+				&:nth-of-type(#{$viceversaSpokeNum}) {
+					animation-delay: calc(($bladePlayDuration / 2) / 8 * $j * -1);
+				}
+			}
+		}
+	}
 
-    z-index: -2;
-  }
+	// .trophy-spin-text {
+	// 	color: currentColor;
+	// 	mix-blend-mode: difference;
+
+	// 	position: absolute;
+	// 	top: 105%;
+	// 	left: 50%;
+	// 	transform: translateX(-50%);
+
+	// 	z-index: -2;
+	// }
 }
 
-@keyframes trophyBlade {
-  from {
-    transform: rotateY(0deg) rotateX(-20deg);
-  }
-  to {
-    transform: rotateY(360deg) rotateX(-20deg);
-  }
+@keyframes #{$trophyBladeAnim} {
+	to {
+		transform: rotateY(1turn) rotateX(-25deg);
+	}
 }
 
-@keyframes bgPlay {
-  0% {
-    filter: brightness(1);
-    // opacity: 1;
-  }
-  50% {
-    filter: brightness(0.59);
-    // opacity: 1;
-  }
-  51% {
-    filter: opacity(0.5);
-    // opacity: 1;
-  }
-  70% {
-    filter: opacity(0.7);
-    // opacity: 1;
-  }
-  100% {
-    // filter: brightness(1);
-    filter: opacity(1);
-    // opacity: 1;
-  }
+@keyframes #{$shadowAnim} {
+	100%,
+	0% {
+		filter: brightness(1);
+		opacity: 1; // Use opacity property since animating it, browser will interpolate btwn values
+	}
+	15% {
+		filter: brightness(1);
+	}
+
+	// --------------------
+	25% {
+		opacity: 0.96;
+	}
+	// --------------------
+
+	30% {
+		filter: brightness(0.92);
+	}
+
+	// --------------------
+	50% {
+		filter: brightness(0.7);
+		opacity: 1;
+	}
+	// --------------------
+
+	75% {
+		filter: brightness(0.92);
+		opacity: 0.96;
+	}
+	90% {
+		filter: brightness(1);
+	}
 }
 
-// @keyframes trophyRotate360 {
-//   from {
-//     transform: rotate(0deg);
-//   }
-//   to {
-//     transform: rotate(360deg);
-//   }
+// @keyframes #{$shadowAnim} {
+// 	100%,
+// 	0% {
+// 		filter: opacity(1) brightness(1);
+// 		// opacity: 1;
+// 	}
+// 	15% {
+// 		filter: opacity(1) brightness(0.86);
+// 	}
+// 	30% {
+// 		filter: opacity(1) brightness(0.72);
+// 	}
+// 	45% {
+// 		filter: opacity(1) brightness(0.58);
+// 	}
+
+// 	50% {
+// 		filter: opacity(1) brightness(0.5);
+// 	}
+
+// 	60% {
+// 		filter: opacity(0.85) brightness(0.58);
+// 	}
+// 	75% {
+// 		filter: opacity(0.9) brightness(0.72);
+// 	}
+// 	90% {
+// 		filter: opacity(0.95) brightness(0.86);
+// 	}
 // }
+
+@keyframes #{$trophySpinColoring} {
+	100%,
+	0% {
+		background-color: trophySpinColorPhase(1);
+	}
+	18% {
+		background-color: trophySpinColorPhase(1);
+	}
+	25% {
+		background-color: trophySpinColorPhase(2);
+	}
+	43% {
+		background-color: trophySpinColorPhase(2);
+	}
+	50% {
+		background-color: trophySpinColorPhase(3);
+	}
+	68% {
+		background-color: trophySpinColorPhase(3);
+	}
+	75% {
+		background-color: trophySpinColorPhase(4);
+	}
+	93% {
+		background-color: trophySpinColorPhase(4);
+	}
+}

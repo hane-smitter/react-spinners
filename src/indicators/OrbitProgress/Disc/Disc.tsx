@@ -30,17 +30,14 @@ const Disc = (props: DiscProps) => {
 
 	/* Color SETTING */
 	useRegisterCssColors(discColorSwitchVars);
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				// elemRef.current?.style.removeProperty("color");
-				for (let i = 0; i < discColorSwitchVars.length; i++) {
-					elemRef.current?.style.removeProperty(discColorSwitchVars[i]);
-				}
+	const colorReset = useCallback(function () {
+		if (elemRef.current) {
+			// elemRef.current?.style.removeProperty("color");
+			for (let i = 0; i < discColorSwitchVars.length; i++) {
+				elemRef.current?.style.removeProperty(discColorSwitchVars[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const discColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,

@@ -28,7 +28,7 @@ $spokesColoringAnim: string.unique-id();
 
 	font-size: defaults.$fontSizer;
 	position: relative;
-	color: var(--OP-spokes-phase1-color);
+	color: spokesColorPhase();
 
 	.OP-spokes-indicator {
 		width: calc($spokeSize * 4);

@@ -88,25 +88,25 @@ $annulusTrackColoring: string.unique-id();
 	0% {
 		@include applyColor(1);
 	}
-	20% {
+	18% {
 		@include applyColor(1);
 	}
 	25% {
 		@include applyColor(2);
 	}
-	45% {
+	43% {
 		@include applyColor(2);
 	}
 	50% {
 		@include applyColor(3);
 	}
-	70% {
+	68% {
 		@include applyColor(3);
 	}
 	75% {
 		@include applyColor(4);
 	}
-	95% {
+	93% {
 		@include applyColor(4);
 	}
 }

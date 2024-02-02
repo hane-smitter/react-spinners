@@ -4,9 +4,17 @@ import React, { useCallback, useRef } from "react";
 
 import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
+import useRegisterCssColors from "../../hooks/useRegisterCssColors";
 import Text from "../../utils/Text";
 import "./TrophySpin.scss";
 import { TwistProps } from "./TrophySpin.types";
+import arrayRepeat from "../../utils/arrayRepeat";
+import { defaultColor as DEFAULT_COLOR } from "../variables";
+
+const trophySpinColorSwitchVars = Array.from(
+	{ length: 4 },
+	(_, idx) => `--trophySpin-phase${idx + 1}-color`
+);
 
 const TrophySpin = (props: TwistProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -21,17 +29,21 @@ const TrophySpin = (props: TwistProps) => {
 		DEFAULT_ANIMATION_DURATION
 	);
 
-	/* Color SETTINGS - Sets colors of all tesserae boxes*/
+	/* Color SETTINGS */
+	useRegisterCssColors(trophySpinColorSwitchVars);
 	const colorReset = useCallback(
 		function () {
 			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
+				// elemRef.current?.style.removeProperty("color");
+				for (let i = 0; i < trophySpinColorSwitchVars.length; i++) {
+					elemRef.current?.style.removeProperty(trophySpinColorSwitchVars[i]);
+				}
 			}
 		},
-		[elemRef.current]
+		[]
 	);
 	const colorProp: string | string[] = props?.color ?? "";
-	const twistColorStyles: React.CSSProperties = stylesObjectFromColorProp(
+	const trophySpinColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
 	);
@@ -47,7 +59,7 @@ const TrophySpin = (props: TwistProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...twistColorStyles
+					...trophySpinColorStyles
 				} as React.CSSProperties
 			}
 			role="status"
@@ -85,6 +97,7 @@ function stylesObjectFromColorProp(
 	resetToDefaultColors: () => void
 ): React.CSSProperties {
 	const stylesObject: any = {};
+	const switchersLength = trophySpinColorSwitchVars.length;
 
 	if (!colorProp) {
 		resetToDefaultColors();
@@ -92,14 +105,42 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const [color] = colorProp;
+		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);
 
-		stylesObject["color"] = color;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
+
+			stylesObject[trophySpinColorSwitchVars[idx]] = colorArr[idx];
+		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < switchersLength; i++) {
+			stylesObject[trophySpinColorSwitchVars[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <TrophySpin /> indicator cannot be processed. Using default instead!`
+			  );
+		for (let i = 0; i < switchersLength; i++) {
+			stylesObject[trophySpinColorSwitchVars[i]] = DEFAULT_COLOR;
+		}
+	}
+	// stylesObject["color"] = colorProp;
 
 	return stylesObject;
 }
