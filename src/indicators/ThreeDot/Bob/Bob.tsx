@@ -7,6 +7,14 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
 import "./Bob.scss";
 import { BobProps } from "./Bob.types";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
+import arrayRepeat from "../../../utils/arrayRepeat";
+import { defaultColor as DEFAULT_COLOR } from "../../variables";
+
+const TDBobColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--TD-bob-phase${idx + 1}-color`
+);
 
 const Bob = (props: BobProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -23,26 +31,24 @@ const Bob = (props: BobProps) => {
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	const colorReset: () => void = useCallback(
-		function () {
-			if (elemRef.current) {
-				const cssVars: string[] = Array.from({ length: 3 }, (item, idx) => {
-					// bob-dot2-color
-					const bodDotId: string = `--bob-dot${idx + 1}-color`;
+	useRegisterCssColors(TDBobColorPhases);
+	const colorReset: () => void = useCallback(function () {
+		if (elemRef.current) {
+			// const cssVars: string[] = Array.from({ length: 3 }, (item, idx) => {
+			// 	// bob-dot2-color
+			// 	const bodDotId: string = `--bob-dot${idx + 1}-color`;
 
-					return bodDotId;
-				});
+			// 	return bodDotId;
+			// });
 
-				elemRef.current?.style.removeProperty("color");
-				for (let i = 0; i < cssVars.length; i++) {
-					elemRef.current?.style.removeProperty(cssVars[i]);
-				}
+			// elemRef.current?.style.removeProperty("color");
+			for (let i = 0; i < TDBobColorPhases.length; i++) {
+				elemRef.current?.style.removeProperty(TDBobColorPhases[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const brickStackColorStyles: React.CSSProperties = stylesObjectFromColorProp(
+	const bobColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
 	);
@@ -58,7 +64,7 @@ const Bob = (props: BobProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...brickStackColorStyles
+					...bobColorStyles
 				} as React.CSSProperties
 			}
 			role="status"
@@ -84,6 +90,7 @@ function stylesObjectFromColorProp(
 	resetToDefaultColors: () => void
 ): React.CSSProperties {
 	const stylesObject: any = {};
+	const switchersLength: number = TDBobColorPhases.length;
 
 	if (!colorProp) {
 		resetToDefaultColors();
@@ -91,26 +98,42 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const arrLength: number = colorProp.length;
+		const colorArr: string[] = arrayRepeat(colorProp, TDBobColorPhases.length);
 
-		// STEPS:
-		// 1. first item in Array to set `color` prop
-		const [color] = colorProp;
-		stylesObject["color"] = color;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
 
-		// 2. Set CSS variables to set individual dots
-		for (let i = 0; i < arrLength; i++) {
-			if (i >= 3) break; // Indicator has only 3 brick/dots, hence stop processing longer array
-			const num: number = i + 1;
-			const bodDotId: string = `--bob-dot${num}-color`;
-
-			stylesObject[bodDotId] = colorProp[i];
+			stylesObject[TDBobColorPhases[idx]] = colorArr[idx];
 		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < TDBobColorPhases.length; i++) {
+			stylesObject[TDBobColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <ThreeDot variant="bob" /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < TDBobColorPhases.length; i++) {
+			stylesObject[TDBobColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }

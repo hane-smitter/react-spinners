@@ -32,14 +32,14 @@ const Riple = (props: RipleProps) => {
 
 	/* Color SETTINGS */
 	useRegisterCssColors(ripleColorPhases);
-	const colorReset: () => void = useCallback(
-		function () {
-			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
+	const colorReset: () => void = useCallback(function () {
+		if (elemRef.current) {
+			// elemRef.current?.style.removeProperty("color");
+			for (let i = 0; i < ripleColorPhases.length; i++) {
+				elemRef.current?.style.removeProperty(ripleColorPhases[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const ripleColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
