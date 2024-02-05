@@ -1,62 +1,127 @@
+@use "sass:string";
 @use "../../../scss/variables" as defaults;
 
 $animationDuration: var(--rli-animation-duration, 1s);
 $animationFn: var(--rli-animation-function, ease-out);
-$brick-width: 0.98em;
+$brick-width: 1.4em;
 
-@function brickFace($brickNumber) {
-  $bgProps: currentColor;
+$brickStackMove: string.unique-id();
+$brickStackColoring: string.unique-id();
 
-  @if ($brickNumber) {
-    $bgProps: no-repeat
-      radial-gradient(
-        circle closest-side,
-        var(--brick#{$brickNumber}-color, currentColor) 0% 75%,
-        rgba(0, 0, 0, 0) 95%
-      );
-  }
+@function TDBrickStackColorVar($num: null) {
+	$cssVar: var(--TD-brick-stack-phase1-color);
 
-  @return $bgProps;
+	@if ($num and $num != 1) {
+		$cssVar: var(--TD-brick-stack-phase#{$num}-color, $cssVar);
+	}
+
+	@return $cssVar;
+}
+
+@mixin dotShapes() {
+	background:
+		radial-gradient(
+				circle closest-side,
+				currentColor 0% 95%,
+				rgba(0, 0, 0, 0) calc(95% + 1px)
+			)
+			0 0/ 40% 40% no-repeat,
+		radial-gradient(
+				circle closest-side,
+				currentColor 0% 95%,
+				rgba(0, 0, 0, 0) calc(95% + 1px)
+			)
+			0 100% / 40% 40% no-repeat,
+		radial-gradient(
+				circle closest-side,
+				currentColor 0% 95%,
+				rgba(0, 0, 0, 0) calc(95% + 1px)
+			)
+			100% 100% / 40% 40% no-repeat;
 }
 
 .brick-stack-rli-bounding-box {
-  box-sizing: border-box;
-  font-size: defaults.$fontSizer;
-  display: inline-block;
-  color: defaults.$defaultColor;
+	box-sizing: border-box;
+	font-size: defaults.$fontSizer;
+	display: inline-block;
+	color: defaults.$defaultColor;
 
-  .brick-stack-indicator {
-    width: calc($brick-width * 2);
-    height: calc($brick-width * 2);
-    position: relative;
-    display: block;
-    margin: 0 auto;
-  }
+	.brick-stack-indicator {
+		width: calc($brick-width * 2);
+		height: calc($brick-width * 2);
+		position: relative;
+		display: block;
+		margin: 0 auto;
+	}
 
-  .brick-stack {
-    width: 100%;
-    height: 100%;
-    background: brickFace(1) 0 0, brickFace(2) 0 100%, brickFace(3) 100% 100%;
-    background-size: 40% 40%;
+	.brick-stack {
+		width: 100%;
+		height: 100%;
+		@include dotShapes();
 
-    animation-name: stackBricks;
-    animation-duration: $animationDuration;
-    animation-iteration-count: infinite;
-    animation-timing-function: $animationFn;
-  }
+		animation:
+			$brickStackMove $animationDuration $animationFn infinite,
+			$brickStackColoring calc($animationDuration * 4) $animationFn infinite;
+	}
 }
 
-@keyframes stackBricks {
-  25% {
-    background-position: 100% 0, 0 100%, 100% 100%;
-  }
-  50% {
-    background-position: 100% 0, 0 0, 100% 100%;
-  }
-  75% {
-    background-position: 100% 0, 0 0, 0 100%;
-  }
-  100% {
-    background-position: 100% 100%, 0 0, 0 100%;
-  }
+@keyframes #{$brickStackMove} {
+	0% {
+		background-position:
+			0 0,
+			0 100%,
+			100% 100%;
+	}
+	25% {
+		background-position:
+			100% 0,
+			0 100%,
+			100% 100%;
+	}
+	50% {
+		background-position:
+			100% 0,
+			0 0,
+			100% 100%;
+	}
+	75% {
+		background-position:
+			100% 0,
+			0 0,
+			0 100%;
+	}
+	100% {
+		background-position:
+			100% 100%,
+			0 0,
+			0 100%;
+	}
+}
+
+@keyframes #{$brickStackColoring} {
+	100%,
+	0% {
+		color: TDBrickStackColorVar(1);
+	}
+	20% {
+		color: TDBrickStackColorVar(1);
+	}
+	25% {
+		color: TDBrickStackColorVar(2);
+	}
+	45% {
+		color: TDBrickStackColorVar(2);
+	}
+	50% {
+		color: TDBrickStackColorVar(3);
+	}
+	70% {
+		color: TDBrickStackColorVar(3);
+	}
+	75% {
+		color: TDBrickStackColorVar(4);
+	}
+	95% {
+		color: TDBrickStackColorVar(4);
+	}
 }

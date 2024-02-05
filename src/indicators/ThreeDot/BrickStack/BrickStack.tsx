@@ -4,13 +4,21 @@ import React, { useCallback, useRef } from "react";
 
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 import Text from "../../../utils/Text";
+import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import "./BrickStack.scss";
 import { BrickStackProps } from "./BrickStack.types";
+import arrayRepeat from "../../../utils/arrayRepeat";
+
+const TDBrickStackColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--TD-brick-stack-phase${idx + 1}-color`
+);
 
 const BrickStack = (props: BrickStackProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
-	
+
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -23,29 +31,20 @@ const BrickStack = (props: BrickStackProps) => {
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	const colorReset: () => void = useCallback(
-		function () {
-			if (elemRef.current) {
-				const cssVars: string[] = Array.from({ length: 3 }, (item, idx) => {
-					const num: number = idx + 1;
-					const brickId: string = `--brick${num}-color`;
-
-					return brickId;
-				});
-
-				elemRef.current?.style.removeProperty("color");
-				for (let i = 0; i < cssVars.length; i++) {
-					elemRef.current?.style.removeProperty(cssVars[i]);
-				}
+	useRegisterCssColors(TDBrickStackColorPhases);
+	const colorReset: () => void = useCallback(function () {
+		if (elemRef.current) {
+			for (let i = 0; i < TDBrickStackColorPhases.length; i++) {
+				elemRef.current?.style.removeProperty(TDBrickStackColorPhases[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const brickStackColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
 	);
+
 	return (
 		<span
 			className="rli-d-i-b brick-stack-rli-bounding-box"
@@ -90,26 +89,45 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const arrLength: number = colorProp.length;
+		const colorArr: string[] = arrayRepeat(
+			colorProp,
+			TDBrickStackColorPhases.length
+		);
 
-		// STEPS:
-		// 1. first item in Array to set `color` prop
-		const [color] = colorProp;
-		stylesObject["color"] = color;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
 
-		// 2. Set CSS variables to set individual dots
-		for (let i = 0; i < arrLength; i++) {
-			if (i >= 3) break; // Indicator has only 3 brick/dots, hence stop processing longer array
-			const num: number = i + 1;
-			const brickId: string = `--brick${num}-color`;
-
-			stylesObject[brickId] = colorProp[i];
+			stylesObject[TDBrickStackColorPhases[idx]] = colorArr[idx];
 		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < TDBrickStackColorPhases.length; i++) {
+			stylesObject[TDBrickStackColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <ThreeDot variant="brick-stack" /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < TDBrickStackColorPhases.length; i++) {
+			stylesObject[TDBrickStackColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }
