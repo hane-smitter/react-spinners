@@ -36,8 +36,8 @@ $bobColoringAnim: string.unique-id();
 	// 	50% 50%/100% 50% no-repeat;
 	background: radial-gradient(
 			circle closest-side at center,
-			currentColor 0% 95%,
-			rgba(0, 0, 0, 0) calc(95% + 1px)
+			currentColor 0% 92%,
+			rgba(0, 0, 0, 0) calc(92% + 1px)
 		)
 		50% 50%/100% 50% no-repeat;
 }

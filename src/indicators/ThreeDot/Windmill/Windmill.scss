@@ -1,84 +1,161 @@
+@use "sass:string";
 @use "../../../scss/variables" as defaults;
 
-$animationDuration: var(--rli-animation-duration, 1.4s);
+$animationDuration: var(--rli-animation-duration, 1.2s);
 $animationFn: var(--rli-animation-function, linear);
-$dot-width: 0.625em;
-$windmill-wrapper-box: calc($dot-width * 3);
+// $dot-width: 0.625em;
+// $windmill-wrapper-box: calc($dot-width * 3);
+$windmill-container: 2.6em;
 
-@mixin windmillPrep($dotNo) {
-  width: $dot-width;
-  height: $dot-width;
-  border-radius: 50%;
+$windmillSpin: string.unique-id();
+$windmillColoring: string.unique-id();
 
-  @if ($dotNo == 1) {
-    background-color: var(--windmill-dot1-color, currentColor);
-  } @else if ($dotNo == 2) {
-    background-color: var(--windmill-dot2-color, currentColor);
-  } @else if ($dotNo == 3) {
-    background-color: var(--windmill-dot3-color, currentColor);
-  } @else {
-    background-color: currentColor;
-  }
+@function TDWindmillColorVar($num: null) {
+	$cssVar: var(--TD-windmill-phase1-color);
+
+	@if ($num and $num != 1) {
+		$cssVar: var(--TD-windmill-phase#{$num}-color, $cssVar);
+	}
+
+	@return $cssVar;
+}
+
+// @mixin windmillPrep($dotNo) {
+// 	width: $dot-width;
+// 	height: $dot-width;
+// 	border-radius: 50%;
+
+// 	@if ($dotNo == 1) {
+// 		background-color: var(--windmill-dot1-color, currentColor);
+// 	} @else if ($dotNo == 2) {
+// 		background-color: var(--windmill-dot2-color, currentColor);
+// 	} @else if ($dotNo == 3) {
+// 		background-color: var(--windmill-dot3-color, currentColor);
+// 	} @else {
+// 		background-color: currentColor;
+// 	}
+// }
+@mixin windmillDots() {
+	background:
+		radial-gradient(
+				circle closest-side,
+				currentColor 0% 95%,
+				rgba(0, 0, 0, 0) calc(95% + 1px)
+			)
+			50% 0/ 40% 40% no-repeat,
+		radial-gradient(
+				circle closest-side,
+				currentColor 0% 95%,
+				rgba(0, 0, 0, 0) calc(95% + 1px)
+			)
+			0 100% / 40% 40% no-repeat,
+		radial-gradient(
+				circle closest-side,
+				currentColor 0% 95%,
+				rgba(0, 0, 0, 0) calc(95% + 1px)
+			)
+			100% 100% / 40% 40% no-repeat;
 }
 
 .windmill-rli-bounding-box {
-  box-sizing: border-box;
-  font-size: defaults.$fontSizer;
-  display: inline-block;
-  color: defaults.$defaultColor;
+	--TD-windmill-phase1-color: #{defaults.$defaultColor};
 
-  .windmill-indicator {
-    width: $windmill-wrapper-box;
-    height: $windmill-wrapper-box;
-    display: block;
-    position: relative;
-    margin: 0 auto;
+	box-sizing: border-box;
+	font-size: defaults.$fontSizer;
+	display: inline-block;
+	color: TDWindmillColorVar();
 
-    .windmill {
-      position: absolute;
-      display: inline-block;
-      // Calculating absolute left value to place element at the middle
-      // without using: `transform(translate(-50%)), since it's overridden during animation`
-      left: calc(($windmill-wrapper-box * 0.5) - ($dot-width / 2));
+	.windmill-indicator {
+		width: $windmill-container;
+		height: $windmill-container;
+		display: block;
+		position: relative;
+		margin: 0 auto;
 
-      @include windmillPrep(1);
+		// .windmill {
+		//   position: absolute;
+		//   display: inline-block;
+		//   // Calculating absolute left value to place element at the middle
+		//   // without using: `transform(translate(-50%)), since it's overridden during animation`
+		//   left: calc(($windmill-wrapper-box * 0.5) - ($dot-width / 2));
 
-      transform-origin: 50% 150%;
-      animation-name: windmillSpin;
-      animation-duration: $animationDuration;
-      animation-iteration-count: infinite;
-      animation-timing-function: $animationFn;
+		//   @include windmillPrep(1);
 
-      &::before,
-      &::after {
-        content: "";
-        display: inline-block;
-        position: absolute;
-      }
+		//   transform-origin: 50% 150%;
+		//   animation-name: $windmillSpin;
+		//   animation-duration: $animationDuration;
+		//   animation-iteration-count: infinite;
+		//   animation-timing-function: $animationFn;
 
-      &::before {
-        left: calc(50% * 1.7320508 /* √3 */ * -1); // 1.732050808
-        top: calc(150%);
+		//   &::before,
+		//   &::after {
+		//     content: "";
+		//     display: inline-block;
+		//     position: absolute;
+		//   }
 
-        @include windmillPrep(2);
-      }
+		//   &::before {
+		//     left: calc(50% * 1.7320508 /* √3 */ * -1); // 1.732050808
+		//     top: calc(150%);
 
-      &::after {
-        left: calc(50% * 1.7320508 /* √3 */);
-        top: calc(150%);
+		//     @include windmillPrep(2);
+		//   }
 
-        @include windmillPrep(3);
-      }
-    }
-  }
+		//   &::after {
+		//     left: calc(50% * 1.7320508 /* √3 */);
+		//     top: calc(150%);
+
+		//     @include windmillPrep(3);
+		//   }
+		// }
+		.windmill {
+			display: inline-block;
+			width: 100%;
+			height: 100%;
+			transform-origin: 50% 50%;
+
+			@include windmillDots();
+
+			animation:
+				$windmillSpin $animationDuration $animationFn infinite,
+				$windmillColoring calc($animationDuration * 4) $animationFn infinite;
+		}
+	}
 }
 
-@keyframes windmillSpin {
-  0% {
-    transform: rotateZ(0deg);
-  }
+@keyframes #{$windmillSpin} {
+	0% {
+		transform: rotateZ(0deg);
+	}
 
-  100% {
-    transform: rotateZ(360deg);
-  }
+	100% {
+		transform: rotateZ(360deg);
+	}
+}
+@keyframes #{$windmillColoring} {
+	100%,
+	0% {
+		color: TDWindmillColorVar(1);
+	}
+	20% {
+		color: TDWindmillColorVar(1);
+	}
+	25% {
+		color: TDWindmillColorVar(2);
+	}
+	45% {
+		color: TDWindmillColorVar(2);
+	}
+	50% {
+		color: TDWindmillColorVar(3);
+	}
+	70% {
+		color: TDWindmillColorVar(3);
+	}
+	75% {
+		color: TDWindmillColorVar(4);
+	}
+	95% {
+		color: TDWindmillColorVar(4);
+	}
 }

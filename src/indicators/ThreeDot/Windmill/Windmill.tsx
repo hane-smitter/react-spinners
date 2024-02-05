@@ -7,6 +7,14 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
 import "./Windmill.scss";
 import { WindmillProps } from "./Windmill.types";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
+import { defaultColor as DEFAULT_COLOR } from "../../variables";
+import arrayRepeat from "../../../utils/arrayRepeat";
+
+const TDWindmillColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--TD-windmill-phase${idx + 1}-color`
+);
 
 const Windmill = (props: WindmillProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -16,13 +24,14 @@ const Windmill = (props: WindmillProps) => {
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
-	const DEFAULT_ANIMATION_DURATION = "1.4s"; // Animation's default duration
+	const DEFAULT_ANIMATION_DURATION = "1.2s"; // Animation's default duration
 	const { animationPeriod } = useAnimationPacer(
 		props?.speedPlus,
 		DEFAULT_ANIMATION_DURATION
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
+	useRegisterCssColors(TDWindmillColorPhases);
 	const colorReset: () => void = useCallback(
 		function () {
 			if (elemRef.current) {
@@ -57,7 +66,8 @@ const Windmill = (props: WindmillProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...brickStackColorStyles
+					...brickStackColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
@@ -65,7 +75,7 @@ const Windmill = (props: WindmillProps) => {
 			aria-label="Loading"
 		>
 			<span className="rli-d-i-b windmill-indicator">
-				<span className="windmill"></span>
+				<span className="rli-d-i-b windmill"></span>
 			</span>
 
 			<Text staticText text={props?.text} textColor={props?.textColor} />
@@ -90,26 +100,45 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const arrLength: number = colorProp.length;
+		const colorArr: string[] = arrayRepeat(
+			colorProp,
+			TDWindmillColorPhases.length
+		);
 
-		// STEPS:
-		// 1. first item in Array to set `color` prop
-		const [color] = colorProp;
-		stylesObject["color"] = color;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
 
-		// 2. Set CSS variables to set individual dots
-		for (let i = 0; i < arrLength; i++) {
-			if (i >= 3) break; // Indicator has only 3 dots, hence stop processing longer array
-			const num: number = i + 1;
-			const windmillDotId: string = `--windmill-dot${num}-color`;
-
-			stylesObject[windmillDotId] = colorProp[i];
+			stylesObject[TDWindmillColorPhases[idx]] = colorArr[idx];
 		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < TDWindmillColorPhases.length; i++) {
+			stylesObject[TDWindmillColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <ThreeDot variant="windmill" /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < TDWindmillColorPhases.length; i++) {
+			stylesObject[TDWindmillColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }

@@ -41,10 +41,12 @@ $brickStackColoring: string.unique-id();
 }
 
 .brick-stack-rli-bounding-box {
+	--TD-brick-stack-phase1-color: #{defaults.$defaultColor};
+
 	box-sizing: border-box;
 	font-size: defaults.$fontSizer;
 	display: inline-block;
-	color: defaults.$defaultColor;
+	color: TDBrickStackColorVar();
 
 	.brick-stack-indicator {
 		width: calc($brick-width * 2);
