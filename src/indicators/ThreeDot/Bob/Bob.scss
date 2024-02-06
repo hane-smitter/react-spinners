@@ -72,9 +72,8 @@ $bobColoringAnim: string.unique-id();
 			// animation-delay: calc(var(--delay, 0) * 0.4s);
 
 			animation:
-				$bobMovement $animationDuration $animationFn infinite,
-				$bobColoringAnim calc($animationDuration * 4) $animationFn infinite;
-			animation-delay: var(--delay);
+				$animationDuration $animationFn var(--delay) infinite $bobMovement,
+				calc($animationDuration * 4) $animationFn var(--delay) infinite $bobColoringAnim;
 		}
 		.bobbing::before,
 		.bobbing::after {
@@ -83,7 +82,7 @@ $bobColoringAnim: string.unique-id();
 		}
 		.bobbing {
 			// --delay: -0.15;
-			--delay: #{calc($animationDuration * 0.1 * -1)}; // 10% into keyframe animation
+			--delay: #{calc($animationDuration * 0.12 * -1)}; // 10% into keyframe animation
 
 			@include dot(1);
 		}
@@ -97,7 +96,7 @@ $bobColoringAnim: string.unique-id();
 		}
 		.bobbing::after {
 			// --delay: 0.5;
-			--delay: #{calc($animationDuration * 0.1)};
+			--delay: #{calc($animationDuration * 0.12)};
 
 			transform: translateX(300%);
 

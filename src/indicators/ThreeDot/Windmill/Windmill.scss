@@ -117,8 +117,8 @@ $windmillColoring: string.unique-id();
 			@include windmillDots();
 
 			animation:
-				$windmillSpin $animationDuration $animationFn infinite,
-				$windmillColoring calc($animationDuration * 4) $animationFn infinite;
+				$animationDuration $animationFn infinite $windmillSpin,
+				calc($animationDuration * 4) $animationFn infinite $windmillColoring;
 		}
 	}
 }

@@ -32,29 +32,19 @@ const Windmill = (props: WindmillProps) => {
 
 	/* Color SETTINGS - Set color of the loading indicator */
 	useRegisterCssColors(TDWindmillColorPhases);
-	const colorReset: () => void = useCallback(
-		function () {
-			if (elemRef.current) {
-				const cssVars: string[] = Array.from({ length: 3 }, (item, idx) => {
-					const num: number = idx + 1;
-					const windmillDotId: string = `--windmill-dot${num}-color`;
-
-					return windmillDotId;
-				});
-
-				elemRef.current?.style.removeProperty("color");
-				for (let i = 0; i < cssVars.length; i++) {
-					elemRef.current?.style.removeProperty(cssVars[i]);
-				}
+	const colorReset: () => void = useCallback(function () {
+		if (elemRef.current) {
+			for (let i = 0; i < TDWindmillColorPhases.length; i++) {
+				elemRef.current?.style.removeProperty(TDWindmillColorPhases[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const brickStackColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
 	);
+
 	return (
 		<span
 			ref={elemRef}
@@ -78,7 +68,12 @@ const Windmill = (props: WindmillProps) => {
 				<span className="rli-d-i-b windmill"></span>
 			</span>
 
-			<Text staticText text={props?.text} textColor={props?.textColor} />
+			<Text
+				staticText
+				text={props?.text}
+				textColor={props?.textColor}
+				style={{ marginTop: "8px" }}
+			/>
 		</span>
 	);
 };

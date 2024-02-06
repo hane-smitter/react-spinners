@@ -62,8 +62,8 @@ $brickStackColoring: string.unique-id();
 		@include dotShapes();
 
 		animation:
-			$brickStackMove $animationDuration $animationFn infinite,
-			$brickStackColoring calc($animationDuration * 4) $animationFn infinite;
+			$animationDuration $animationFn infinite $brickStackMove,
+			calc($animationDuration * 4) $animationFn infinite $brickStackColoring;
 	}
 }
 

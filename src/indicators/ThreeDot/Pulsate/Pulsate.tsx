@@ -7,6 +7,14 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
 import "./Pulsate.scss";
 import { PulsateProps } from "./Pulsate.types";
+import { defaultColor as DEFAULT_COLOR } from "../../variables";
+import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
+import arrayRepeat from "../../../utils/arrayRepeat";
+
+const TDPulsateColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--TD-pulsate-phase${idx + 1}-color`
+);
 
 const Pulsate = (props: PulsateProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -15,31 +23,21 @@ const Pulsate = (props: PulsateProps) => {
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
-	const DEFAULT_ANIMATION_DURATION = "1.3s"; // Animation's default duration
+	const DEFAULT_ANIMATION_DURATION = "1.2s"; // Animation's default duration
 	const { animationPeriod } = useAnimationPacer(
 		props?.speedPlus,
 		DEFAULT_ANIMATION_DURATION
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	const colorReset: () => void = useCallback(
-		function () {
-			if (elemRef.current) {
-				const cssVars: string[] = Array.from({ length: 3 }, (item, idx) => {
-					const num: number = idx + 1;
-					const dotId: string = `--pulsateDot${num}-color`;
-
-					return dotId;
-				});
-
-				elemRef.current?.style.removeProperty("color");
-				for (let i = 0; i < cssVars.length; i++) {
-					elemRef.current?.style.removeProperty(cssVars[i]);
-				}
+	useRegisterCssColors(TDPulsateColorPhases);
+	const colorReset: () => void = useCallback(function () {
+		if (elemRef.current) {
+			for (let i = 0; i < TDPulsateColorPhases.length; i++) {
+				elemRef.current?.style.removeProperty(TDPulsateColorPhases[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const pulsateDotColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
@@ -57,17 +55,18 @@ const Pulsate = (props: PulsateProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...pulsateDotColorStyles
+					...pulsateDotColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span className="rli-d-i-b pulsate-indicator" style={{ ...styles }}>
-				<span className="rli-d-i-b pulsate-bounce pulsate-bounce1"></span>
-				<span className="rli-d-i-b pulsate-bounce pulsate-bounce2"></span>
-				<span className="rli-d-i-b pulsate-bounce pulsate-bounce3"></span>
+			<span className="rli-d-i-b pulsate-indicator">
+				<span className="rli-d-i-b pulsate-dot"></span>
+				<span className="rli-d-i-b pulsate-dot"></span>
+				<span className="rli-d-i-b pulsate-dot"></span>
 			</span>
 
 			<Text
@@ -97,26 +96,45 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const arrLength: number = colorProp.length;
+		const colorArr: string[] = arrayRepeat(
+			colorProp,
+			TDPulsateColorPhases.length
+		);
 
-		// STEPS:
-		// 1. first item in Array to set `color` prop
-		const [color] = colorProp;
-		stylesObject["color"] = color;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
 
-		// 2. Set CSS variables to set individual dots
-		for (let i = 0; i < arrLength; i++) {
-			if (i >= 3) break; // Indicator has only 3 dots, hence stop processing longer array
-			const num: number = i + 1;
-			const dotId: string = `--pulsateDot${num}-color`;
-
-			stylesObject[dotId] = colorProp[i];
+			stylesObject[TDPulsateColorPhases[idx]] = colorArr[idx];
 		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < TDPulsateColorPhases.length; i++) {
+			stylesObject[TDPulsateColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <ThreeDot variant="pulsate" /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < TDPulsateColorPhases.length; i++) {
+			stylesObject[TDPulsateColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }
