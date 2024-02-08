@@ -1,26 +1,88 @@
+@use "sass:string";
 @use "../../scss/variables" as defaults;
 
 // `animation duration` and `animation function(easing function)` are set from javascript
+$animationDuration: var(--rli-animation-duration, 1s);
+$animationFn: var(--rli-animation-function, linear);
+
+$lifelineMove: string.unique-id();
+$lifelineColoring: string.unique-id();
+$lifeLineTotalPathLength: 1010.1312255859375;
+
+@function lifelineColorVar($num: null) {
+	$cssVar: var(--life-line-phase1-color);
+
+	@if ($num and $num != 1) {
+		$cssVar: var(--life-line-phase#{$num}-color, $cssVar);
+	}
+
+	@return $cssVar;
+}
 
 .lifeline-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  isolation: isolate;
+	--life-line-phase1-color: #{defaults.$defaultColor};
 
-  .lifeline-throbber {
-    color: defaults.$defaultColor;
-    position: relative;
-    text-align: center;
+	font-size: defaults.$fontSizer;
+	isolation: isolate;
+	color: lifelineColorVar();
 
-    svg.rli-lifeline-svg {
-      visibility: hidden;
-      overflow: hidden;
-    }
+	.lifeline-indicator {
+		position: relative;
+		text-align: center;
 
-    .lifeline-text {
-      color: currentColor;
-      mix-blend-mode: difference;
-      width: unset;
-      display: block;
-    }
-  }
+		// svg.rli-lifeline-svg {
+		// 	visibility: hidden;
+		// 	overflow: hidden;
+		// }
+
+		path.rli-lifeline {
+			stroke-dasharray: calc($lifeLineTotalPathLength * 0.5 * 0.94)
+				calc($lifeLineTotalPathLength * 0.5 * 0.06);
+			// animation: name duration timing-function delay iteration-count direction fill-mode;
+			animation:
+				$animationDuration $animationFn infinite $lifelineMove,
+				calc($animationDuration * 4) $animationFn infinite $lifelineColoring;
+		}
+	}
+
+	.lifeline-text {
+		color: currentColor;
+		mix-blend-mode: difference;
+		width: unset;
+		display: block;
+	}
+}
+
+@keyframes #{$lifelineMove} {
+	to {
+		stroke-dashoffset: calc($lifeLineTotalPathLength * -1);
+	}
+}
+
+@keyframes #{$lifelineColoring} {
+	100%,
+	0% {
+		color: lifelineColorVar(1);
+	}
+	20% {
+		color: lifelineColorVar(1);
+	}
+	25% {
+		color: lifelineColorVar(2);
+	}
+	45% {
+		color: lifelineColorVar(2);
+	}
+	50% {
+		color: lifelineColorVar(3);
+	}
+	70% {
+		color: lifelineColorVar(3);
+	}
+	75% {
+		color: lifelineColorVar(4);
+	}
+	95% {
+		color: lifelineColorVar(4);
+	}
 }

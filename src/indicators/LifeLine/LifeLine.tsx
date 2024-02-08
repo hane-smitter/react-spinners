@@ -1,17 +1,23 @@
 "use strict";
 
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useRef, useCallback } from "react";
 
 import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
 import "./LifeLine.scss";
 import { LifeLineProps } from "./LifeLine.types";
+import useRegisterCssColors from "../../hooks/useRegisterCssColors";
+import arrayRepeat from "../../utils/arrayRepeat";
+import { defaultColor as DEFAULT_COLOR } from "../variables";
+
+const lifeLineColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--life-line-phase${idx + 1}-color`
+);
 
 const LifeLine = (props: LifeLineProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
-	const svgPathRef = useRef<SVGPathElement>(null);
-	const lifeLineAnimation = useRef<Animation | null>(null);
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
 	// Animation speed and smoothing control
@@ -23,73 +29,20 @@ const LifeLine = (props: LifeLineProps) => {
 	);
 
 	/* Color SETTINGS */
-	// Sets the color
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
+	useRegisterCssColors(lifeLineColorPhases);
+	const colorReset = useCallback(function () {
+		if (elemRef.current) {
+			// elemRef.current?.style.removeProperty("color");
+			for (let i = 0; i < lifeLineColorPhases.length; i++) {
+				elemRef.current?.style.removeProperty(lifeLineColorPhases[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const lifeLineColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
 	);
-
-	useEffect(() => {
-		if (svgPathRef.current) {
-			const pathEl: SVGPathElement = svgPathRef.current;
-			const parentSvgEl: HTMLElement | null = pathEl.parentElement;
-			const pathLength: number = pathEl.getTotalLength();
-
-			const pathLengthRepeats = pathLength / 2;
-			const dashArray = pathLengthRepeats * 0.94;
-			const dashArrayGap = pathLengthRepeats * 0.06;
-
-			pathEl.style.strokeDasharray = `${dashArray} ${dashArrayGap}`;
-			pathEl.style.strokeDashoffset = `${pathLength}`;
-			parentSvgEl && (parentSvgEl.style.visibility = "visible");
-
-			// Trigger a layout so styles are calculated & the browser
-			// picks up the starting position before animating
-			pathEl.getBoundingClientRect();
-
-			const lifeLineKeyframes = new KeyframeEffect(
-				pathEl, // element to animate
-				[{ strokeDashoffset: `${pathLength}` }, { strokeDashoffset: `0` }],
-				{
-					duration: parseFloat(DEFAULT_ANIMATION_DURATION) * 1000, // seconds to milliseconds
-					iterations: Infinity,
-					easing: easingFn || "linear"
-				}
-			);
-
-			const lifeLine = new Animation(lifeLineKeyframes, document.timeline);
-			lifeLineAnimation.current = lifeLine;
-
-			// Play lifeLine animation
-			lifeLine.play();
-		}
-
-		return () => {
-			lifeLineAnimation.current = null;
-		};
-	}, []);
-
-	useEffect(() => {
-		try {
-			if (lifeLineAnimation.current) {
-				lifeLineAnimation.current.effect?.updateTiming({
-					duration: parseFloat(animationPeriod) * 1000,
-					easing: easingFn
-				}); // ease, linear
-			}
-		} catch (error: any) {
-			console.warn(error?.message);
-		}
-	}, [easingFn, animationPeriod]);
 
 	return (
 		<span
@@ -100,20 +53,18 @@ const LifeLine = (props: LifeLineProps) => {
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...lifeLineColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				ref={elemRef}
-				className="rli-d-i-b lifeline-throbber"
-				style={{ ...lifeLineColorStyles, ...styles }}
-			>
-				{/* Original size SVG */}
-				{/* <svg
+			<span ref={elemRef} className="rli-d-i-b lifeline-indicator">
+				{/* Original size SVG
+				<svg
 					width="16em" // ratio -> 2.947368421
 					height="5.428571429em"
 					xmlns="http://www.w3.org/2000/svg"
@@ -139,25 +90,25 @@ const LifeLine = (props: LifeLineProps) => {
 					version="1.2"
 					viewBox="0 0 350 50"
 					preserveAspectRatio="xMinYMin meet"
-					className="rli-pulse-svg"
+					// className="rli-pulse-svg"
 				>
 					<path
-						ref={svgPathRef}
+						className="rli-lifeline"
 						stroke="currentColor"
 						fill="none"
 						strokeLinejoin="round"
-						strokeWidth="0.18em"
+						strokeWidth="4px"
 						d="M-113 70h250q8-30 12-3t5 8 3-7 3 4 6 35 8-55 6 40 8-3s2-11 10-10 1 1 8-10l4 8c6 4 8-6 10-17s2 10 9 11h210"
 					></path>
 				</svg>
-
-				<Text
-					// className="lifeline-text"
-					staticText
-					text={props?.text}
-					textColor={props?.textColor}
-				/>
 			</span>
+
+			<Text
+				// className="lifeline-text"
+				staticText
+				text={props?.text}
+				textColor={props?.textColor}
+			/>
 		</span>
 	);
 };
@@ -179,14 +130,45 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const [color] = colorProp;
+		const colorArr: string[] = arrayRepeat(
+			colorProp,
+			lifeLineColorPhases.length
+		);
 
-		stylesObject["color"] = color;
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
+
+			stylesObject[lifeLineColorPhases[idx]] = colorArr[idx];
+		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < lifeLineColorPhases.length; i++) {
+			stylesObject[lifeLineColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <Riple /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < lifeLineColorPhases.length; i++) {
+			stylesObject[lifeLineColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }

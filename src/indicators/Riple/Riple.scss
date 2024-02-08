@@ -55,8 +55,8 @@ $rippleColoring: string.unique-id();
 			opacity: 1;
 			border-radius: 50%;
 			animation:
-				$rippling $animationDuration $animationFn infinite,
-				$rippleColoring calc($animationDuration * 4) $animationFn infinite;
+				$animationDuration $animationFn infinite $rippling,
+				calc($animationDuration * 4) $animationFn infinite $rippleColoring;
 		}
 		.riple:nth-of-type(2) {
 			// animation-delay: -0.5s;
