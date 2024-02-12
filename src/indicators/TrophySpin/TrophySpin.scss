@@ -35,6 +35,7 @@ $trophySpinColoring: string.unique-id();
 	.trophy-spin-indicator {
 		width: $trophyBladeWidth;
 		perspective: 1000px;
+		transform-style: preserve-3d;
 		display: block;
 		margin: 0 auto;
 
