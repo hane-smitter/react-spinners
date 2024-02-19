@@ -9,6 +9,10 @@ import "./Atom.scss";
 import { AtomProps } from "./Atom.types";
 
 const DEFAULT_COLOR = colorParse(defaultColor).toRgb();
+const atomColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--atom-phase${idx + 1}-rgb`
+);
 
 const Atom = (props: AtomProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -66,21 +70,18 @@ const Atom = (props: AtomProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...atomColorStyles
+					...atomColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span className="rli-d-i-b atom-throbber" style={{ ...styles }}>
-				<span className="rli-d-i-b inner">
-					<span className="orbit nucleus-holder">
-						<span className="nucleus"></span>
-					</span>
-					<span className="orbit"></span>
-					<span className="orbit"></span>
-				</span>
+			<span className="rli-d-i-b atom-indicator">
+				<span className="rli-d-i-b electron-orbit"></span>
+				<span className="rli-d-i-b electron-orbit"></span>
+				<span className="rli-d-i-b electron-orbit"></span>
 			</span>
 			<Text
 				className="atom-text"

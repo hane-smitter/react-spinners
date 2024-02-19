@@ -1,160 +1,248 @@
 @use "sass:color";
+@use "sass:string";
 @use "../../scss/variables" as defaults;
 
-$defaultColorRedChannel: color.red(defaults.$defaultColor);
-$defaultColorGreenChannel: color.green(defaults.$defaultColor);
-$defaultColorBlueChannel: color.blue(defaults.$defaultColor);
-
-$atomSpinDuration: var(--rli-animation-duration, 1.8s); // ratio -> 0.2625(2.1 / 8)
+$atomSpinDuration: var(
+	--rli-animation-duration,
+	1.8s
+); // ratio -> 0.2625(2.1 / 8)
 $atomSpinPathDuration: calc($atomSpinDuration / 0.2625);
 $animationFn: var(--rli-animation-function, linear);
 
-$colorInversionDegree: 200; // 0 - 255
+// ------------------------------------------------------------------------------------------------------------------
+// @function atomColorPhase($num: null) {
+// 	$cssVar: var(--atom-phase1-color);
+
+// 	@if ($num and $num != 1) {
+// 		$cssVar: var(--atom-phase#{$num}-color, $cssVar);
+// 	}
+
+// 	@return $cssVar;
+// }
+@function RGBVarChannels($phaseNum: null, $alpha: 1) {
+	// $rgb: rgb(
+	// 	var(--atom-channel-r),
+	// 	var(--atom-channel-g),
+	// 	var(--atom-channel-b),
+	// 	$alpha
+	// );
+	$rgbColor: rgb(var(--atom-phase1-rgb), $alpha);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$rgbColor: rgb(
+			var(--atom-phase#{$phaseNum}-rgb, var(--atom-phase1-rgb)),
+			$alpha
+		);
+	}
+
+	@return $rgbColor;
+}
+
+// -- NEW INDICATOR VARS
+$atomWidth: 18.75em;
+$atomHeight: $atomWidth;
+
+// $atomColor: goldenrod;
+$atomColor: defaults.$defaultColor;
+$defaultColorRedChannel: color.red($atomColor);
+$defaultColorGreenChannel: color.green($atomColor);
+$defaultColorBlueChannel: color.blue($atomColor);
+
+$nucleusGlow: string.unique-id();
+$electronSpinAnimation: string.unique-id();
+$orbitSpinAnimation: string.unique-id();
 
 .atom-rli-bounding-box {
-  --color-r: #{$defaultColorRedChannel};
-  --color-g: #{$defaultColorGreenChannel};
-  --color-b: #{$defaultColorBlueChannel};
+	// --atom-channel-r: #{$defaultColorRedChannel};
+	// --atom-channel-g: #{$defaultColorGreenChannel};
+	// --atom-channel-b: #{$defaultColorBlueChannel};
+	--atom-phase1-rgb: #{$defaultColorRedChannel}, #{$defaultColorGreenChannel},
+		#{$defaultColorBlueChannel};
 
-  font-size: defaults.$fontSizer;
-  position: relative;
-  color: rgb(var(--color-r), var(--color-g), var(--color-b));
-  text-align: unset;
+	// --atom-phase1-color: #{RGBVarChannels()};
 
-  // Create stacking context
-  isolation: isolate;
+	color: RGBVarChannels();
+	font-size: defaults.$fontSizer;
+	position: relative;
+	text-align: unset;
 
-  .atom-throbber {
-    $box-width: 5em;
-    $box-height: 5em;
+	// Create stacking context
+	isolation: isolate;
 
-    // create stacking context + relative positioning
-    position: relative;
-    z-index: 1;
+	.atom-indicator {
+		// create stacking context + relative positioning
+		// position: relative;
+		// z-index: 1;
 
-    width: $box-width;
-    height: $box-height;
-    transform: perspective(500px) rotateX(-24deg) rotateY(20deg) rotateZ(30deg);
-    transform-style: preserve-3d;
+		// width: $box-width;
+		// height: $box-height;
+		width: $atomWidth;
+		height: $atomHeight;
 
-    & .inner {
-      width: 100%;
-      height: 100%;
-      -webkit-transform-style: preserve-3d;
-      transform-style: preserve-3d;
-      animation: atomSpin $atomSpinDuration $animationFn infinite;
-      display: inline-block;
-      transform-origin: center center;
-      position: relative;
+		position: relative;
+		/*  transform-style: preserve-3d; */
+		// perspective: 31.25em;
+		perspective: 18.75em;
+		overflow: hidden;
+		color: RGBVarChannels();
 
-      & .orbit:nth-of-type(1) {
-        --orbit-color: var(--disc3-color);
-        animation: rotate $atomSpinPathDuration $animationFn infinite;
-      }
-      & .orbit:nth-of-type(2) {
-        --orbit-color: var(--disc2-color);
-        animation: rotateAtomDisc2 $atomSpinPathDuration $animationFn infinite;
-      }
-      & .orbit:nth-of-type(3) {
-        --orbit-color: var(--disc1-color);
-        animation: rotateAtomDisc3 $atomSpinPathDuration $animationFn infinite;
-      }
+		// -- DEBUGGING BLOCK start -> For DEBUGGING
+		// background-color: bisque;
+		background-color: #221122;
+		// -- DEBUGGING BLOCK end --
 
-      $orbit-border-width: 0.3em;
-      & .orbit {
-        position: absolute;
-        // width: 100%;
-        // height: 98%;
-        border-radius: 50%;
-        border: $orbit-border-width solid var(--orbit-color, currentColor);
-        display: inline-block;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 2%;
-      }
+		// nucleus
+		&::after,
+		&::before {
+			$dimension: calc($atomWidth * 0.08); // 18px
 
-      & .orbit.nucleus-holder {
-        // width: $box-width;
-        // height: $box-height;
-        border: $orbit-border-width solid transparent;
+			content: "";
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			width: $dimension;
+			height: $dimension;
+			margin: auto;
+			border-radius: 50%;
 
-        & .nucleus {
-          $nucleus-dimension: 0.8em;
-          --color-invert-r: calc(#{$colorInversionDegree} - var(--color-r));
-          --color-invert-g: calc(#{$colorInversionDegree} - var(--color-g));
-          --color-invert-b: calc(#{$colorInversionDegree} - var(--color-b));
+			background-color: currentColor;
+		}
+		&::before {
+			filter: blur(2px) drop-shadow(0px 0px 0.375em currentColor)
+				drop-shadow(0px 0px 0.75em currentColor);
+			animation: $nucleusGlow 2s linear infinite;
+		}
 
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: $nucleus-dimension;
-          height: $nucleus-dimension;
-          display: inline-block;
-          border-radius: 50%;
-          background-color: currentColor;
-          // box-shadow: inset 0 0 calc($nucleus-dimension / 6) #fff,
-          //   inset calc($nucleus-dimension / 6) 0 calc($nucleus-dimension / 3.75) #f0f,
-          //   inset calc($nucleus-dimension / 6 * -1) 0 calc($nucleus-dimension / 3.75) #0ff,
-          //   inset calc($nucleus-dimension / 6) 0 $nucleus-dimension #f0f,
-          //   inset calc($nucleus-dimension / 6 * -1) 0 $nucleus-dimension #0ff, 0 0 calc($nucleus-dimension / 6) #fff,
-          //   calc($nucleus-dimension / 30 * -1) 0 calc($nucleus-dimension / 3.75) #f0f,
-          //   calc($nucleus-dimension / 30) 0 calc($nucleus-dimension / 3.75) #0ff;
-          box-shadow: inset 0 0 calc($nucleus-dimension / 6) rgba(var(--color-r), var(--color-g), var(--color-b), 0.16),
-            inset calc($nucleus-dimension / 6) 0 calc($nucleus-dimension / 3.75)
-              rgb(var(--color-invert-r), var(--color-invert-g), var(--color-invert-b), 1),
-            inset calc($nucleus-dimension / 6 * -1) 0 calc($nucleus-dimension / 3.75)
-              rgb(var(--color-invert-g), var(--color-invert-r), var(--color-invert-b), 1),
-            inset calc($nucleus-dimension / 6) 0 $nucleus-dimension
-              rgb(var(--color-invert-r), var(--color-invert-g), var(--color-invert-b), 1),
-            inset calc($nucleus-dimension / 6 * -1) 0 $nucleus-dimension
-              rgb(var(--color-invert-g), var(--color-invert-r), var(--color-invert-b), 1),
-            0 0 calc($nucleus-dimension / 6) rgba(var(--color-r), var(--color-g), var(--color-b), 0.16),
-            calc($nucleus-dimension / 30 * -1) 0 calc($nucleus-dimension / 1.35)
-              rgb(var(--color-invert-r), var(--color-invert-g), var(--color-invert-b), 0.44),
-            calc($nucleus-dimension / 30) 0 calc($nucleus-dimension / 1.35)
-              rgb(var(--color-invert-g), var(--color-invert-r), var(--color-invert-b), 0.44);
-        }
-      }
-    }
-  }
+		.electron-orbit {
+			$dimension: calc($atomWidth * 0.8);
 
-  .atom-text {
-    color: currentColor;
-    mix-blend-mode: difference;
-    width: unset;
-    display: block;
-  }
+			color: RGBVarChannels(null, 0.85);
+			border: 0;
+			border-left: 0.5em solid currentColor;
+			box-sizing: border-box;
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			margin: auto;
+			width: $dimension;
+			height: $dimension;
+			background-color: transparent;
+			border-radius: 50%;
+			transform-style: preserve-3d;
+
+			animation: 2s linear infinite $orbitSpinAnimation;
+
+			// -- DEBUGGING BLOCK start -- Below is for debugging
+			transition: transform 4s linear;
+			// -- DEBUGGING BLOCK end --
+
+			// Orbit track
+			&::after {
+				content: "";
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				border-radius: 50%;
+				color: RGBVarChannels(null, 0.18);
+				border: 0.125em solid currentColor;
+			}
+
+			// electron
+			&::before {
+				$dimension: calc($atomWidth * 0.032);
+
+				content: "";
+				width: $dimension;
+				height: $dimension;
+				position: absolute;
+				border-radius: 50%;
+				top: calc($dimension * 0.5 * -1);
+				right: 0;
+				bottom: 0;
+				left: 0;
+				margin: 0 auto;
+				color: RGBVarChannels();
+				box-shadow:
+					0px 0px 0.125em 0.0625em currentColor,
+					0px 0px 1.25em 0.125em currentColor;
+				background-color: currentColor;
+				transform: rotateY(-70deg);
+				animation: 2s linear infinite $electronSpinAnimation;
+			}
+
+			&:nth-of-type(1) {
+				--orbit-vector-factor: -1;
+
+				transform: rotateY(65deg)
+					rotateX(calc(54deg * var(--orbit-vector-factor)));
+
+				// animation-delay: 1s;
+				// &::before {
+				//   animation-delay: 1s;
+				// }
+			}
+			&:nth-of-type(2) {
+				--orbit-vector-factor: 1;
+
+				transform: rotateY(65deg)
+					rotateX(calc(54deg * var(--orbit-vector-factor)));
+
+				// animation-delay: -1s;
+				// &::before {
+				//   animation-delay: -1s;
+				// }
+			}
+			&:nth-of-type(3) {
+				--orbit-vector-factor: 0;
+
+				transform: rotateY(65deg)
+					rotateX(calc(54deg * var(--orbit-vector-factor)));
+				animation-duration: 1.5s;
+				&::before {
+					animation-duration: 1.5s;
+				}
+			}
+		}
+	}
+
+	.atom-text {
+		color: currentColor;
+		mix-blend-mode: difference;
+		width: unset;
+		display: block;
+	}
 }
 
-/* @keyframes spin-atom {
-  0% {
-    transform: rotateX(360deg) rotateY(0deg);
-  }
-  100% {
-    transform: rotateX(0deg) rotateY(360deg);
-  }
-} */
-@keyframes atomSpin {
-  to {
-    transform: rotate(1turn);
-  }
+@keyframes #{$orbitSpinAnimation} {
+	from {
+		transform: rotateY(70deg) rotateX(calc(54deg * var(--orbit-vector-factor)))
+			rotateZ(0deg);
+	}
+	to {
+		transform: rotateY(70deg) rotateX(calc(54deg * var(--orbit-vector-factor)))
+			rotateZ(360deg);
+	}
 }
-
-@keyframes rotateAtomDisc2 {
-  from {
-    transform: rotateX(90deg) rotateZ(0deg);
-  }
-  to {
-    transform: rotateX(90deg) rotateZ(360deg);
-  }
+@keyframes #{$electronSpinAnimation} {
+	from {
+		transform: rotateY(-70deg) rotateX(0deg);
+	}
+	to {
+		transform: rotateY(-70deg) rotateX(-360deg);
+	}
 }
-@keyframes rotateAtomDisc3 {
-  from {
-    transform: rotateY(90deg) rotateZ(0deg);
-  }
-  to {
-    transform: rotateY(90deg) rotateZ(360deg);
-  }
+@keyframes #{$nucleusGlow} {
+	100%,
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.2;
+	}
 }
