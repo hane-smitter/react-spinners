@@ -21,7 +21,7 @@ const Atom = (props: AtomProps) => {
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
-	const DEFAULT_ANIMATION_DURATION = "1.8s"; // Animation's default duration
+	const DEFAULT_ANIMATION_DURATION = "1s"; // Animation's default duration
 	const { animationPeriod } = useAnimationPacer(
 		props?.speedPlus,
 		DEFAULT_ANIMATION_DURATION

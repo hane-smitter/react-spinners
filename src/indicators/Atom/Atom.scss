@@ -2,30 +2,20 @@
 @use "sass:string";
 @use "../../scss/variables" as defaults;
 
-$atomSpinDuration: var(
-	--rli-animation-duration,
-	1.8s
-); // ratio -> 0.2625(2.1 / 8)
-$atomSpinPathDuration: calc($atomSpinDuration / 0.2625);
-$animationFn: var(--rli-animation-function, linear);
+$atomColor: defaults.$defaultColor;
+$defaultColorRedChannel: color.red($atomColor);
+$defaultColorGreenChannel: color.green($atomColor);
+$defaultColorBlueChannel: color.blue($atomColor);
+$atomWidth: 8em;
+$atomHeight: $atomWidth;
 
-// ------------------------------------------------------------------------------------------------------------------
-// @function atomColorPhase($num: null) {
-// 	$cssVar: var(--atom-phase1-color);
+$atomAnimationDuration: var(--rli-animation-duration, 2s);
 
-// 	@if ($num and $num != 1) {
-// 		$cssVar: var(--atom-phase#{$num}-color, $cssVar);
-// 	}
+$nucleusGlow: string.unique-id();
+$electronSpinAnimation: string.unique-id();
+$orbitSpinAnimation: string.unique-id();
 
-// 	@return $cssVar;
-// }
 @function RGBVarChannels($phaseNum: null, $alpha: 1) {
-	// $rgb: rgb(
-	// 	var(--atom-channel-r),
-	// 	var(--atom-channel-g),
-	// 	var(--atom-channel-b),
-	// 	$alpha
-	// );
 	$rgbColor: rgb(var(--atom-phase1-rgb), $alpha);
 
 	@if ($phaseNum and $phaseNum != 1) {
@@ -38,28 +28,9 @@ $animationFn: var(--rli-animation-function, linear);
 	@return $rgbColor;
 }
 
-// -- NEW INDICATOR VARS
-$atomWidth: 18.75em;
-$atomHeight: $atomWidth;
-
-// $atomColor: goldenrod;
-$atomColor: defaults.$defaultColor;
-$defaultColorRedChannel: color.red($atomColor);
-$defaultColorGreenChannel: color.green($atomColor);
-$defaultColorBlueChannel: color.blue($atomColor);
-
-$nucleusGlow: string.unique-id();
-$electronSpinAnimation: string.unique-id();
-$orbitSpinAnimation: string.unique-id();
-
 .atom-rli-bounding-box {
-	// --atom-channel-r: #{$defaultColorRedChannel};
-	// --atom-channel-g: #{$defaultColorGreenChannel};
-	// --atom-channel-b: #{$defaultColorBlueChannel};
 	--atom-phase1-rgb: #{$defaultColorRedChannel}, #{$defaultColorGreenChannel},
 		#{$defaultColorBlueChannel};
-
-	// --atom-phase1-color: #{RGBVarChannels()};
 
 	color: RGBVarChannels();
 	font-size: defaults.$fontSizer;
@@ -70,31 +41,18 @@ $orbitSpinAnimation: string.unique-id();
 	isolation: isolate;
 
 	.atom-indicator {
-		// create stacking context + relative positioning
-		// position: relative;
-		// z-index: 1;
-
-		// width: $box-width;
-		// height: $box-height;
 		width: $atomWidth;
 		height: $atomHeight;
 
 		position: relative;
-		/*  transform-style: preserve-3d; */
-		// perspective: 31.25em;
-		perspective: 18.75em;
+		perspective: $atomWidth;
 		overflow: hidden;
 		color: RGBVarChannels();
-
-		// -- DEBUGGING BLOCK start -> For DEBUGGING
-		// background-color: bisque;
-		background-color: #221122;
-		// -- DEBUGGING BLOCK end --
 
 		// nucleus
 		&::after,
 		&::before {
-			$dimension: calc($atomWidth * 0.08); // 18px
+			$dimension: calc($atomWidth * 0.08);
 
 			content: "";
 			position: absolute;
@@ -106,13 +64,12 @@ $orbitSpinAnimation: string.unique-id();
 			height: $dimension;
 			margin: auto;
 			border-radius: 50%;
-
 			background-color: currentColor;
 		}
 		&::before {
-			filter: blur(2px) drop-shadow(0px 0px 0.375em currentColor)
+			filter: blur(0.125em) drop-shadow(0px 0px 0.375em currentColor)
 				drop-shadow(0px 0px 0.75em currentColor);
-			animation: $nucleusGlow 2s linear infinite;
+			animation: $atomAnimationDuration linear infinite $nucleusGlow;
 		}
 
 		.electron-orbit {
@@ -134,11 +91,7 @@ $orbitSpinAnimation: string.unique-id();
 			border-radius: 50%;
 			transform-style: preserve-3d;
 
-			animation: 2s linear infinite $orbitSpinAnimation;
-
-			// -- DEBUGGING BLOCK start -- Below is for debugging
-			transition: transform 4s linear;
-			// -- DEBUGGING BLOCK end --
+			animation: $atomAnimationDuration linear infinite $orbitSpinAnimation;
 
 			// Orbit track
 			&::after {
@@ -173,7 +126,7 @@ $orbitSpinAnimation: string.unique-id();
 					0px 0px 1.25em 0.125em currentColor;
 				background-color: currentColor;
 				transform: rotateY(-70deg);
-				animation: 2s linear infinite $electronSpinAnimation;
+				animation: $atomAnimationDuration linear infinite $electronSpinAnimation;
 			}
 
 			&:nth-of-type(1) {
@@ -181,31 +134,21 @@ $orbitSpinAnimation: string.unique-id();
 
 				transform: rotateY(65deg)
 					rotateX(calc(54deg * var(--orbit-vector-factor)));
-
-				// animation-delay: 1s;
-				// &::before {
-				//   animation-delay: 1s;
-				// }
 			}
 			&:nth-of-type(2) {
 				--orbit-vector-factor: 1;
 
 				transform: rotateY(65deg)
 					rotateX(calc(54deg * var(--orbit-vector-factor)));
-
-				// animation-delay: -1s;
-				// &::before {
-				//   animation-delay: -1s;
-				// }
 			}
 			&:nth-of-type(3) {
 				--orbit-vector-factor: 0;
 
 				transform: rotateY(65deg)
 					rotateX(calc(54deg * var(--orbit-vector-factor)));
-				animation-duration: 1.5s;
+				animation-duration: calc($atomAnimationDuration * 0.75);
 				&::before {
-					animation-duration: 1.5s;
+					animation-duration: calc($atomAnimationDuration * 0.75);
 				}
 			}
 		}
