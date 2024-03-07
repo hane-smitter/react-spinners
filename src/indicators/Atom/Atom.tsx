@@ -7,8 +7,11 @@ import Text from "../../utils/Text";
 import { defaultColor } from "../variables";
 import "./Atom.scss";
 import { AtomProps } from "./Atom.types";
+import arrayRepeat from "../../utils/arrayRepeat";
 
 const DEFAULT_COLOR = colorParse(defaultColor).toRgb();
+
+// NOTE: Below variables should match with ones set in sass file
 const atomColorPhases: Array<string> = Array.from(
 	{ length: 4 },
 	(_, idx) => `--atom-phase${idx + 1}-rgb`
@@ -28,31 +31,11 @@ const Atom = (props: AtomProps) => {
 	);
 
 	/* Color SETTINGS */
-	// If Color property is a string, that is the color of all rings
-	// If color property is an array, that is color for each rings
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				// e.g --ring1-color
-				const cssColorVars: Array<string> = Array.from(
-					{ length: 3 },
-					(item, idx) => {
-						const num: number = idx + 1;
-						const cssPropName: string = `--${"orbit" + num + "-"}color`;
-						return cssPropName;
-					}
-				);
-
-				elemRef.current?.style.removeProperty("--color-r");
-				elemRef.current?.style.removeProperty("--color-g");
-				elemRef.current?.style.removeProperty("--color-b");
-				for (let i = 0; i < cssColorVars.length; i++) {
-					elemRef.current?.style.removeProperty(cssColorVars[i]);
-				}
-			}
-		},
-		[elemRef.current]
-	);
+	const colorReset = useCallback(function () {
+		for (let i = 0; i < atomColorPhases.length; i++) {
+			elemRef.current?.style.removeProperty(atomColorPhases[i]);
+		}
+	}, []);
 	let colorProp: string | string[] = props?.color ?? "";
 	const atomColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
@@ -110,52 +93,80 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		let arrLength: number = colorProp.length;
+		const colorArr: string[] = arrayRepeat(colorProp, atomColorPhases.length);
 
-		if (arrLength <= 0) return stylesObject;
+		for (let i = 0; i < colorArr.length; i++) {
+			if (i >= 4) break;
 
-		try {
-			const firstColor = colorParse(colorProp[0]);
-			if (!firstColor.isValid()) throw new Error("invalid color");
+			try {
+				const newColor = colorParse(colorArr[i]);
+				if (!newColor.isValid()) throw new Error("invalid color");
 
-			const toRgbColor = firstColor.toRgb();
-			stylesObject["--color-r"] = toRgbColor.r;
-			stylesObject["--color-g"] = toRgbColor.g;
-			stylesObject["--color-b"] = toRgbColor.b;
-		} catch (error) {
-			console.warn(
-				`Possibly an invalid color( ${colorProp[0]} ) passed to Atom loader!`
-			);
-			stylesObject["--color-r"] = DEFAULT_COLOR.r;
-			stylesObject["--color-g"] = DEFAULT_COLOR.g;
-			stylesObject["--color-b"] = DEFAULT_COLOR.b;
-		}
+				const newRgbColor = newColor.toRgb();
 
-		for (let i = 0; i < arrLength; i++) {
-			if (i >= 3) break; // Max no. of discs can only be 3
-			let currentItem: string = `orbit${i + 1}`;
-			let currentColor = colorProp[i];
+				const redChannel = newRgbColor.r;
+				const greenChannel = newRgbColor.g;
+				const blueChannel = newRgbColor.b;
 
-			stylesObject[`--${currentItem}-color`] = currentColor;
+				stylesObject[
+					atomColorPhases[i]
+				] = `${redChannel}, ${greenChannel}, ${blueChannel}`;
+			} catch (error) {
+				const redChannel = DEFAULT_COLOR.r;
+				const greenChannel = DEFAULT_COLOR.g;
+				const blueChannel = DEFAULT_COLOR.b;
+
+				stylesObject[
+					atomColorPhases[i]
+				] = `${redChannel}, ${greenChannel}, ${blueChannel}`;
+				console.warn(
+					`Possibly an invalid color( ${colorArr[i]} ) passed to Atom indicator!`
+				);
+			}
 		}
 		return stylesObject;
 	}
 
 	try {
-		const color = colorParse(colorProp);
-		if (!color.isValid()) throw new Error("invalid color");
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
 
-		const toRgbColor = color.toRgb();
-		stylesObject["--color-r"] = toRgbColor.r;
-		stylesObject["--color-g"] = toRgbColor.g;
-		stylesObject["--color-b"] = toRgbColor.b;
-	} catch (error) {
-		console.warn(
-			`Invalid color( ${JSON.stringify(colorProp)} ) passed to Atom indicator!`
-		);
-		stylesObject["--color-r"] = DEFAULT_COLOR.r;
-		stylesObject["--color-g"] = DEFAULT_COLOR.g;
-		stylesObject["--color-b"] = DEFAULT_COLOR.b;
+		const newColor = colorParse(colorProp);
+		if (!newColor.isValid()) throw new Error("Invalid color");
+
+		const newRgbColor = newColor.toRgb();
+
+		const redChannel = newRgbColor.r;
+		const greenChannel = newRgbColor.g;
+		const blueChannel = newRgbColor.b;
+
+		for (let i = 0; i < atomColorPhases.length; i++) {
+			stylesObject[
+				atomColorPhases[i]
+			] = `${redChannel}, ${greenChannel}, ${blueChannel}`;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <Atom /> indicator cannot be processed. Using default instead!`
+			  );
+		for (let i = 0; i < atomColorPhases.length; i++) {
+			const redChannel = DEFAULT_COLOR.r;
+			const greenChannel = DEFAULT_COLOR.g;
+			const blueChannel = DEFAULT_COLOR.b;
+
+			stylesObject[
+				atomColorPhases[i]
+			] = `${redChannel}, ${greenChannel}, ${blueChannel}`;
+		}
 	}
 
 	return stylesObject;

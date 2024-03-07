@@ -1,38 +1,51 @@
 @use "sass:color";
 @use "sass:string";
 @use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
 
 $atomColor: defaults.$defaultColor;
+$fallbackAnimationDuration: 1s; // This time value should sync with JS
+$fallbackAnimationFn: linear;
+$atomAnimationDuration: var(
+	--rli-animation-duration,
+	$fallbackAnimationDuration
+);
+$animationFn: var(--rli-animation-function, $fallbackAnimationFn);
+
 $defaultColorRedChannel: color.red($atomColor);
 $defaultColorGreenChannel: color.green($atomColor);
 $defaultColorBlueChannel: color.blue($atomColor);
 $atomWidth: 8em;
 $atomHeight: $atomWidth;
-
-$atomAnimationDuration: var(--rli-animation-duration, 2s);
+$electronPathOpacity: 0.18; // The faint orbit path the electron travels around
+$electronApparentWindOpacity: 0.85; // The wind trail of the speeding/travelling electron
 
 $nucleusGlow: string.unique-id();
 $electronSpinAnimation: string.unique-id();
 $orbitSpinAnimation: string.unique-id();
+$atomColoring: string.unique-id();
+$atomColoringOpacityLevel_1: string.unique-id();
+$atomColoringOpacityLevel_2: string.unique-id();
 
-@function RGBVarChannels($phaseNum: null, $alpha: 1) {
-	$rgbColor: rgb(var(--atom-phase1-rgb), $alpha);
+@mixin color($phaseNum: null, $alpha: 1) {
+	$rgbColor: rgba(var(--atom-phase1-rgb), $alpha);
 
 	@if ($phaseNum and $phaseNum != 1) {
-		$rgbColor: rgb(
+		$rgbColor: rgba(
 			var(--atom-phase#{$phaseNum}-rgb, var(--atom-phase1-rgb)),
 			$alpha
 		);
 	}
 
-	@return $rgbColor;
+	color: $rgbColor;
 }
 
 .atom-rli-bounding-box {
 	--atom-phase1-rgb: #{$defaultColorRedChannel}, #{$defaultColorGreenChannel},
 		#{$defaultColorBlueChannel};
 
-	color: RGBVarChannels();
+	// color: RGBVarChannels();
+	@include color();
 	font-size: defaults.$fontSizer;
 	position: relative;
 	text-align: unset;
@@ -47,7 +60,9 @@ $orbitSpinAnimation: string.unique-id();
 		position: relative;
 		perspective: $atomWidth;
 		overflow: hidden;
-		color: RGBVarChannels();
+		@include color();
+		animation: calc($atomAnimationDuration * 4) $animationFn infinite
+			$atomColoring;
 
 		// nucleus
 		&::after,
@@ -69,13 +84,13 @@ $orbitSpinAnimation: string.unique-id();
 		&::before {
 			filter: blur(0.125em) drop-shadow(0px 0px 0.375em currentColor)
 				drop-shadow(0px 0px 0.75em currentColor);
-			animation: $atomAnimationDuration linear infinite $nucleusGlow;
+			animation: $atomAnimationDuration $animationFn infinite $nucleusGlow;
 		}
 
 		.electron-orbit {
 			$dimension: calc($atomWidth * 0.8);
 
-			color: RGBVarChannels(null, 0.85);
+			@include color(null, $electronApparentWindOpacity);
 			border: 0;
 			border-left: 0.5em solid currentColor;
 			box-sizing: border-box;
@@ -91,9 +106,12 @@ $orbitSpinAnimation: string.unique-id();
 			border-radius: 50%;
 			transform-style: preserve-3d;
 
-			animation: $atomAnimationDuration linear infinite $orbitSpinAnimation;
+			animation:
+				$atomAnimationDuration $animationFn infinite $orbitSpinAnimation,
+				calc($atomAnimationDuration * 4) $animationFn infinite
+					$atomColoringOpacityLevel_1;
 
-			// Orbit track
+			// Electron track/path
 			&::after {
 				content: "";
 				position: absolute;
@@ -102,7 +120,9 @@ $orbitSpinAnimation: string.unique-id();
 				bottom: 0;
 				left: 0;
 				border-radius: 50%;
-				color: RGBVarChannels(null, 0.18);
+				@include color(null, $electronPathOpacity);
+				animation: calc($atomAnimationDuration * 4) $animationFn infinite
+					$atomColoringOpacityLevel_2;
 				border: 0.125em solid currentColor;
 			}
 
@@ -120,13 +140,15 @@ $orbitSpinAnimation: string.unique-id();
 				bottom: 0;
 				left: 0;
 				margin: 0 auto;
-				color: RGBVarChannels();
+				@include color();
 				box-shadow:
 					0px 0px 0.125em 0.0625em currentColor,
 					0px 0px 1.25em 0.125em currentColor;
 				background-color: currentColor;
 				transform: rotateY(-70deg);
-				animation: $atomAnimationDuration linear infinite $electronSpinAnimation;
+				animation:
+					$atomAnimationDuration $animationFn infinite $electronSpinAnimation,
+					calc($atomAnimationDuration * 4) $animationFn infinite $atomColoring;
 			}
 
 			&:nth-of-type(1) {
@@ -146,10 +168,24 @@ $orbitSpinAnimation: string.unique-id();
 
 				transform: rotateY(65deg)
 					rotateX(calc(54deg * var(--orbit-vector-factor)));
-				animation-duration: calc($atomAnimationDuration * 0.75);
+
+				// --------Animation ahead into time <START--------
+				animation-delay: calc($atomAnimationDuration * 0.5 * -1),
+					calc($atomAnimationDuration * 0.5 * 4 * -1);
 				&::before {
-					animation-duration: calc($atomAnimationDuration * 0.75);
+					animation-delay: calc($atomAnimationDuration * 0.5 * -1),
+						calc($atomAnimationDuration * 0.5 * 4 * -1);
 				}
+				// --------Animation ahead into time <END--------
+
+				// --------Animation shorter time <START--------
+				// animation-duration: calc($atomAnimationDuration * 0.75),
+				// 	calc($atomAnimationDuration * 0.75 * 4);
+				// &::before {
+				// 	animation-duration: calc($atomAnimationDuration * 0.75),
+				// 		calc($atomAnimationDuration * 0.75 * 4);
+				// }
+				// --------Animation shorter time <END--------
 			}
 		}
 	}
@@ -160,6 +196,34 @@ $orbitSpinAnimation: string.unique-id();
 		width: unset;
 		display: block;
 	}
+}
+
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--atom-phase1-rgb",
+	"--atom-phase2-rgb",
+	"--atom-phase3-rgb",
+	"--atom-phase4-rgb"
+);
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<number>#";
+	inherits: true;
+	initial-value:
+		#{$defaultColorRedChannel},
+		#{$defaultColorGreenChannel},
+		#{$defaultColorBlueChannel};
+}
+$animationEasingName: ("--rli-animation-function");
+@include sharedMixins.registerCustomProperties($animationEasingName) {
+	syntax: "<easing-function>";
+	inherits: true;
+	initial-value: $fallbackAnimationFn;
+}
+$animationDurationName: ("--rli-animation-duration");
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
 }
 
 @keyframes #{$orbitSpinAnimation} {
@@ -187,5 +251,91 @@ $orbitSpinAnimation: string.unique-id();
 	}
 	50% {
 		opacity: 0.2;
+	}
+}
+
+// It is easier animating the value of a css variable(--some-name), but animation of a property name is buggy in firefox
+// and requires some bit of extra hack in chrome
+// There option left is to animate CSS property, e.g color. Disadvantage of this approach is it requires more animatiion frames
+// since some sections of the animation have different opacity for there color.
+@keyframes #{$atomColoring} {
+	100%,
+	0% {
+		@include color(1);
+	}
+	22% {
+		@include color(1);
+	}
+	25% {
+		@include color(2);
+	}
+	42% {
+		@include color(2);
+	}
+	50% {
+		@include color(3);
+	}
+	72% {
+		@include color(3);
+	}
+	75% {
+		@include color(4);
+	}
+	97% {
+		@include color(4);
+	}
+}
+@keyframes #{$atomColoringOpacityLevel_1} {
+	100%,
+	0% {
+		@include color(1, $electronApparentWindOpacity);
+	}
+	22% {
+		@include color(1, $electronApparentWindOpacity);
+	}
+	25% {
+		@include color(2, $electronApparentWindOpacity);
+	}
+	47% {
+		@include color(2, $electronApparentWindOpacity);
+	}
+	50% {
+		@include color(3, $electronApparentWindOpacity);
+	}
+	72% {
+		@include color(3, $electronApparentWindOpacity);
+	}
+	75% {
+		@include color(4, $electronApparentWindOpacity);
+	}
+	97% {
+		@include color(4, $electronApparentWindOpacity);
+	}
+}
+@keyframes #{$atomColoringOpacityLevel_2} {
+	100%,
+	0% {
+		@include color(1, $electronPathOpacity);
+	}
+	22% {
+		@include color(1, $electronPathOpacity);
+	}
+	25% {
+		@include color(2, $electronPathOpacity);
+	}
+	47% {
+		@include color(2, $electronPathOpacity);
+	}
+	50% {
+		@include color(3, $electronPathOpacity);
+	}
+	72% {
+		@include color(3, $electronPathOpacity);
+	}
+	75% {
+		@include color(4, $electronPathOpacity);
+	}
+	97% {
+		@include color(4, $electronPathOpacity);
 	}
 }
