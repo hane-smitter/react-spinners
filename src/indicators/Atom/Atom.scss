@@ -1,16 +1,14 @@
 @use "sass:color";
 @use "sass:string";
+@use "sass:list";
 @use "../../scss/variables" as defaults;
 @use "../../scss/mixins" as sharedMixins;
 
 $atomColor: defaults.$defaultColor;
-$fallbackAnimationDuration: 1s; // This time value should sync with JS
-$fallbackAnimationFn: linear;
-$atomAnimationDuration: var(
-	--rli-animation-duration,
-	$fallbackAnimationDuration
-);
-$animationFn: var(--rli-animation-function, $fallbackAnimationFn);
+$fallbackAnimationDuration: 1s; // This time value should be in sync with JS(React component)
+$animationDuration: var(--rli-animation-duration, $fallbackAnimationDuration);
+$fallbackEasingFn: linear;
+$animationFn: var(--rli-animation-function, $fallbackEasingFn);
 
 $defaultColorRedChannel: color.red($atomColor);
 $defaultColorGreenChannel: color.green($atomColor);
@@ -27,14 +25,24 @@ $atomColoring: string.unique-id();
 $atomColoringOpacityLevel_1: string.unique-id();
 $atomColoringOpacityLevel_2: string.unique-id();
 
-@mixin color($phaseNum: null, $alpha: 1) {
-	$rgbColor: rgba(var(--atom-phase1-rgb), $alpha);
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--atom-phase1-rgb",
+	"--atom-phase2-rgb",
+	"--atom-phase3-rgb",
+	"--atom-phase4-rgb"
+);
+
+@mixin fontColor($phaseNum: null, $alpha: 1) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$rgbColor: rgba(var($varName), $alpha);
 
 	@if ($phaseNum and $phaseNum != 1) {
-		$rgbColor: rgba(
-			var(--atom-phase#{$phaseNum}-rgb, var(--atom-phase1-rgb)),
-			$alpha
-		);
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$rgbColor: rgba(var($newVarName, var($varName)), $alpha);
 	}
 
 	color: $rgbColor;
@@ -45,7 +53,7 @@ $atomColoringOpacityLevel_2: string.unique-id();
 		#{$defaultColorBlueChannel};
 
 	// color: RGBVarChannels();
-	@include color();
+	@include fontColor();
 	font-size: defaults.$fontSizer;
 	position: relative;
 	text-align: unset;
@@ -60,9 +68,8 @@ $atomColoringOpacityLevel_2: string.unique-id();
 		position: relative;
 		perspective: $atomWidth;
 		overflow: hidden;
-		@include color();
-		animation: calc($atomAnimationDuration * 4) $animationFn infinite
-			$atomColoring;
+		@include fontColor();
+		animation: calc($animationDuration * 4) $animationFn infinite $atomColoring;
 
 		// nucleus
 		&::after,
@@ -84,13 +91,13 @@ $atomColoringOpacityLevel_2: string.unique-id();
 		&::before {
 			filter: blur(0.125em) drop-shadow(0px 0px 0.375em currentColor)
 				drop-shadow(0px 0px 0.75em currentColor);
-			animation: $atomAnimationDuration $animationFn infinite $nucleusGlow;
+			animation: $animationDuration $animationFn infinite $nucleusGlow;
 		}
 
 		.electron-orbit {
 			$dimension: calc($atomWidth * 0.8);
 
-			@include color(null, $electronApparentWindOpacity);
+			@include fontColor(null, $electronApparentWindOpacity);
 			border: 0;
 			border-left: 0.5em solid currentColor;
 			box-sizing: border-box;
@@ -107,8 +114,8 @@ $atomColoringOpacityLevel_2: string.unique-id();
 			transform-style: preserve-3d;
 
 			animation:
-				$atomAnimationDuration $animationFn infinite $orbitSpinAnimation,
-				calc($atomAnimationDuration * 4) $animationFn infinite
+				$animationDuration $animationFn infinite $orbitSpinAnimation,
+				calc($animationDuration * 4) $animationFn infinite
 					$atomColoringOpacityLevel_1;
 
 			// Electron track/path
@@ -120,8 +127,8 @@ $atomColoringOpacityLevel_2: string.unique-id();
 				bottom: 0;
 				left: 0;
 				border-radius: 50%;
-				@include color(null, $electronPathOpacity);
-				animation: calc($atomAnimationDuration * 4) $animationFn infinite
+				@include fontColor(null, $electronPathOpacity);
+				animation: calc($animationDuration * 4) $animationFn infinite
 					$atomColoringOpacityLevel_2;
 				border: 0.125em solid currentColor;
 			}
@@ -140,15 +147,15 @@ $atomColoringOpacityLevel_2: string.unique-id();
 				bottom: 0;
 				left: 0;
 				margin: 0 auto;
-				@include color();
+				@include fontColor();
 				box-shadow:
 					0px 0px 0.125em 0.0625em currentColor,
 					0px 0px 1.25em 0.125em currentColor;
 				background-color: currentColor;
 				transform: rotateY(-70deg);
 				animation:
-					$atomAnimationDuration $animationFn infinite $electronSpinAnimation,
-					calc($atomAnimationDuration * 4) $animationFn infinite $atomColoring;
+					$animationDuration $animationFn infinite $electronSpinAnimation,
+					calc($animationDuration * 4) $animationFn infinite $atomColoring;
 			}
 
 			&:nth-of-type(1) {
@@ -170,20 +177,20 @@ $atomColoringOpacityLevel_2: string.unique-id();
 					rotateX(calc(54deg * var(--orbit-vector-factor)));
 
 				// --------Animation ahead into time <START--------
-				animation-delay: calc($atomAnimationDuration * 0.5 * -1),
-					calc($atomAnimationDuration * 0.5 * 4 * -1);
+				animation-delay: calc($animationDuration * 0.5 * -1),
+					calc($animationDuration * 4 * -1); // No delay applied to coloring animation
 				&::before {
-					animation-delay: calc($atomAnimationDuration * 0.5 * -1),
-						calc($atomAnimationDuration * 0.5 * 4 * -1);
+					animation-delay: calc($animationDuration * 0.5 * -1),
+						calc($animationDuration * 4 * -1); // No delay applied to coloring animation
 				}
 				// --------Animation ahead into time <END--------
 
 				// --------Animation shorter time <START--------
-				// animation-duration: calc($atomAnimationDuration * 0.75),
-				// 	calc($atomAnimationDuration * 0.75 * 4);
+				// animation-duration: calc($animationDuration * 0.75),
+				// 	calc($animationDuration * 0.75 * 4);
 				// &::before {
-				// 	animation-duration: calc($atomAnimationDuration * 0.75),
-				// 		calc($atomAnimationDuration * 0.75 * 4);
+				// 	animation-duration: calc($animationDuration * 0.75),
+				// 		calc($animationDuration * 0.75 * 4);
 				// }
 				// --------Animation shorter time <END--------
 			}
@@ -198,13 +205,6 @@ $atomColoringOpacityLevel_2: string.unique-id();
 	}
 }
 
-// NOTE: These names should match with ones in Javascript(React component)
-$coloringPropertyNames: (
-	"--atom-phase1-rgb",
-	"--atom-phase2-rgb",
-	"--atom-phase3-rgb",
-	"--atom-phase4-rgb"
-);
 @include sharedMixins.registerCustomProperties($coloringPropertyNames) {
 	syntax: "<number>#";
 	inherits: true;
@@ -213,13 +213,17 @@ $coloringPropertyNames: (
 		#{$defaultColorGreenChannel},
 		#{$defaultColorBlueChannel};
 }
-$animationEasingName: ("--rli-animation-function");
+
+// Sass list with common variable name across indicator components
+$animationEasingName: (#{defaults.$animationEasingVarName});
 @include sharedMixins.registerCustomProperties($animationEasingName) {
 	syntax: "<easing-function>";
 	inherits: true;
-	initial-value: $fallbackAnimationFn;
+	initial-value: $fallbackEasingFn;
 }
-$animationDurationName: ("--rli-animation-duration");
+
+// Sass list with common variable name across indicator components
+$animationDurationName: (#{defaults.$animationDurationVarName});
 @include sharedMixins.registerCustomProperties($animationDurationName) {
 	syntax: "<time>";
 	inherits: true;
@@ -261,81 +265,81 @@ $animationDurationName: ("--rli-animation-duration");
 @keyframes #{$atomColoring} {
 	100%,
 	0% {
-		@include color(1);
+		@include fontColor(1);
 	}
-	22% {
-		@include color(1);
+	20% {
+		@include fontColor(1);
 	}
 	25% {
-		@include color(2);
+		@include fontColor(2);
 	}
-	42% {
-		@include color(2);
+	45% {
+		@include fontColor(2);
 	}
 	50% {
-		@include color(3);
+		@include fontColor(3);
 	}
-	72% {
-		@include color(3);
+	70% {
+		@include fontColor(3);
 	}
 	75% {
-		@include color(4);
+		@include fontColor(4);
 	}
-	97% {
-		@include color(4);
+	95% {
+		@include fontColor(4);
 	}
 }
 @keyframes #{$atomColoringOpacityLevel_1} {
 	100%,
 	0% {
-		@include color(1, $electronApparentWindOpacity);
+		@include fontColor(1, $electronApparentWindOpacity);
 	}
-	22% {
-		@include color(1, $electronApparentWindOpacity);
+	20% {
+		@include fontColor(1, $electronApparentWindOpacity);
 	}
 	25% {
-		@include color(2, $electronApparentWindOpacity);
+		@include fontColor(2, $electronApparentWindOpacity);
 	}
-	47% {
-		@include color(2, $electronApparentWindOpacity);
+	45% {
+		@include fontColor(2, $electronApparentWindOpacity);
 	}
 	50% {
-		@include color(3, $electronApparentWindOpacity);
+		@include fontColor(3, $electronApparentWindOpacity);
 	}
-	72% {
-		@include color(3, $electronApparentWindOpacity);
+	70% {
+		@include fontColor(3, $electronApparentWindOpacity);
 	}
 	75% {
-		@include color(4, $electronApparentWindOpacity);
+		@include fontColor(4, $electronApparentWindOpacity);
 	}
-	97% {
-		@include color(4, $electronApparentWindOpacity);
+	95% {
+		@include fontColor(4, $electronApparentWindOpacity);
 	}
 }
 @keyframes #{$atomColoringOpacityLevel_2} {
 	100%,
 	0% {
-		@include color(1, $electronPathOpacity);
+		@include fontColor(1, $electronPathOpacity);
 	}
-	22% {
-		@include color(1, $electronPathOpacity);
+	20% {
+		@include fontColor(1, $electronPathOpacity);
 	}
 	25% {
-		@include color(2, $electronPathOpacity);
+		@include fontColor(2, $electronPathOpacity);
 	}
-	47% {
-		@include color(2, $electronPathOpacity);
+	45% {
+		@include fontColor(2, $electronPathOpacity);
 	}
 	50% {
-		@include color(3, $electronPathOpacity);
+		@include fontColor(3, $electronPathOpacity);
 	}
-	72% {
-		@include color(3, $electronPathOpacity);
+	70% {
+		@include fontColor(3, $electronPathOpacity);
 	}
 	75% {
-		@include color(4, $electronPathOpacity);
+		@include fontColor(4, $electronPathOpacity);
 	}
-	97% {
-		@include color(4, $electronPathOpacity);
+	95% {
+		@include fontColor(4, $electronPathOpacity);
 	}
 }

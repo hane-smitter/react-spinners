@@ -1,150 +1,229 @@
 @use "sass:math";
 @use "sass:meta";
-
+@use "sass:string";
+@use "sass:list";
 @use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
 
-$animationDuration: var(--rli-animation-duration, 1.2s);
-$animationFn: var(--rli-animation-function, cubic-bezier(0.08, 0.03, 0.91, 0.93));
-$bolus-size: 0.4667em;
-$commet-path-width: 0.25em;
+$fallbackAnimationDuration: 1.2s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
 
-@function stripUnit($value) {
-    @if meta.type-of($value) != "number" {
-        @error "The type( `#{meta.type-of($value)}` ) is Invalid. Provide a number instead.";
-    } @else if meta.type-of($value) == "number" and not math.is-unitless($value) {
-        @return math.div($value, ($value * 0 + 1));
-    }
+$fallbackEasingFn: cubic-bezier(0.08, 0.03, 0.91, 0.93);
+$animationFn: var(#{defaults.$animationEasingVarName}, $fallbackEasingFn);
+// $commetball-size: 0.4667em;
+$commetball-size: 0.5em;
+$commet-trail-width: 0.25em;
 
-    @return $value;
-}
+$commetSpinAnimation: string.unique-id();
+$commetColoring: string.unique-id();
 
-@function diffRatio($borderWidth, $bolusSize) {
-    $borderWidth: stripUnit($borderWidth);
-    $bolusSize: stripUnit($bolusSize);
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--commet-phase1-color",
+	"--commet-phase2-color",
+	"--commet-phase3-color",
+	"--commet-phase4-color"
+);
 
-    $value: calc(abs($borderWidth - $bolusSize));
+@mixin fontColor($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
 
-    @return $value;
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
+
+	color: $cssVar;
 }
 
 @mixin glow {
-    box-shadow: 0 0 0.3em 0.03em var(--bg-color), 0 0 1.4em 0.16em var(--bg-color);
+	box-shadow:
+		0 0 0.2em 0em currentColor,
+		0 0 0.6em 0em currentColor;
 }
 
 .commet-rli-bounding-box {
-    font-size: defaults.$fontSizer;
-    display: inline-block;
-    box-sizing: border-box;
+	--commet-phase1-color: #{defaults.$defaultColor};
 
-    .commet-throbber {
-        width: 6em;
-        height: 6em;
-        color: defaults.$defaultColor;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+	// Commet ball will be raised upwards to centrally align it with commet-trail.
+	// This means setting overflow to hidden on this element(*-bounding-box), will clip some part of the commet-ball that will pop-out.
+	// So we add a room for the commet ball to be visible by increasing the width & length by at least half the size of the commet-ball(can be more)
+	// Additional 0.6em is the spread radius of the commet ball
+	$dimensions: calc(6em + ($commetball-size * 0.5) + 0.6em);
 
-        // Create stacking context
-        position: relative;
-        z-index: 0;
+	font-size: defaults.$fontSizer;
+	width: $dimensions;
+	height: $dimensions;
+	overflow: hidden; // A box will be rotating. Its edges should be clipped when they go outside bounding box(Important to avoid triggering browser scrollbar on small viewports)
 
-        .commet-text {
-            mix-blend-mode: difference;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+	display: inline-block;
+	box-sizing: border-box;
+	position: relative;
 
-            z-index: -2;
-        }
+	.commet-indicator {
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		margin: auto;
+		box-sizing: border-box;
+		width: 6em;
+		height: 6em;
+		@include fontColor();
+		display: inline-block;
+		isolation: isolate;
 
-        .ring-wrapper {
-            position: absolute;
-            width: var(--ring-dimensions);
-            height: var(--ring-dimensions);
-            animation: commetSpin $animationDuration $animationFn infinite;
+		// NOTE: Below also creates stacking context
+		position: absolute;
+		z-index: 0;
 
-            & > .ringball-holder {
-                position: absolute;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                left: 0;
-                background-color: transparent;
-            }
+		animation: calc($animationDuration * 4) $animationFn infinite
+			$commetColoring;
 
-            & .ring {
-                border-radius: 50%;
-                border-style: solid;
-                position: absolute;
-                // width: 100%;
-                // height: 100%;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-            }
+		.commet-box {
+			position: absolute;
+			display: inline-block;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			bottom: 0;
+			left: 0;
+			margin: auto;
 
-            &.ring1 {
-                --bg-color: var(--ring1-color, currentColor);
-                --ring-dimensions: 100%;
+			animation: $commetSpinAnimation $animationDuration $animationFn infinite;
 
-                animation-direction: normal;
+			&:nth-of-type(1) {
+				width: 100%;
+				height: 100%;
 
-                & > .ring {
-                    border-color: var(--bg-color) transparent transparent var(--bg-color);
-                    border-width: $commet-path-width $commet-path-width 0em 0em;
-                    transform: rotateZ(-44deg);
-                }
+				animation-direction: normal;
+			}
+			&:nth-of-type(2) {
+				width: 70%;
+				height: 70%;
 
-                & > .ringball-holder::before {
-                    content: "";
-                    position: absolute;
-                    width: $bolus-size;
-                    height: $bolus-size;
-                    top: calc($commet-path-width * diffRatio($commet-path-width, $bolus-size) * -1);
-                    left: 50%;
-                    // transform: translateX(-50%);
-                    background-color: var(--bg-color);
-                    border-radius: 50%;
+				animation-direction: reverse;
+			}
 
-                    @include glow();
-                }
-            }
-            &.ring2 {
-                --bg-color: var(--ring2-color, currentColor);
-                --ring-dimensions: 70%;
+			.commetball-box {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				bottom: 0;
+				left: 0;
+				display: inline-block;
 
-                animation-direction: reverse;
-                & > .ring {
-                    border-color: var(--bg-color) var(--bg-color) transparent transparent;
-                    border-width: $commet-path-width 0em 0em $commet-path-width;
-                    transform: rotateZ(134deg);
-                }
+				// Commet ball
+				&::before {
+					content: "";
+					width: $commetball-size;
+					height: $commetball-size;
+					border-radius: 50%;
+					background-color: currentColor;
+					position: absolute;
+					top: calc(($commetball-size - $commet-trail-width) * 0.5 * -1);
+					left: 50%;
+					transform: translateX(-50%);
 
-                & > .ringball-holder {
-                    &::before {
-                        content: "";
-                        position: absolute;
-                        width: $bolus-size;
-                        height: $bolus-size;
-                        right: calc($commet-path-width * diffRatio($commet-path-width, $bolus-size) * -1);
-                        // right: 0;
-                        // left: 50%;
-                        bottom: 50%;
-                        // transform: translateX(-50%);
-                        background-color: var(--bg-color);
-                        border-radius: 50%;
+					@include glow();
+				}
+			}
 
-                        @include glow();
-                    }
-                }
-            }
-        }
-    }
+			// The tail of a commet ball
+			.commet-trail {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				bottom: 0;
+				left: 0;
+				border-radius: 50%;
+				box-sizing: border-box;
+				border-style: solid;
+
+				&.trail1 {
+					border-color: currentColor transparent transparent currentColor;
+					border-width: $commet-trail-width $commet-trail-width 0 0;
+					transform: rotateZ(-45deg);
+				}
+				&.trail2 {
+					border-color: currentColor currentColor transparent transparent;
+					border-width: $commet-trail-width 0 0 $commet-trail-width;
+					transform: rotateZ(45deg);
+				}
+			}
+		}
+	}
+
+	.commet-text {
+		mix-blend-mode: difference;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		@include fontColor();
+	}
 }
-@keyframes commetSpin {
-    to {
-        transform: rotate(1turn);
-    }
+
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+// Sass list with common variable name across indicator components
+$animationEasingName: (#{defaults.$animationEasingVarName});
+@include sharedMixins.registerCustomProperties($animationEasingName) {
+	syntax: "<easing-function>";
+	inherits: true;
+	initial-value: $fallbackEasingFn;
+}
+
+// Sass list with common variable name across indicator components
+$animationDurationName: (#{defaults.$animationDurationVarName});
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$commetSpinAnimation} {
+	to {
+		transform: rotate(1turn);
+	}
+}
+@keyframes #{$commetColoring} {
+	100%,
+	0% {
+		@include fontColor(1);
+	}
+	20% {
+		@include fontColor(1);
+	}
+	25% {
+		@include fontColor(2);
+	}
+	45% {
+		@include fontColor(2);
+	}
+	50% {
+		@include fontColor(3);
+	}
+	70% {
+		@include fontColor(3);
+	}
+	75% {
+		@include fontColor(4);
+	}
+	95% {
+		@include fontColor(4);
+	}
 }
