@@ -11,8 +11,10 @@ $animationDuration: var(
 	$fallbackAnimationDuration
 );
 
-$fallbackEasingFn: cubic-bezier(0.08, 0.03, 0.91, 0.93);
-$animationFn: var(#{defaults.$animationEasingVarName}, $fallbackEasingFn);
+$animationFn: var(
+	#{defaults.$animationEasingVarName},
+	cubic-bezier(0.08, 0.03, 0.91, 0.93)
+);
 // $commetball-size: 0.4667em;
 $commetball-size: 0.5em;
 $commet-trail-width: 0.25em;
@@ -55,7 +57,7 @@ $coloringPropertyNames: (
 	// Commet ball will be raised upwards to centrally align it with commet-trail.
 	// This means setting overflow to hidden on this element(*-bounding-box), will clip some part of the commet-ball that will pop-out.
 	// So we add a room for the commet ball to be visible by increasing the width & length by at least half the size of the commet-ball(can be more)
-	// Additional 0.6em is the spread radius of the commet ball
+	// Additional 0.6em is the shadow spread radius of the commet ball
 	$dimensions: calc(6em + ($commetball-size * 0.5) + 0.6em);
 
 	font-size: defaults.$fontSizer;
@@ -66,6 +68,8 @@ $coloringPropertyNames: (
 	display: inline-block;
 	box-sizing: border-box;
 	position: relative;
+	// Create stacking context
+	isolation: isolate;
 
 	.commet-indicator {
 		top: 0;
@@ -179,16 +183,10 @@ $coloringPropertyNames: (
 	initial-value: #{defaults.$defaultColor};
 }
 
-// Sass list with common variable name across indicator components
-$animationEasingName: (#{defaults.$animationEasingVarName});
-@include sharedMixins.registerCustomProperties($animationEasingName) {
-	syntax: "<easing-function>";
-	inherits: true;
-	initial-value: $fallbackEasingFn;
-}
-
-// Sass list with common variable name across indicator components
+// Sass list
 $animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
 @include sharedMixins.registerCustomProperties($animationDurationName) {
 	syntax: "<time>";
 	inherits: true;

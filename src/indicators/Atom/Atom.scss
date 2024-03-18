@@ -7,8 +7,7 @@
 $atomColor: defaults.$defaultColor;
 $fallbackAnimationDuration: 1s; // This time value should be in sync with JS(React component)
 $animationDuration: var(--rli-animation-duration, $fallbackAnimationDuration);
-$fallbackEasingFn: linear;
-$animationFn: var(--rli-animation-function, $fallbackEasingFn);
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
 
 $defaultColorRedChannel: color.red($atomColor);
 $defaultColorGreenChannel: color.green($atomColor);
@@ -214,16 +213,10 @@ $coloringPropertyNames: (
 		#{$defaultColorBlueChannel};
 }
 
-// Sass list with common variable name across indicator components
-$animationEasingName: (#{defaults.$animationEasingVarName});
-@include sharedMixins.registerCustomProperties($animationEasingName) {
-	syntax: "<easing-function>";
-	inherits: true;
-	initial-value: $fallbackEasingFn;
-}
-
-// Sass list with common variable name across indicator components
+// Sass list
 $animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: Won't register custom property for animation easing function since it has a data type syntax that is not supported by CSS @property syntax
 @include sharedMixins.registerCustomProperties($animationDurationName) {
 	syntax: "<time>";
 	inherits: true;

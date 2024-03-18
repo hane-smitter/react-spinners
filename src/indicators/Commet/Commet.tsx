@@ -37,7 +37,7 @@ const Commet = (props: CommetProps) => {
 		}
 	}, []);
 	let colorProp: string | string[] = props?.color ?? "";
-	const ringColorStyles: React.CSSProperties = stylesObjectFromColorProp(
+	const commetColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset
 	);
@@ -45,27 +45,23 @@ const Commet = (props: CommetProps) => {
 	return (
 		<span
 			className="rli-d-i-b commet-rli-bounding-box"
+			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...commetColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				className="rli-d-i-b commet-indicator"
-				ref={elemRef}
-				style={{
-					...ringColorStyles,
-					...styles
-				}}
-			>
+			<span className="rli-d-i-b commet-indicator">
 				<span className="rli-d-i-b commet-box">
 					<span className="rli-d-i-b commet-trail trail1"></span>
 					<span className="rli-d-i-b  commetball-box"></span>
