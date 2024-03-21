@@ -12,7 +12,7 @@ $animationFn: var(#{defaults.$animationEasingVarName}, linear);
 $defaultColorRedChannel: color.red($atomColor);
 $defaultColorGreenChannel: color.green($atomColor);
 $defaultColorBlueChannel: color.blue($atomColor);
-$atomWidth: 8em;
+$atomWidth: 5em;
 $atomHeight: $atomWidth;
 $electronPathOpacity: 0.18; // The faint orbit path the electron travels around
 $electronApparentWindOpacity: 0.85; // The wind trail of the speeding/travelling electron
@@ -98,7 +98,7 @@ $coloringPropertyNames: (
 
 			@include fontColor(null, $electronApparentWindOpacity);
 			border: 0;
-			border-left: 0.5em solid currentColor;
+			border-left: 0.4em solid currentColor;
 			box-sizing: border-box;
 			position: absolute;
 			top: 0;

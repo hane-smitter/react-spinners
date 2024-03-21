@@ -1,0 +1,15 @@
+@use "sass:math";
+@use "sass:meta";
+
+/// Function to remove units from a number with unit of measurement
+/// @param {Number} $value - Number to remove unit from
+/// @return {Number} - Unitless number
+@function stripUnit($value) {
+	@if meta.type-of($value) != "number" {
+		@error "The type( `#{meta.type-of($value)}` ) is Invalid. Provide a number instead.";
+	} @else if meta.type-of($value) == "number" and not math.is-unitless($value) {
+		@return math.div($value, ($value * 0 + 1));
+	}
+
+	@return $value;
+}

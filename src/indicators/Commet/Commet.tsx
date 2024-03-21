@@ -17,7 +17,7 @@ const commetColorPhases: Array<string> = Array.from(
 const Commet = (props: CommetProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
-	let { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
+	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
@@ -36,7 +36,7 @@ const Commet = (props: CommetProps) => {
 			}
 		}
 	}, []);
-	let colorProp: string | string[] = props?.color ?? "";
+	const colorProp: string | string[] = props?.color ?? "";
 	const commetColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
 		colorReset

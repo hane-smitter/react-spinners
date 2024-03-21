@@ -7,6 +7,14 @@ import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
 import "./FourSquare.scss";
 import { FourSquareProps } from "./FourSquare.types";
+import arrayRepeat from "../../utils/arrayRepeat";
+import { defaultColor as DEFAULT_COLOR } from "../variables";
+
+// NOTE: Below variables should match with ones set in sass file
+const fourSquareColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--four-square-phase${idx + 1}-color`
+);
 
 const FourSquare = (props: FourSquareProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -22,27 +30,14 @@ const FourSquare = (props: FourSquareProps) => {
 	);
 
 	/* Color SETTINGS - Sets the colors of the 4 squares*/
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				// e.g --square1-color
-				const cssColorVars: Array<string> = Array.from(
-					{ length: 4 },
-					(item, idx) => {
-						const num: number = idx + 1;
-						const cssPropName: string = `--${"square" + num + "-"}color`;
-						return cssPropName;
-					}
-				);
-
-				elemRef.current?.style.removeProperty("color");
-				for (let i = 0; i < cssColorVars.length; i++) {
-					elemRef.current?.style.removeProperty(cssColorVars[i]);
-				}
+	const colorReset: () => void = useCallback(function () {
+		if (elemRef.current) {
+			// elemRef.current?.style.removeProperty("color");
+			for (let i = 0; i < fourSquareColorPhases.length; i++) {
+				elemRef.current?.style.removeProperty(fourSquareColorPhases[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const fourSquareColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
@@ -52,37 +47,32 @@ const FourSquare = (props: FourSquareProps) => {
 	return (
 		<span
 			className="rli-d-i-b foursquare-rli-bounding-box"
+			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...fourSquareColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				className={`rli-d-i-b foursquare-throbber`}
-				ref={elemRef}
-				style={{ ...fourSquareColorStyles, ...styles }}
-			>
-				<span className="rli-d-i-b squares-container">
-					<span className={`square square1`}></span>
-					<span className={`square square2`}></span>
-					<span className={`square square3`}></span>
-					<span className={`square square4`}></span>
+			<span className="rli-d-i-b foursquare-indicator">
+				<span className="squares-container">
+					<span className="square square1"></span>
+					<span className="square square2"></span>
+					<span className="square square3"></span>
+					<span className="square square4"></span>
 				</span>
-
-				<Text
-					className="foursquare-text"
-					text={props?.text}
-					textColor={props?.textColor}
-				/>
 			</span>
+
+			<Text text={props?.text} textColor={props?.textColor} staticText />
 		</span>
 	);
 };
@@ -104,22 +94,45 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const arrLength = colorProp.length;
+		const colorArr: string[] = arrayRepeat(
+			colorProp,
+			fourSquareColorPhases.length
+		);
 
-		stylesObject["color"] = colorProp[0];
-
-		for (let idx = 0; idx < arrLength; idx++) {
+		for (let idx = 0; idx < colorArr.length; idx++) {
 			if (idx >= 4) break;
-			let num: number = idx + 1;
-			let squareId = `square${num}`;
 
-			stylesObject[`--${squareId}-color`] = colorProp[idx];
+			stylesObject[fourSquareColorPhases[idx]] = colorArr[idx];
 		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < fourSquareColorPhases.length; i++) {
+			stylesObject[fourSquareColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <FourSquare /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < fourSquareColorPhases.length; i++) {
+			stylesObject[fourSquareColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }
