@@ -13,22 +13,17 @@ export const Primary = Template.bind({});
 
 export const Secondary = Template.bind({});
 Secondary.args = {
-	color: ["rebeccapurple", "bisque"],
+	color: "rebeccapurple",
 	text: true
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored = Template.bind({});
+MultiColored.args = {
+	color: ["#FF90BC", "dodgerblue", "#610C9F", "crimson"]
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium",
-	textColor: "#ff0000"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText = Template.bind({});
+CustomText.args = {
+	text: "Fairly Long text passed",
+	color: "#64CCC5"
 };

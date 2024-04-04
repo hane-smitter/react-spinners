@@ -1,33 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
+
 import Slab from "./Slab";
+import { developmentColorArr, developmentColorStr } from "../variables";
 
 export default {
 	title: "rli/Slab",
 	component: Slab
-} as ComponentMeta<typeof Slab>;
+} as Meta<typeof Slab>;
 
-const Template: ComponentStory<typeof Slab> = args => <Slab {...args} />;
+type SlabStory = StoryObj<typeof Slab>;
 
-export const Primary = Template.bind({});
+export const Primary: SlabStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: SlabStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: SlabStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: SlabStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };

@@ -1,35 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
+
 import ThreeDot from "./ThreeDot";
+import { developmentColorArr, developmentColorStr } from "../variables";
 
 export default {
 	title: "rli/ThreeDot",
 	component: ThreeDot
-} as ComponentMeta<typeof ThreeDot>;
+} as Meta<typeof ThreeDot>;
 
-const Template: ComponentStory<typeof ThreeDot> = args => (
-	<ThreeDot {...args} />
-);
+type ThreeDotStory = StoryObj<typeof ThreeDot>;
 
-export const Primary = Template.bind({});
+export const Primary: ThreeDotStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: ThreeDotStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: ThreeDotStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: ThreeDotStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };

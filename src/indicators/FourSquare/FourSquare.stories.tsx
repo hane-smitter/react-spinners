@@ -1,35 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
+
 import FourSquare from "./FourSquare";
+import { developmentColorStr, developmentColorArr } from "../variables";
 
 export default {
 	title: "rli/FourSquare",
 	component: FourSquare
-} as ComponentMeta<typeof FourSquare>;
+} as Meta<typeof FourSquare>;
 
-const Template: ComponentStory<typeof FourSquare> = args => (
-	<FourSquare {...args} />
-);
+type FourSquareStory = StoryObj<typeof FourSquare>;
 
-export const Primary = Template.bind({});
+export const Primary: FourSquareStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: FourSquareStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: FourSquareStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: FourSquareStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };
