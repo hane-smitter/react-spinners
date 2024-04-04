@@ -1,35 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { StoryObj, Meta } from "@storybook/react";
+
 import LifeLine from "./LifeLine";
+import { developmentColorStr,developmentColorArr } from "../variables";
 
 export default {
 	title: "rli/LifeLine",
 	component: LifeLine
-} as ComponentMeta<typeof LifeLine>;
+} as Meta<typeof LifeLine>;
 
-const Template: ComponentStory<typeof LifeLine> = args => (
-	<LifeLine {...args} />
-);
+type LifeLineStory = StoryObj<typeof LifeLine>;
 
-export const Primary = Template.bind({});
+export const Primary: LifeLineStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: LifeLineStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: LifeLineStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: LifeLineStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };

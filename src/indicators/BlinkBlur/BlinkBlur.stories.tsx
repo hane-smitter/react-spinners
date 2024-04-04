@@ -1,35 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
+
 import BlinkBlur from "./BlinkBlur";
+import { developmentColorStr, developmentColorArr } from "../variables";
 
 export default {
 	title: "rli/BlinkBlur",
 	component: BlinkBlur
-} as ComponentMeta<typeof BlinkBlur>;
+} as Meta<typeof BlinkBlur>;
 
-const Template: ComponentStory<typeof BlinkBlur> = args => (
-	<BlinkBlur {...args} />
-);
+type BlinkBlurStory = StoryObj<typeof BlinkBlur>;
 
-export const Primary = Template.bind({});
+export const Primary: BlinkBlurStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: BlinkBlurStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: BlinkBlurStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: BlinkBlurStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };
