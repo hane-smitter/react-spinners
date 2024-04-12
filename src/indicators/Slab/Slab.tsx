@@ -7,6 +7,14 @@ import "./Slab.scss";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
 import Text from "../../utils/Text";
+import arrayRepeat from "../../utils/arrayRepeat";
+import { defaultColor as DEFAULT_COLOR } from "../variables";
+
+// NOTE: Below variables should match with ones set in sass file
+const slabColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--slab-phase${idx + 1}-color`
+);
 
 const Slab = (props: SlabProps) => {
 	// Styles
@@ -24,14 +32,14 @@ const Slab = (props: SlabProps) => {
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	const colorReset: () => void = useCallback(
-		function () {
-			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
+	const colorReset: () => void = useCallback(function () {
+		if (elemRef.current) {
+			// elemRef.current?.style.removeProperty("color");
+			for (let i = 0; i < slabColorPhases.length; i++) {
+				elemRef.current?.style.removeProperty(slabColorPhases[i]);
 			}
-		},
-		[elemRef.current]
-	);
+		}
+	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
 	const slabColorStyles: React.CSSProperties = stylesObjectFromColorProp(
 		colorProp,
@@ -45,7 +53,8 @@ const Slab = (props: SlabProps) => {
 			style={{
 				...(fontSize && { fontSize }),
 				...(animationPeriod && {
-					"--rli-animation-duration": animationPeriod
+					// This animation will uniquely use a unitless duration unlike the others with "--rli-animation-duration". See SCSS file for more context
+					"--rli-animation-duration-unitless": parseFloat(animationPeriod)
 				}),
 				...(easingFn && { "--rli-animation-function": easingFn }),
 				...slabColorStyles,
@@ -85,13 +94,42 @@ function stylesObjectFromColorProp(
 	}
 
 	if (colorProp instanceof Array) {
-		const [color] = colorProp;
-		stylesObject["color"] = color;
+		const colorArr: string[] = arrayRepeat(colorProp, slabColorPhases.length);
+
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
+
+			stylesObject[slabColorPhases[idx]] = colorArr[idx];
+		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < slabColorPhases.length; i++) {
+			stylesObject[slabColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <Slab /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < slabColorPhases.length; i++) {
+			stylesObject[slabColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }

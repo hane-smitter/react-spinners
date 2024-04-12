@@ -1,88 +1,155 @@
-@use "../../scss/variables" as defaults;
+@use "sass:string";
 
-$animationDuration: var(--rli-animation-duration, 4s);
+@use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
+@use "../../scss/utils" as fns;
+
+// Current implementation of CSS `calc()` does not support division with right-side number that has unit. e.g calc(200em / 10s) is invalid.
+// Hence using a unitless duration number used as below:
+$fallbackAnimationDuration: 4; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	--rli-animation-duration-unitless,
+	$fallbackAnimationDuration
+);
+
 $animationFn: var(--rli-animation-function, linear);
-$slabTileWidth: 4em;
+$tileWidth: 4em;
 $boundingWidth: 7em;
 $noOfSlabTiles: 4;
 
+$slabMove: string.unique-id();
+$slabColoring: string.unique-id();
+
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--slab-phase1-color",
+	"--slab-phase2-color",
+	"--slab-phase3-color",
+	"--slab-phase4-color"
+);
+
 .slab-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  color: defaults.$defaultColor;
-  position: relative;
+	font-size: defaults.$fontSizer;
+	color: defaults.$defaultColor;
+	position: relative;
 
-  // .slab-text {
-  //   position: absolute;
-  //   top: 105%;
-  //   left: 50%;
-  //   transform: translateX(-50%);
-  //   color: currentColor;
-  //   font-size: 0.7em;
-  //   font-weight: 600;
-  // }
+	// .slab-text {
+	//   position: absolute;
+	//   top: 105%;
+	//   left: 50%;
+	//   transform: translateX(-50%);
+	//   color: currentColor;
+	//   font-size: 0.7em;
+	//   font-weight: 600;
+	// }
 
-  .slab-indicator {
-    position: relative;
-    display: block;
-    width: $boundingWidth;
-    height: calc($slabTileWidth * 1.1);
-    margin: 0 auto;
+	.slab-indicator {
+		position: relative;
+		display: block;
+		width: $boundingWidth;
+		// Height calculated with formula: SOHCAHTOA. After adding perspective, height reduces significanty hence we trim down height to a random suitable value.
+		// height: 8.135em;
+		height: 4em;
+		margin: 0 auto;
+		overflow: hidden;
 
-    .slabs-wrapper {
-      width: $slabTileWidth;
-      height: $slabTileWidth;
-      transform: perspective(15em) rotateX(66deg) rotateZ(-25deg);
-      transform-style: preserve-3d;
-      margin-bottom: -1.3em; // Lowers the animating tiles closer to the bottom
-      // display: block;
-      position: absolute;
-      bottom: 0;
-      right: 0;
+		// Math concept used: Distance = Speed * Time
+		//
+		// Stripping units where we later multiply with one unit of CSS <time> so browser knows the final unit of the value. This would work in sass without stripping units, but variables may change on demand while on the browser, hence browser should be at a position to convert.
+		// Multiplied by 4 bcoz in 'slabMove' animation, we've given a maximum 'translateY' of 400%(Total distance along Y).
+		$distance: fns.stripUnit(calc($tileWidth * 4));
+		$time: $animationDuration;
+		$speed: calc($distance / $time);
+		// Time taken for a slab/tile to slide completely out of `.slabs-wrapper` box bounds.
+		$timeToOutOfBounds: calc(fns.stripUnit($tileWidth) / $speed);
 
-      .slab {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: currentColor;
-        opacity: 0;
-        box-shadow: -0.08em 0.15em 0 rgb(0 0 0 / 45%);
-        transform-origin: 0% 0%;
-        animation: slabMove $animationDuration $animationFn infinite;
+		.slabs-wrapper {
+			width: $tileWidth;
+			height: $tileWidth;
+			transform: perspective(15em) rotateX(66deg) rotateZ(-25deg);
+			transform-style: preserve-3d;
+			transform-origin: 50% 100%;
+			display: block;
+			position: absolute;
+			bottom: 0;
+			right: 0;
 
-        &:nth-child(1) {
-          animation-delay: calc($animationDuration / $noOfSlabTiles * -3);
-        }
-        &:nth-child(2) {
-          animation-delay: calc($animationDuration / $noOfSlabTiles * -2);
-        }
-        &:nth-child(3) {
-          animation-delay: calc($animationDuration / $noOfSlabTiles * -1);
-        }
-        &:nth-child(4) {
-          animation-delay: 0s;
-        }
-      }
-    }
-  }
+			.slab {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: currentColor;
+				opacity: 0;
+				box-shadow: -0.08em 0.15em 0 rgb(0 0 0 / 45%);
+				transform-origin: 0% 0%;
+				animation:
+					calc($animationDuration * 1s) $animationFn infinite $slabMove,
+					calc($animationDuration * 4s) $animationFn infinite $slabColoring;
+
+				// NOTE: We multipy:
+				// 		By `-1` to convert to negative animation-delay.
+				// 		By `1s` to convert to CSS <time> data-type.
+				&:nth-child(1) {
+					animation-delay: calc(($timeToOutOfBounds * 3 * -1) * 1s);
+				}
+				&:nth-child(2) {
+					animation-delay: calc(($timeToOutOfBounds * 2 * -1) * 1s);
+				}
+				&:nth-child(3) {
+					animation-delay: calc(($timeToOutOfBounds * -1) * 1s);
+				}
+				&:nth-child(4) {
+					animation-delay: 0s;
+				}
+			}
+		}
+	}
 }
 
-@keyframes slabMove {
-  0% {
-    transform: translateY(0) rotateX(30deg);
-    opacity: 0;
-  }
-  10% {
-    transform: translateY(-48%) rotateX(0deg);
-    opacity: 1;
-  }
-  90% {
-    transform: translateY(-422%) rotateX(0deg);
-    opacity: 0.1;
-  }
-  100% {
-    transform: translateY(-480%) rotateX(0deg);
-    opacity: 0;
-  }
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+$animationDurationName: (--rli-animation-duration-unitless);
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<number>"; // This is a number(Not <time>)
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$slabMove} {
+	0% {
+		transform: translateY(0) rotateX(30deg);
+		opacity: 0;
+	}
+	10% {
+		transform: translateY(-40%) rotateX(0deg);
+		opacity: 1;
+	}
+	20% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(-400%) rotateX(0deg);
+		opacity: 0;
+	}
+}
+@keyframes #{$slabColoring} {
+	100%,
+	0% {
+	}
+	25% {
+	}
+	50% {
+	}
+	75% {
+	}
 }
