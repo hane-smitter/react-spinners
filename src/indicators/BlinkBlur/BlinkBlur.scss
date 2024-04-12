@@ -32,9 +32,6 @@ $coloringPropertyNames: (
 	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
 	$cssVar: var($varName);
 
-	// @if ($shapeNumber and $shapeNumber != 1) {
-	// 	$cssVar: var(--shape-phase#{$shapeNumber}-color, $cssVar);
-	// }
 	@if ($phaseNum and $phaseNum != 1) {
 		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
 
