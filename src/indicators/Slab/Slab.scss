@@ -1,4 +1,5 @@
 @use "sass:string";
+@use "sass:list";
 
 @use "../../scss/variables" as defaults;
 @use "../../scss/mixins" as sharedMixins;
@@ -6,7 +7,7 @@
 
 // Current implementation of CSS `calc()` does not support division with right-side number that has unit. e.g calc(200em / 10s) is invalid.
 // Hence using a unitless duration number used as below:
-$fallbackAnimationDuration: 4; // This time value should be in sync with JS(React component)
+$fallbackAnimationDuration: 3; // This time value should be in sync with JS(React component)
 $animationDuration: var(
 	--rli-animation-duration-unitless,
 	$fallbackAnimationDuration
@@ -29,20 +30,26 @@ $coloringPropertyNames: (
 	"--slab-phase4-color"
 );
 
-.slab-rli-bounding-box {
-	font-size: defaults.$fontSizer;
-	color: defaults.$defaultColor;
-	position: relative;
+@mixin coverColor($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
 
-	// .slab-text {
-	//   position: absolute;
-	//   top: 105%;
-	//   left: 50%;
-	//   transform: translateX(-50%);
-	//   color: currentColor;
-	//   font-size: 0.7em;
-	//   font-weight: 600;
-	// }
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
+
+	background-color: $cssVar;
+}
+
+.slab-rli-bounding-box {
+	--slab-phase1-color: #{defaults.$defaultColor};
+
+	font-size: defaults.$fontSizer;
+	color: var(--slab-phase1-color);
+	position: relative;
 
 	.slab-indicator {
 		position: relative;
@@ -81,7 +88,7 @@ $coloringPropertyNames: (
 				left: 0;
 				right: 0;
 				bottom: 0;
-				background: currentColor;
+				@include coverColor();
 				opacity: 0;
 				box-shadow: -0.08em 0.15em 0 rgb(0 0 0 / 45%);
 				transform-origin: 0% 0%;
@@ -134,7 +141,7 @@ $animationDurationName: (--rli-animation-duration-unitless);
 		transform: translateY(-40%) rotateX(0deg);
 		opacity: 1;
 	}
-	20% {
+	25% {
 		opacity: 1;
 	}
 	100% {
@@ -145,11 +152,27 @@ $animationDurationName: (--rli-animation-duration-unitless);
 @keyframes #{$slabColoring} {
 	100%,
 	0% {
+		@include coverColor(1);
+	}
+	24.9% {
+		@include coverColor(1);
 	}
 	25% {
+		@include coverColor(2);
+	}
+	49.9% {
+		@include coverColor(2);
 	}
 	50% {
+		@include coverColor(3);
+	}
+	74.9% {
+		@include coverColor(3);
 	}
 	75% {
+		@include coverColor(4);
+	}
+	99.9% {
+		@include coverColor(4);
 	}
 }

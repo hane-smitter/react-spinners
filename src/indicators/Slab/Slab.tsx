@@ -25,7 +25,7 @@ const Slab = (props: SlabProps) => {
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
-	const DEFAULT_ANIMATION_DURATION = "4s"; // Animation's default duration
+	const DEFAULT_ANIMATION_DURATION = "3s"; // Animation's default duration
 	const { animationPeriod } = useAnimationPacer(
 		props?.speedPlus,
 		DEFAULT_ANIMATION_DURATION

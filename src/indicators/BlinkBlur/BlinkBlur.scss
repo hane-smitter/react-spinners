@@ -5,7 +5,7 @@ $animationDuration: var(--rli-animation-duration, 2s);
 $animationFn: var(--rli-animation-function, linear);
 
 $numOfShapes: 6;
-$shapeWidth: 2em;
+$shapeWidth: 1.8em;
 $shapeSpacing: 0.4em;
 
 $shiftingBlinkBlur: string.unique-id();
@@ -78,7 +78,7 @@ $blinkBlurColoring: string.unique-id();
 	100%,
 	0% {
 		opacity: 0.4;
-		filter: blur(2px) drop-shadow(0 0 0.625em);
+		filter: blur(0.075em) drop-shadow(0 0 0.625em);
 		transform: skewX(var(--x-deg)) scale(1.45);
 	}
 
@@ -98,7 +98,7 @@ $blinkBlurColoring: string.unique-id();
 
 	50% {
 		opacity: 1;
-		filter: blur(0px) drop-shadow(0 0 0);
+		filter: blur(0em) drop-shadow(0 0 0);
 		transform: skewX(var(--x-deg)) scale(1);
 	}
 }
