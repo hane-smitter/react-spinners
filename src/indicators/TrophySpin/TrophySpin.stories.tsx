@@ -1,35 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
+
 import TrophySpin from "./TrophySpin";
+import { developmentColorArr, developmentColorStr } from "../variables";
 
 export default {
 	title: "rli/TrophySpin",
 	component: TrophySpin
-} as ComponentMeta<typeof TrophySpin>;
+} as Meta<typeof TrophySpin>;
 
-const Template: ComponentStory<typeof TrophySpin> = args => (
-	<TrophySpin {...args} />
-);
+type TrophySpinStory = StoryObj<typeof TrophySpin>;
 
-export const Primary = Template.bind({});
+export const Primary: TrophySpinStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: TrophySpinStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: TrophySpinStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: TrophySpinStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };
