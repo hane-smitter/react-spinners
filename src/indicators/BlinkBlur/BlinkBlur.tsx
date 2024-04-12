@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React from "react";
 
 import { BlinkBlurProps } from "./BlinkBlur.types";
 import "./BlinkBlur.scss";
@@ -15,7 +15,6 @@ const ColorPhaseVars: Array<string> = Array.from(
 );
 
 const BlinkBlur = (props: BlinkBlurProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -27,45 +26,13 @@ const BlinkBlur = (props: BlinkBlurProps) => {
 		DEFAULT_ANIMATION_DURATION
 	);
 
-	// Register types for CSS properties
-	useEffect(() => {
-		for (let idx = 0; idx < ColorPhaseVars.length; idx++) {
-			try {
-				window.CSS.registerProperty({
-					name: ColorPhaseVars[idx],
-					syntax: "<color>",
-					inherits: true,
-					initialValue: DEFAULT_COLOR
-				});
-			} catch (error) {
-				continue;
-			}
-		}
-
-		return () => {};
-	}, []);
-
-	/* Color SETTINGS */
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				for (let i = 0; i < ColorPhaseVars.length; i++) {
-					elemRef.current?.style.removeProperty(ColorPhaseVars[i]);
-				}
-			}
-		},
-		[elemRef.current]
-	);
 	const colorProp: string | string[] = props?.color ?? "";
-	const blinkBlurColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const blinkBlurColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b blink-blur-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -85,11 +52,6 @@ const BlinkBlur = (props: BlinkBlurProps) => {
 				<span className="blink-blur-shape blink-blur-shape4"></span>
 				<span className="blink-blur-shape blink-blur-shape5"></span>
 				<span className="blink-blur-shape blink-blur-shape6"></span>
-
-				{/* <span
-					ref={blinkBlurElemRef}
-					className="blink-blur-shape"
-				></span> */}
 			</span>
 
 			<Text
@@ -103,22 +65,16 @@ const BlinkBlur = (props: BlinkBlurProps) => {
 	);
 };
 
-export default React.memo(BlinkBlur);
+export default BlinkBlur;
 
 /**
  * Creates a style object with props that color the loading indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
 	const coloringPhases = ColorPhaseVars.length;
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (Array.isArray(colorProp) && colorProp.length > 0) {
 		const colorArr: string[] = arrayRepeat(colorProp, coloringPhases);
