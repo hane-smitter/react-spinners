@@ -1,4 +1,6 @@
-import React, { useCallback, useRef } from "react";
+"use strict";
+
+import React from "react";
 
 import { DiscProps } from "./Disc.types";
 import "./Disc.scss";
@@ -7,7 +9,6 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const discColorSwitchVars: Array<string> = Array.from(
@@ -16,7 +17,6 @@ const discColorSwitchVars: Array<string> = Array.from(
 );
 
 const Disc = (props: DiscProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -29,20 +29,9 @@ const Disc = (props: DiscProps) => {
 	);
 
 	/* Color SETTING */
-	useRegisterCssColors(discColorSwitchVars);
-	const colorReset = useCallback(function () {
-		if (elemRef.current) {
-			// elemRef.current?.style.removeProperty("color");
-			for (let i = 0; i < discColorSwitchVars.length; i++) {
-				elemRef.current?.style.removeProperty(discColorSwitchVars[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const discColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const discColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 	const bolderWidth: number = props?.dense ? 4.3 : 2.9;
 
 	return (
@@ -54,15 +43,13 @@ const Disc = (props: DiscProps) => {
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...discColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 		>
-			<span
-				className="rli-d-i-b OP-annulus-indicator"
-				ref={elemRef}
-				style={{ ...discColorStyles, ...styles }}
-			>
+			<span className="rli-d-i-b OP-annulus-indicator">
 				<svg className="whirl" viewBox="25 25 50 50">
 					{/* 👇SVGGeometry length: 124.85393524169922 */}
 					<circle
@@ -92,16 +79,10 @@ export { Disc };
  * Creates a style object with props that color the indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
 	const switchersLength = discColorSwitchVars.length;
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);

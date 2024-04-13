@@ -10,7 +10,7 @@ $animationDuration: var(
 	$fallbackAnimationDuration
 );
 
-$animationFn: var(--rli-animation-function, linear);
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
 
 $numOfShapes: 6;
 $shapeWidth: 1.8em;
@@ -95,6 +95,7 @@ $coloringPropertyNames: (
 	}
 }
 
+// Register coloring CSS properties
 @include sharedMixins.registerCustomProperties($coloringPropertyNames) {
 	syntax: "<color>";
 	inherits: true;

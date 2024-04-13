@@ -13,7 +13,7 @@ $animationDuration: var(
 	$fallbackAnimationDuration
 );
 
-$animationFn: var(--rli-animation-function, linear);
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
 $tileWidth: 4em;
 $boundingWidth: 7em;
 $noOfSlabTiles: 4;

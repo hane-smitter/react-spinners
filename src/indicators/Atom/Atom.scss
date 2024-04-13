@@ -204,6 +204,7 @@ $coloringPropertyNames: (
 	}
 }
 
+// Register coloring CSS properties
 @include sharedMixins.registerCustomProperties($coloringPropertyNames) {
 	syntax: "<number>#";
 	inherits: true;

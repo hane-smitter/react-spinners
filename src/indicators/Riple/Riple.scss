@@ -10,7 +10,7 @@ $animationDuration: var(
 	$fallbackAnimationDuration
 );
 
-$animationFn: var(--rli-animation-function, cubic-bezier(0, 0.2, 0.8, 1));
+$animationFn: var(#{defaults.$animationEasingVarName}, cubic-bezier(0, 0.2, 0.8, 1));
 
 $rippling: string.unique-id();
 $rippleColoring: string.unique-id();
@@ -75,7 +75,7 @@ $coloringPropertyNames: (
 			border: var(--border-width) solid ripleColorVar();
 			opacity: 1;
 			border-radius: 50%;
-			will-change: top, right, left, bottom;
+			will-change: top, right, left, bottom, border-color;
 			animation:
 				$animationDuration $animationFn infinite $rippling,
 				calc($animationDuration * 4) $animationFn infinite $rippleColoring;
@@ -87,6 +87,7 @@ $coloringPropertyNames: (
 	}
 }
 
+// Register coloring CSS properties
 @include sharedMixins.registerCustomProperties($coloringPropertyNames) {
 	syntax: "<color>";
 	inherits: true;

@@ -25,4 +25,4 @@ const OrbitProgress = (props: OrbitProgressProps) => {
 	) : null;
 };
 
-export default React.memo(OrbitProgress);
+export default OrbitProgress;
