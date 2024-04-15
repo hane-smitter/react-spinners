@@ -1,19 +1,39 @@
 @use "sass:string";
-@use "../../scss/variables" as defaults;
+@use "sass:list";
 
-// `animation duration` and `animation function(easing function)` are set from javascript
-$animationDuration: var(--rli-animation-duration, 1s);
-$animationFn: var(--rli-animation-function, linear);
+@use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
+
+$fallbackAnimationDuration: 2s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
+
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
 
 $lifelineMove: string.unique-id();
 $lifelineColoring: string.unique-id();
-$lifeLineTotalPathLength: 1010.1312255859375;
+$lifeLineTotalPathLength: 1010.1312255859375; // SVG fixed length
 
-@function lifelineColorVar($num: null) {
-	$cssVar: var(--life-line-phase1-color);
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--life-line-phase1-color",
+	"--life-line-phase2-color",
+	"--life-line-phase3-color",
+	"--life-line-phase4-color"
+);
 
-	@if ($num and $num != 1) {
-		$cssVar: var(--life-line-phase#{$num}-color, $cssVar);
+@function lifelineColorVar($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
 	}
 
 	@return $cssVar;
@@ -51,6 +71,22 @@ $lifeLineTotalPathLength: 1010.1312255859375;
 		width: unset;
 		display: block;
 	}
+}
+
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
 }
 
 @keyframes #{$lifelineMove} {
