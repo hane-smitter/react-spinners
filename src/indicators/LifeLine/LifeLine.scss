@@ -73,6 +73,7 @@ $coloringPropertyNames: (
 	}
 }
 
+// Register coloring CSS properties
 @include sharedMixins.registerCustomProperties($coloringPropertyNames) {
 	syntax: "<color>";
 	inherits: true;
