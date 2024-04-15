@@ -1,9 +1,10 @@
 @use "sass:string";
 @use "sass:list";
 @use "sass:math";
+
 @use "../../scss/variables" as defaults;
 @use "../../scss/mixins" as sharedMixins;
-@use "../../scss/utils" as utils;
+@use "../../scss/utils" as fns;
 
 $fallbackAnimationDuration: 1s; // This time value should be in sync with JS(React component)
 $animationDuration: var(
@@ -64,8 +65,8 @@ $coloringPropertyNames: (
 		$biggestWidth: $squareWidth + $squareWidth * 0.5;
 		$biggestHeight: $squareHeight + $squareHeight * 0.5;
 		$size: math.sqrt(
-			math.pow(utils.stripUnit($biggestWidth), 2) +
-				math.pow(utils.stripUnit($biggestHeight), 2)
+			math.pow(fns.stripUnit($biggestWidth), 2) +
+				math.pow(fns.stripUnit($biggestHeight), 2)
 		); // FORMULA calculating hypot. of right-angled triangle
 
 		// Multiply by 1em to assign `em` units that was initially stripped

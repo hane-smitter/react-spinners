@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 import { FourSquareProps } from "./FourSquare.types";
 import "./FourSquare.scss";
@@ -17,7 +17,6 @@ const fourSquareColorPhases: Array<string> = Array.from(
 );
 
 const FourSquare = (props: FourSquareProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -30,24 +29,13 @@ const FourSquare = (props: FourSquareProps) => {
 	);
 
 	/* Color SETTINGS - Sets the colors of the 4 squares*/
-	const colorReset: () => void = useCallback(function () {
-		if (elemRef.current) {
-			// elemRef.current?.style.removeProperty("color");
-			for (let i = 0; i < fourSquareColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(fourSquareColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const fourSquareColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const fourSquareColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b foursquare-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -74,21 +62,15 @@ const FourSquare = (props: FourSquareProps) => {
 	);
 };
 
-export default React.memo(FourSquare);
+export default FourSquare;
 
 /**
  * Creates a style object with props that color the throbber/spinner
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(
