@@ -1,4 +1,6 @@
-import React, { useCallback, useRef } from "react";
+"use strict";
+
+import React from "react";
 import colorParse from "tinycolor2";
 
 import "./Atom.scss";
@@ -18,9 +20,8 @@ const atomColorPhases: Array<string> = Array.from(
 );
 
 const Atom = (props: AtomProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
-	let { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
+	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
@@ -31,21 +32,13 @@ const Atom = (props: AtomProps) => {
 	);
 
 	/* Color SETTINGS */
-	const colorReset = useCallback(function () {
-		for (let i = 0; i < atomColorPhases.length; i++) {
-			elemRef.current?.style.removeProperty(atomColorPhases[i]);
-		}
-	}, []);
-	let colorProp: string | string[] = props?.color ?? "";
-	const atomColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const colorProp: string | string[] = props?.color ?? "";
+	const atomColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b atom-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -73,21 +66,15 @@ const Atom = (props: AtomProps) => {
 	);
 };
 
-export default React.memo(Atom);
+export default Atom;
 
 /**
  * Creates a style object with props that color the throbber/spinner
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, atomColorPhases.length);
