@@ -1,13 +1,12 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
-import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
-import useRegisterCssColors from "../../hooks/useRegisterCssColors";
+import useAnimationPacer from "../../hooks/useAnimationPacer";
 import Text from "../../utils/Text";
 import "./TrophySpin.scss";
-import { TwistProps } from "./TrophySpin.types";
+import { TrophySpinProps } from "./TrophySpin.types";
 import arrayRepeat from "../../utils/arrayRepeat";
 import { defaultColor as DEFAULT_COLOR } from "../variables";
 
@@ -16,8 +15,7 @@ const trophySpinColorSwitchVars = Array.from(
 	(_, idx) => `--trophySpin-phase${idx + 1}-color`
 );
 
-const TrophySpin = (props: TwistProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
+const TrophySpin = (props: TrophySpinProps) => {
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -30,28 +28,13 @@ const TrophySpin = (props: TwistProps) => {
 	);
 
 	/* Color SETTINGS */
-	useRegisterCssColors(trophySpinColorSwitchVars);
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				// elemRef.current?.style.removeProperty("color");
-				for (let i = 0; i < trophySpinColorSwitchVars.length; i++) {
-					elemRef.current?.style.removeProperty(trophySpinColorSwitchVars[i]);
-				}
-			}
-		},
-		[]
-	);
 	const colorProp: string | string[] = props?.color ?? "";
-	const trophySpinColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const trophySpinColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b trophy-spin-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -59,14 +42,15 @@ const TrophySpin = (props: TwistProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...trophySpinColorStyles
+					...trophySpinColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span className="rli-d-i-b trophy-spin-indicator" style={{ ...styles }}>
+			<span className="rli-d-i-b trophy-spin-indicator">
 				<span className="blade"></span>
 				<span className="blade"></span>
 				<span className="blade"></span>
@@ -87,22 +71,16 @@ const TrophySpin = (props: TwistProps) => {
 	);
 };
 
-export default React.memo(TrophySpin);
+export default TrophySpin;
 
 /**
  * Creates a style object with props that color the throbber/spinner
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
 	const switchersLength = trophySpinColorSwitchVars.length;
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);

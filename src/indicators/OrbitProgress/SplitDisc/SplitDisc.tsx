@@ -1,4 +1,6 @@
-import React, { useCallback, useRef } from "react";
+"use strict";
+
+import React from "react";
 
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
@@ -7,7 +9,6 @@ import "./SplitDisc.scss";
 import { SplitDiscProps } from "./SplitDisc.types";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const annulusSplitsColorVars: Array<string> = Array.from(
@@ -16,7 +17,6 @@ const annulusSplitsColorVars: Array<string> = Array.from(
 );
 
 const SplitDisc = (props: SplitDiscProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -29,20 +29,9 @@ const SplitDisc = (props: SplitDiscProps) => {
 	);
 
 	/* Color SETTINGS */
-	useRegisterCssColors(annulusSplitsColorVars);
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				for (let i = 0; i < annulusSplitsColorVars.length; i++) {
-					elemRef.current?.style.removeProperty(annulusSplitsColorVars[i]);
-				}
-			}
-		},
-		[elemRef.current]
-	);
 	const colorProp: string | string[] = props?.color ?? "";
 	const annulusSplitsColorStyles: React.CSSProperties =
-		stylesObjectFromColorProp(colorProp, colorReset);
+		stylesObjectFromColorProp(colorProp);
 	const boldSector: string = props.dense ? "0.45em" : "";
 
 	return (
@@ -54,21 +43,16 @@ const SplitDisc = (props: SplitDiscProps) => {
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...annulusSplitsColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				className="rli-d-i-b OP-annulus-dual-sectors-indicator"
-				ref={elemRef}
-				style={{
-					...annulusSplitsColorStyles,
-					...styles
-				}}
-			>
+			<span className="rli-d-i-b OP-annulus-dual-sectors-indicator">
 				<span
 					className="rli-d-i-b annulus-sectors"
 					style={{ ...(boldSector && { borderWidth: boldSector }) }}
@@ -89,16 +73,10 @@ export { SplitDisc };
  * Creates a style object with props that color the throbber/spinner
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
 	const switchersLength = annulusSplitsColorVars.length;
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);
@@ -111,20 +89,6 @@ function stylesObjectFromColorProp(
 
 		return stylesObject;
 	}
-
-	// if (colorProp instanceof Array) {
-	// 	const arrLength = colorProp.length;
-	// 	stylesObject["--splits-color"] = colorProp[0];
-	// 	stylesObject["color"] = colorProp[0];
-
-	// 	for (let idx = 0; idx < arrLength; idx++) {
-	// 		if (idx >= 2) break;
-	// 		let currentItem = `split${idx + 1}`;
-
-	// 		stylesObject[`--${currentItem}-color`] = colorProp[idx];
-	// 	}
-	// 	return stylesObject;
-	// }
 
 	try {
 		if (typeof colorProp !== "string") throw new Error("Color String expected");

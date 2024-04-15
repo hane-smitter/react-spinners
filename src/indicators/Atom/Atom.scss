@@ -1,12 +1,13 @@
 @use "sass:color";
 @use "sass:string";
 @use "sass:list";
+
 @use "../../scss/variables" as defaults;
 @use "../../scss/mixins" as sharedMixins;
 
 $atomColor: defaults.$defaultColor;
 $fallbackAnimationDuration: 1s; // This time value should be in sync with JS(React component)
-$animationDuration: var(--rli-animation-duration, $fallbackAnimationDuration);
+$animationDuration: var(#{defaults.$animationDurationVarName}, $fallbackAnimationDuration);
 $animationFn: var(#{defaults.$animationEasingVarName}, linear);
 
 $defaultColorRedChannel: color.red($atomColor);
@@ -204,6 +205,7 @@ $coloringPropertyNames: (
 	}
 }
 
+// Register coloring CSS properties
 @include sharedMixins.registerCustomProperties($coloringPropertyNames) {
 	syntax: "<number>#";
 	inherits: true;

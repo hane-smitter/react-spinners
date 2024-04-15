@@ -1,13 +1,12 @@
 "use strict";
 
-import React, { useRef, useCallback } from "react";
+import React from "react";
 
 import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
 import "./LifeLine.scss";
 import { LifeLineProps } from "./LifeLine.types";
-import useRegisterCssColors from "../../hooks/useRegisterCssColors";
 import arrayRepeat from "../../utils/arrayRepeat";
 import { defaultColor as DEFAULT_COLOR } from "../variables";
 
@@ -17,7 +16,6 @@ const lifeLineColorPhases: Array<string> = Array.from(
 );
 
 const LifeLine = (props: LifeLineProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
 	// Animation speed and smoothing control
@@ -29,20 +27,9 @@ const LifeLine = (props: LifeLineProps) => {
 	);
 
 	/* Color SETTINGS */
-	useRegisterCssColors(lifeLineColorPhases);
-	const colorReset = useCallback(function () {
-		if (elemRef.current) {
-			// elemRef.current?.style.removeProperty("color");
-			for (let i = 0; i < lifeLineColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(lifeLineColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const lifeLineColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const lifeLineColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
@@ -62,7 +49,7 @@ const LifeLine = (props: LifeLineProps) => {
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span ref={elemRef} className="rli-d-i-b lifeline-indicator">
+			<span className="rli-d-i-b lifeline-indicator">
 				{/* Original size SVG
 				<svg
 					width="16em" // ratio -> 2.947368421
@@ -113,21 +100,15 @@ const LifeLine = (props: LifeLineProps) => {
 	);
 };
 
-export default React.memo(LifeLine);
+export default LifeLine;
 
 /**
  * Creates a style object with props that color the throbber/spinner
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(
@@ -162,7 +143,7 @@ function stylesObjectFromColorProp(
 			: console.warn(
 					`${JSON.stringify(
 						colorProp
-					)} received in <Riple /> indicator cannot be processed. Using default instead!`
+					)} received in <LifeLine /> indicator cannot be processed. Using default instead!`
 			  );
 
 		for (let i = 0; i < lifeLineColorPhases.length; i++) {

@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
@@ -17,9 +17,6 @@ const slabColorPhases: Array<string> = Array.from(
 );
 
 const Slab = (props: SlabProps) => {
-	// Styles
-	const elemRef = useRef<HTMLSpanElement | null>(null);
-
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -32,24 +29,13 @@ const Slab = (props: SlabProps) => {
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	const colorReset: () => void = useCallback(function () {
-		if (elemRef.current) {
-			// elemRef.current?.style.removeProperty("color");
-			for (let i = 0; i < slabColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(slabColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const slabColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const slabColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b slab-rli-bounding-box"
-			ref={elemRef}
 			style={{
 				...(fontSize && { fontSize }),
 				...(animationPeriod && {
@@ -83,18 +69,12 @@ const Slab = (props: SlabProps) => {
 	);
 };
 
-export default React.memo(Slab);
+export default Slab;
 
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, slabColorPhases.length);

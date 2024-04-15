@@ -1,13 +1,12 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
 import "./Bob.scss";
 import { BobProps } from "./Bob.types";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 import arrayRepeat from "../../../utils/arrayRepeat";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 
@@ -17,8 +16,6 @@ const TDBobColorPhases: Array<string> = Array.from(
 );
 
 const Bob = (props: BobProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
-
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -31,32 +28,13 @@ const Bob = (props: BobProps) => {
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	useRegisterCssColors(TDBobColorPhases);
-	const colorReset: () => void = useCallback(function () {
-		if (elemRef.current) {
-			// const cssVars: string[] = Array.from({ length: 3 }, (item, idx) => {
-			// 	// bob-dot2-color
-			// 	const bodDotId: string = `--bob-dot${idx + 1}-color`;
-
-			// 	return bodDotId;
-			// });
-
-			// elemRef.current?.style.removeProperty("color");
-			for (let i = 0; i < TDBobColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(TDBobColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const bobColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const bobColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b bob-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -64,14 +42,15 @@ const Bob = (props: BobProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...bobColorStyles
+					...bobColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span className="bob-indicator" style={{ ...styles }}>
+			<span className="bob-indicator">
 				<span className="bobbing"></span>
 			</span>
 
@@ -86,15 +65,9 @@ export { Bob };
  * Creates a style object with props that color the loading indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, TDBobColorPhases.length);

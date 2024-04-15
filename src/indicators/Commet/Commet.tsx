@@ -1,4 +1,6 @@
-import React, { useCallback, useRef } from "react";
+"use strict";
+
+import React from "react";
 
 import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
@@ -15,7 +17,6 @@ const commetColorPhases: Array<string> = Array.from(
 );
 
 const Commet = (props: CommetProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -28,24 +29,13 @@ const Commet = (props: CommetProps) => {
 	);
 
 	// color SETTINGS
-	const colorReset: () => void = useCallback(function () {
-		if (elemRef.current) {
-			// elemRef.current?.style.removeProperty("color");
-			for (let i = 0; i < commetColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(commetColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const commetColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const commetColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b commet-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -81,21 +71,15 @@ const Commet = (props: CommetProps) => {
 	);
 };
 
-export default React.memo(Commet);
+export default Commet;
 
 /**
  * Creates a style object with props that color the loading indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, commetColorPhases.length);

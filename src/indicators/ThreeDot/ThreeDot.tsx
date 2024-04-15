@@ -1,4 +1,5 @@
 import React from "react";
+
 import { ThreeDotProps } from "./ThreeDot.types";
 import { Pulsate } from "./Pulsate";
 import { BrickStack } from "./BrickStack";
@@ -19,4 +20,4 @@ const ThreeDot = (props: ThreeDotProps) => {
 	) : null;
 };
 
-export default React.memo(ThreeDot);
+export default ThreeDot;

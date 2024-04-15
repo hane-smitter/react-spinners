@@ -1,23 +1,43 @@
 @use "sass:string";
-@use "../../scss/variables" as defaults;
+@use "sass:list";
 
-$trophyAnimDuration: var(--rli-animation-duration, 2.5s);
-// $trophyAnimDuration: 4.5s;
-$animationFn: var(--rli-animation-function, linear);
+@use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
+
+$fallbackAnimationDuration: 2.5s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
+
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
 
 $trophyBladeWidth: 4em;
-$bladePlayDuration: $trophyAnimDuration;
-$bladeBgPlayDuration: calc($trophyAnimDuration * 0.5);
+$bladePlayDuration: $animationDuration;
+$bladeBgPlayDuration: calc($animationDuration * 0.5);
 
 $trophyBladeAnim: string.unique-id();
 $shadowAnim: string.unique-id();
 $trophySpinColoring: string.unique-id();
 
-@function trophySpinColorPhase($num: null) {
-	$cssVar: var(--trophySpin-phase1-color);
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--trophySpin-phase1-color",
+	"--trophySpin-phase2-color",
+	"--trophySpin-phase3-color",
+	"--trophySpin-phase4-color"
+);
 
-	@if ($num and $num != 1) {
-		$cssVar: var(--trophySpin-phase#{$num}-color, $cssVar);
+@function trophySpinColorPhase($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
 	}
 
 	@return $cssVar;
@@ -75,6 +95,23 @@ $trophySpinColoring: string.unique-id();
 
 	// 	z-index: -2;
 	// }
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
 }
 
 @keyframes #{$trophyBladeAnim} {

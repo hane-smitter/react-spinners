@@ -1,10 +1,9 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 import Text from "../../../utils/Text";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import "./BrickStack.scss";
@@ -17,8 +16,6 @@ const TDBrickStackColorPhases: Array<string> = Array.from(
 );
 
 const BrickStack = (props: BrickStackProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
-
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -31,24 +28,13 @@ const BrickStack = (props: BrickStackProps) => {
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	useRegisterCssColors(TDBrickStackColorPhases);
-	const colorReset: () => void = useCallback(function () {
-		if (elemRef.current) {
-			for (let i = 0; i < TDBrickStackColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(TDBrickStackColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const brickStackColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const brickStackColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b brick-stack-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -56,15 +42,16 @@ const BrickStack = (props: BrickStackProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...brickStackColorStyles
+					...brickStackColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span className="rli-d-i-b brick-stack-indicator" style={{ ...styles }}>
-				<span className=" rli-d-i-b brick-stack"></span>
+			<span className="rli-d-i-b brick-stack-indicator">
+				<span className="rli-d-i-b brick-stack"></span>
 			</span>
 
 			<Text staticText text={props?.text} textColor={props?.textColor} />
@@ -78,15 +65,9 @@ export { BrickStack };
  * Creates a style object with props that color the loading indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(

@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useCallback, useRef, useEffect } from "react";
+import React from "react";
 
 import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
@@ -9,7 +9,6 @@ import "./Mosaic.scss";
 import { MosaicProps } from "./Mosaic.types";
 import { defaultColor as DEFAULT_COLOR } from "../variables";
 import arrayRepeat from "../../utils/arrayRepeat";
-import useRegisterCssColors from "../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const mosaicColorPhases: Array<string> = Array.from(
@@ -18,7 +17,6 @@ const mosaicColorPhases: Array<string> = Array.from(
 );
 
 const Mosaic = (props: MosaicProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -37,25 +35,13 @@ const Mosaic = (props: MosaicProps) => {
 	tesseractAnimationInterval = tesseractAnimationInterval + "s"; // Convert to CSS time unit
 
 	/* Color SETTINGS - Sets colors of all tesserae boxes*/
-	useRegisterCssColors(mosaicColorPhases);
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				elemRef.current?.style.removeProperty("color");
-			}
-		},
-		[elemRef.current]
-	);
 	const colorProp: string | string[] = props?.color ?? "";
-	const tesseraeColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const tesseraeColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b  mosaic-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -63,7 +49,8 @@ const Mosaic = (props: MosaicProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...tesseraeColorStyles
+					...tesseraeColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
@@ -71,13 +58,12 @@ const Mosaic = (props: MosaicProps) => {
 			aria-label="Loading"
 		>
 			<span
-				className="rli-d-i-b mosaic-throbber"
+				className="rli-d-i-b mosaic-indicator"
 				style={
 					{
 						...(tesseractAnimationInterval && {
 							"--mosaic-skip-interval": tesseractAnimationInterval
-						}),
-						...styles
+						})
 					} as React.CSSProperties
 				}
 			>
@@ -102,21 +88,15 @@ const Mosaic = (props: MosaicProps) => {
 	);
 };
 
-export default React.memo(Mosaic);
+export default Mosaic;
 
 /**
  * Creates a style object with props that color the throbber/spinner
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, mosaicColorPhases.length);

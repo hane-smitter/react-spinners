@@ -1,4 +1,6 @@
-import React, { useCallback, useRef } from "react";
+"use strict";
+
+import React from "react";
 
 import "./Dotted.scss";
 import { DottedProps } from "./Dotted.types";
@@ -8,7 +10,6 @@ import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
 import makeId from "../../../utils/makeId";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const dottedColorSwitchVars: Array<string> = Array.from(
@@ -17,7 +18,6 @@ const dottedColorSwitchVars: Array<string> = Array.from(
 );
 
 const Dotted = (props: DottedProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -30,52 +30,11 @@ const Dotted = (props: DottedProps) => {
 	);
 
 	/* Color SETTINGS */
-	useRegisterCssColors(dottedColorSwitchVars);
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				for (let i = 0; i < dottedColorSwitchVars.length; i++) {
-					elemRef.current?.style.removeProperty(dottedColorSwitchVars[i]);
-				}
-			}
-		},
-		[elemRef.current]
-	);
 	const colorProp: string | string[] = props?.color ?? "";
-	const dotsColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const dotsColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	const numOfDots: 16 | 12 = props?.dense ? 16 : 12; // dense prop logic
-
-	const createStyles = useCallback(
-		/**
-		 * Calculates styles for compact variant of indicator when `dotsCount = 16`, i.e `dense` prop is `true`.
-		 * @param {number} i Index position in array
-		 * @param {number} dotsCount Number of dots
-		 */
-		(
-			i: number,
-			dotsCount: 16 | 12
-		): { transform: string; animationDelay: string } => {
-			if (dotsCount === 16) {
-				const rotationDeg = (i * 360) / dotsCount;
-				const reverseDotNum: number = dotsCount - i;
-				const duration: number = Number.parseFloat(animationPeriod);
-				const animationDelay: number =
-					(duration / dotsCount) * reverseDotNum * -1;
-
-				return {
-					transform: `rotate(${rotationDeg}deg)`,
-					animationDelay: `${animationDelay}s`
-				};
-			} else {
-				return { transform: "", animationDelay: "" };
-			}
-		},
-		[animationPeriod]
-	);
 
 	return (
 		<span
@@ -86,20 +45,22 @@ const Dotted = (props: DottedProps) => {
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...dotsColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				className="rli-d-i-b OP-dotted-indicator"
-				ref={elemRef}
-				style={{ ...dotsColorStyles, ...styles }}
-			>
+			<span className="rli-d-i-b OP-dotted-indicator">
 				{Array.from({ length: numOfDots }).map((_, idx) => {
-					const { animationDelay, transform } = createStyles(idx, numOfDots);
+					const { animationDelay, transform } = createStyles(
+						idx,
+						numOfDots,
+						animationPeriod
+					);
 
 					return (
 						<span
@@ -131,16 +92,10 @@ export { Dotted };
  * Creates a style object with props that colors the indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
 	const switchersLength = dottedColorSwitchVars.length;
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);
@@ -181,4 +136,30 @@ function stylesObjectFromColorProp(
 	}
 
 	return stylesObject;
+}
+
+/**
+ * Calculates styles for compact variant of indicator when `dotsCount = 16`, i.e `dense` prop is `true`.
+ * @param {number} i Index position in array
+ * @param {number} dotsCount Number of dots
+ * @param {string} animationPeriod Animation Duration in CSS seconds
+ */
+function createStyles(
+	i: number,
+	dotsCount: 16 | 12,
+	animationPeriod: string
+): { transform: string; animationDelay: string } {
+	if (dotsCount === 16) {
+		const rotationDeg = (i * 360) / dotsCount;
+		const reverseDotNum: number = dotsCount - i;
+		const duration: number = Number.parseFloat(animationPeriod);
+		const animationDelay: number = (duration / dotsCount) * reverseDotNum * -1;
+
+		return {
+			transform: `rotate(${rotationDeg}deg)`,
+			animationDelay: `${animationDelay}s`
+		};
+	} else {
+		return { transform: "", animationDelay: "" };
+	}
 }

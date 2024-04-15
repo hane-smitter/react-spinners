@@ -1,10 +1,9 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
-import useRegisterCssColors from "../../hooks/useRegisterCssColors";
 import Text from "../../utils/Text";
 import "./Riple.scss";
 import { RipleProps } from "./Riple.types";
@@ -18,7 +17,6 @@ const ripleColorPhases: Array<string> = Array.from(
 );
 
 const Riple = (props: RipleProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -31,20 +29,9 @@ const Riple = (props: RipleProps) => {
 	);
 
 	/* Color SETTINGS */
-	useRegisterCssColors(ripleColorPhases);
-	const colorReset: () => void = useCallback(function () {
-		if (elemRef.current) {
-			// elemRef.current?.style.removeProperty("color");
-			for (let i = 0; i < ripleColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(ripleColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const ripleColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const ripleColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
@@ -56,18 +43,15 @@ const Riple = (props: RipleProps) => {
 						"--rli-animation-duration": animationPeriod
 					}),
 					...(easingFn && { "--rli-animation-function": easingFn }),
-					...ripleColorStyles
+					...ripleColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				className="rli-d-i-b riple-indicator"
-				ref={elemRef}
-				style={{ ...styles }}
-			>
+			<span className="rli-d-i-b riple-indicator">
 				<span className="rli-d-i-b riple"></span>
 				<span className="rli-d-i-b riple"></span>
 
@@ -81,21 +65,15 @@ const Riple = (props: RipleProps) => {
 	);
 };
 
-export default React.memo(Riple);
+export default Riple;
 
 /**
  * Creates a style object with props that color the loading indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, ripleColorPhases.length);

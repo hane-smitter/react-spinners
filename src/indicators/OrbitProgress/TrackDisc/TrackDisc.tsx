@@ -1,4 +1,6 @@
-import React, { useCallback, useRef } from "react";
+"use strict";
+
+import React from "react";
 import colorParse from "tinycolor2";
 
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
@@ -8,7 +10,6 @@ import "./TrackDisc.scss";
 import { TrackDiscProps } from "./TrackDisc.types";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 
 // CSS properties for switching colors
 const annulusTrackColorVars: Array<string[]> = Array.from(
@@ -25,7 +26,6 @@ const alphaSetter: (num?: number) => number = (originalAlpha: number = 1) => {
 };
 
 const TrackDisc = (props: TrackDiscProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -38,35 +38,9 @@ const TrackDisc = (props: TrackDiscProps) => {
 	);
 
 	/* Color SETTING */
-	useRegisterCssColors(annulusTrackColorVars, (defaultColor, positionIndex) => {
-		if (positionIndex % 2 == 0) {
-			const parsedColor = colorParse(defaultColor);
-			return parsedColor
-				.setAlpha(alphaSetter(parsedColor.getAlpha()))
-				.toRgbString();
-		}
-
-		return defaultColor;
-	});
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				// elemRef.current?.style.removeProperty("color");
-				// elemRef.current?.style.removeProperty("--annulus-track-color");
-
-				for (let i = 0; i < annulusTrackColorVars.length; i++) {
-					const varNamesArr = annulusTrackColorVars[i];
-					for (let idx = 0; idx < varNamesArr.length; idx++) {
-						elemRef.current?.style.removeProperty(varNamesArr[idx]);
-					}
-				}
-			}
-		},
-		[elemRef.current]
-	);
 	let colorProp: string | string[] = props?.color ?? "";
 	const annulusTrackColorStyles: React.CSSProperties =
-		stylesObjectFromColorProp(colorProp, colorReset);
+		stylesObjectFromColorProp(colorProp);
 	const boldface: string = props.dense ? "0.45em" : "";
 
 	return (
@@ -78,18 +52,16 @@ const TrackDisc = (props: TrackDiscProps) => {
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...annulusTrackColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				className="rli-d-i-b OP-annulus-sector-track-indicator"
-				ref={elemRef}
-				style={{ ...annulusTrackColorStyles, ...styles }}
-			>
+			<span className="rli-d-i-b OP-annulus-sector-track-indicator">
 				<span
 					className="rli-d-i-b annulus-track-ring"
 					style={{ ...(boldface && { borderWidth: boldface }) }}
@@ -111,16 +83,10 @@ export { TrackDisc };
  * Creates a style object with props that color the throbber/spinner
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
 	const switchersLength = annulusTrackColorVars.length;
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);

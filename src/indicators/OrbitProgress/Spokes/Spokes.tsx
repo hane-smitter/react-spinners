@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 import { SpokesProps } from "./Spokes.types";
 import "./Spokes.scss";
@@ -9,7 +9,6 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 import makeId from "../../../utils/makeId";
 
 const spokesColorSwitchVars = Array.from(
@@ -19,8 +18,6 @@ const spokesColorSwitchVars = Array.from(
 const spokeSize: number = 1.2; // Size of spoke for this indicator when dense prop is activated
 
 const Spokes = (props: SpokesProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
-
 	// Styles
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -33,49 +30,11 @@ const Spokes = (props: SpokesProps) => {
 	);
 
 	/* Color SETTINGS */
-	useRegisterCssColors(spokesColorSwitchVars);
-	const colorReset = useCallback(function () {
-		if (elemRef.current) {
-			// elemRef.current?.style.removeProperty("color");
-			for (let i = 0; i < spokesColorSwitchVars.length; i++) {
-				elemRef.current?.style.removeProperty(spokesColorSwitchVars[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const spokesColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const spokesColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	const numOfSpokes: 16 | 12 = props?.dense ? 16 : 12; // specific to this indicator
-
-	const createStyles = useCallback(
-		/**
-		 * Calculates styles for compact variant of indicator when `spokesCount = 16`, i.e `dense` prop is `true`.
-		 * @param {number} i Index position in array
-		 * @param {number} spokesCount Number of spokes/bars
-		 */
-		(i: number, spokesCount: 16 | 12): React.CSSProperties | undefined => {
-			if (spokesCount === 16) {
-				const spokesOffset: string = (spokeSize + spokeSize * 0.3) * -1 + "em";
-
-				const reverseSpokeNum: number = spokesCount - i;
-				const duration = Number.parseFloat(animationPeriod);
-				const delayInterval: number = duration / spokesCount;
-
-				const rotateInclination = (i * 360) / spokesCount;
-
-				return {
-					transform: `rotate(${rotateInclination}deg) translate(-50%, ${spokesOffset})`,
-					animationDelay: `${(reverseSpokeNum - 1) * delayInterval * -1}s`
-				};
-			} else {
-				return undefined;
-			}
-		},
-		[animationPeriod]
-	);
 
 	return (
 		<span
@@ -100,7 +59,7 @@ const Spokes = (props: SpokesProps) => {
 					<span
 						key={makeId()}
 						className="rli-d-i-b spoke"
-						style={createStyles(idx, numOfSpokes)}
+						style={createStyles(idx, numOfSpokes, animationPeriod)}
 					></span>
 				))}
 			</span>
@@ -120,16 +79,10 @@ export { Spokes };
  * Creates a style object with props that color the throbber/spinner
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
 	const switchersLength = spokesColorSwitchVars.length;
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(colorProp, switchersLength);
@@ -170,4 +123,33 @@ function stylesObjectFromColorProp(
 	}
 
 	return stylesObject;
+}
+
+/**
+ * Calculates styles for compact variant of indicator when `spokesCount = 16`, i.e `dense` prop is `true`.
+ * @param {number} i Index position in array
+ * @param {number} spokesCount Number of spokes/bars
+ * @param {string} animationPeriod Animation Duration in CSS seconds
+ */
+function createStyles(
+	i: number,
+	spokesCount: 16 | 12,
+	animationPeriod: string
+): React.CSSProperties | undefined {
+	if (spokesCount === 16) {
+		const spokesOffset: string = (spokeSize + spokeSize * 0.3) * -1 + "em";
+
+		const reverseSpokeNum: number = spokesCount - i;
+		const duration = Number.parseFloat(animationPeriod);
+		const delayInterval: number = duration / spokesCount;
+
+		const rotateInclination = (i * 360) / spokesCount;
+
+		return {
+			transform: `rotate(${rotateInclination}deg) translate(-50%, ${spokesOffset})`,
+			animationDelay: `${(reverseSpokeNum - 1) * delayInterval * -1}s`
+		};
+	} else {
+		return undefined;
+	}
 }
