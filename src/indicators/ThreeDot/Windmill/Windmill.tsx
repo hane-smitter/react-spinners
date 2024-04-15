@@ -1,13 +1,12 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 import { WindmillProps } from "./Windmill.types";
 import "./Windmill.scss";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
 
@@ -17,8 +16,6 @@ const TDWindmillColorPhases: Array<string> = Array.from(
 );
 
 const Windmill = (props: WindmillProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
-
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -31,23 +28,12 @@ const Windmill = (props: WindmillProps) => {
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	useRegisterCssColors(TDWindmillColorPhases);
-	const colorReset: () => void = useCallback(function () {
-		if (elemRef.current) {
-			for (let i = 0; i < TDWindmillColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(TDWindmillColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const brickStackColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const brickStackColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
-			ref={elemRef}
 			className="rli-d-i-b windmill-rli-bounding-box"
 			style={
 				{
@@ -81,15 +67,9 @@ export { Windmill };
  * Creates a style object with props that color the loading indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(

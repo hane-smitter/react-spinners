@@ -1,39 +1,45 @@
 @use "sass:string";
-@use "../../../scss/variables" as defaults;
+@use "sass:list";
 
-// Radial graient syntax: radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )
-$animationDuration: var(--rli-animation-duration, 1.2s);
-// $animationDuration: 1.2s;
-$animationFn: var(--rli-animation-function, linear);
+@use "../../../scss/variables" as defaults;
+@use "../../../scss/mixins" as sharedMixins;
+
+$fallbackAnimationDuration: 1.2s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
+
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
 $dot-width: 1.1em;
 
 $bobMovement: string.unique-id();
 $bobColoringAnim: string.unique-id();
 
-@function TDBobColorVar($num: null) {
-	$cssVar: var(--TD-bob-phase1-color);
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--TD-bob-phase1-color",
+	"--TD-bob-phase2-color",
+	"--TD-bob-phase3-color",
+	"--TD-bob-phase4-color"
+);
 
-	@if ($num and $num != 1) {
-		$cssVar: var(--TD-bob-phase#{$num}-color, $cssVar);
+@function TDBobColorVar($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
 	}
 
 	@return $cssVar;
 }
 
 @mixin dot($dotNo) {
-	$dotColor: currentColor;
-
-	@if ($dotNo) {
-		$dotColor: var(--bob-dot#{$dotNo}-color, currentColor);
-	}
-
-	// background: radial-gradient(circle at center, $dotColor 0% 58%, rgba(0, 0, 0, 0) 68%) 50% 50%/100% 50% no-repeat;
-	// background: radial-gradient(
-	// 		circle at center,
-	// 		$dotColor 0% 50%,
-	// 		rgba(0, 0, 0, 0) calc(50% + 1px)
-	// 	)
-	// 	50% 50%/100% 50% no-repeat;
 	background: radial-gradient(
 			circle closest-side at center,
 			currentColor 0% 92%,
@@ -73,7 +79,8 @@ $bobColoringAnim: string.unique-id();
 
 			animation:
 				$animationDuration $animationFn var(--delay) infinite $bobMovement,
-				calc($animationDuration * 4) $animationFn var(--delay) infinite $bobColoringAnim;
+				calc($animationDuration * 4) $animationFn var(--delay) infinite
+					$bobColoringAnim;
 		}
 		.bobbing::before,
 		.bobbing::after {
@@ -103,6 +110,22 @@ $bobColoringAnim: string.unique-id();
 			@include dot(3);
 		}
 	}
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
 }
 
 @keyframes #{$bobMovement} {

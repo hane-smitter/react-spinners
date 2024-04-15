@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useCallback, useRef } from "react";
+import React from "react";
 
 import { PulsateProps } from "./Pulsate.types";
 import "./Pulsate.scss";
@@ -8,7 +8,6 @@ import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import Text from "../../../utils/Text";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
-import useRegisterCssColors from "../../../hooks/useRegisterCssColors";
 import arrayRepeat from "../../../utils/arrayRepeat";
 
 const TDPulsateColorPhases: Array<string> = Array.from(
@@ -17,7 +16,6 @@ const TDPulsateColorPhases: Array<string> = Array.from(
 );
 
 const Pulsate = (props: PulsateProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles and size
 	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
@@ -30,24 +28,13 @@ const Pulsate = (props: PulsateProps) => {
 	);
 
 	/* Color SETTINGS - Set color of the loading indicator */
-	useRegisterCssColors(TDPulsateColorPhases);
-	const colorReset: () => void = useCallback(function () {
-		if (elemRef.current) {
-			for (let i = 0; i < TDPulsateColorPhases.length; i++) {
-				elemRef.current?.style.removeProperty(TDPulsateColorPhases[i]);
-			}
-		}
-	}, []);
 	const colorProp: string | string[] = props?.color ?? "";
-	const pulsateDotColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const pulsateDotColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
 			className="rli-d-i-b pulsate-rli-bounding-box"
-			ref={elemRef}
 			style={
 				{
 					...(fontSize && { fontSize }),
@@ -82,15 +69,9 @@ export { Pulsate };
  * Creates a style object with props that color the loading indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
-
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
 
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(
