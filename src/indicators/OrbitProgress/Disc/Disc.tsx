@@ -1,10 +1,10 @@
 import React, { useCallback, useRef } from "react";
 
-import { DiscProps } from "./Disc.types";
-import "./Disc.scss";
-import Text from "../../../utils/Text";
-import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../../hooks/useStylesPipeline";
+import Text from "../../../utils/Text";
+import "./Disc.scss";
+import { DiscProps } from "./Disc.types";
 
 const Disc = (props: DiscProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -46,6 +46,9 @@ const Disc = (props: DiscProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b disc-throbber"

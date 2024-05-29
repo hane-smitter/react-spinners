@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { RipleProps } from "./Riple.types";
-import "./Riple.scss";
-import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
+import "./Riple.scss";
+import { RipleProps } from "./Riple.types";
 
 const Riple = (props: RipleProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -50,6 +50,9 @@ const Riple = (props: RipleProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b riple-throbber"

@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { BrickStackProps } from "./BrickStack.types";
-import "./BrickStack.scss";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
+import "./BrickStack.scss";
+import { BrickStackProps } from "./BrickStack.types";
 
 const BrickStack = (props: BrickStackProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -60,6 +60,9 @@ const BrickStack = (props: BrickStackProps) => {
 					...brickStackColorStyles
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span className="rli-d-i-b brick-stack-indicator" style={{ ...styles }}>
 				<span className=" rli-d-i-b brick-stack"></span>

@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { BobProps } from "./Bob.types";
-import "./Bob.scss";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
+import "./Bob.scss";
+import { BobProps } from "./Bob.types";
 
 const Bob = (props: BobProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -61,6 +61,9 @@ const Bob = (props: BobProps) => {
 					...brickStackColorStyles
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span className="bob-indicator" style={{ ...styles }}>
 				<span className="bobbing"></span>

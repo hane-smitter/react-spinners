@@ -1,12 +1,12 @@
 import React, { useCallback, useRef } from "react";
 import colorParse from "tinycolor2";
 
-import "./Atom.scss";
-import { AtomProps } from "./Atom.types";
-import { defaultColor } from "../variables";
+import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
-import useAnimationPacer from "../../hooks/useAnimationPacer";
+import { defaultColor } from "../variables";
+import "./Atom.scss";
+import { AtomProps } from "./Atom.types";
 
 const DEFAULT_COLOR = colorParse(defaultColor).toRgb();
 
@@ -69,6 +69,9 @@ const Atom = (props: AtomProps) => {
 					...atomColorStyles
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span className="rli-d-i-b atom-throbber" style={{ ...styles }}>
 				<span className="rli-d-i-b inner">

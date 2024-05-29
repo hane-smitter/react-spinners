@@ -1,10 +1,10 @@
 import React, { useCallback, useRef } from "react";
 
-import { SplitDiscProps } from "./SplitDisc.types";
-import "./SplitDisc.scss";
+import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
-import useAnimationPacer from "../../../hooks/useAnimationPacer";
+import "./SplitDisc.scss";
+import { SplitDiscProps } from "./SplitDisc.types";
 
 const SplitDisc = (props: SplitDiscProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -48,6 +48,9 @@ const SplitDisc = (props: SplitDiscProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b split-disc-throbber"
