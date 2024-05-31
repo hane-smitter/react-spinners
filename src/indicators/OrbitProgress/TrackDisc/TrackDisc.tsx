@@ -1,10 +1,10 @@
 import React, { useCallback, useRef } from "react";
 
-import { TrackDiscProps } from "./TrackDisc.types";
-import "./TrackDisc.scss";
-import Text from "../../../utils/Text";
-import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../../hooks/useStylesPipeline";
+import Text from "../../../utils/Text";
+import "./TrackDisc.scss";
+import { TrackDiscProps } from "./TrackDisc.types";
 
 const TrackDisc = (props: TrackDiscProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -47,6 +47,9 @@ const TrackDisc = (props: TrackDiscProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b track-disc-throbber"

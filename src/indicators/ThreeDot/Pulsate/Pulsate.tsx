@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { PulsateProps } from "./Pulsate.types";
-import "./Pulsate.scss";
-import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
+import "./Pulsate.scss";
+import { PulsateProps } from "./Pulsate.types";
 
 const Pulsate = (props: PulsateProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -60,6 +60,9 @@ const Pulsate = (props: PulsateProps) => {
 					...pulsateDotColorStyles
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span className="rli-d-i-b pulsate-indicator" style={{ ...styles }}>
 				<span className="rli-d-i-b pulsate-bounce pulsate-bounce1"></span>

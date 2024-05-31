@@ -1,12 +1,12 @@
 "use strict";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
-import { LifeLineProps } from "./LifeLine.types";
-import "./LifeLine.scss";
-import Text from "../../utils/Text";
-import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../hooks/useStylesPipeline";
+import Text from "../../utils/Text";
+import "./LifeLine.scss";
+import { LifeLineProps } from "./LifeLine.types";
 
 const LifeLine = (props: LifeLineProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -60,7 +60,7 @@ const LifeLine = (props: LifeLineProps) => {
 				pathEl, // element to animate
 				[{ strokeDashoffset: `${pathLength}` }, { strokeDashoffset: `0` }],
 				{
-					duration: parseFloat(DEFAULT_ANIMATION_DURATION) * 1000, // seconds to miliseconds
+					duration: parseFloat(DEFAULT_ANIMATION_DURATION) * 1000, // seconds to milliseconds
 					iterations: Infinity,
 					easing: easingFn || "linear"
 				}
@@ -103,6 +103,9 @@ const LifeLine = (props: LifeLineProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				ref={elemRef}

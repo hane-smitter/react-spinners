@@ -1,10 +1,10 @@
 import React, { useCallback, useRef } from "react";
 
+import useAnimationPacer from "../../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../../hooks/useStylesPipeline";
+import Text from "../../../utils/Text";
 import "./Dotted.scss";
 import { DottedProps } from "./Dotted.types";
-import Text from "../../../utils/Text";
-import useStylesPipeline from "../../../hooks/useStylesPipeline";
-import useAnimationPacer from "../../../hooks/useAnimationPacer";
 
 const Dotted = (props: DottedProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -47,6 +47,9 @@ const Dotted = (props: DottedProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b fading-dot-throbber"

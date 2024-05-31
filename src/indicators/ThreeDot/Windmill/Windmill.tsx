@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { WindmillProps } from "./Windmill.types";
-import "./Windmill.scss";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import Text from "../../../utils/Text";
+import "./Windmill.scss";
+import { WindmillProps } from "./Windmill.types";
 
 const Windmill = (props: WindmillProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -60,6 +60,9 @@ const Windmill = (props: WindmillProps) => {
 					...brickStackColorStyles
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span className="rli-d-i-b windmill-indicator">
 				<span className="windmill"></span>

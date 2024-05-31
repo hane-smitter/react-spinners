@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { BubbleDottedProps } from "./BubbleDotted.types";
-import "./BubbleDotted.scss";
-import Text from "../../../utils/Text";
-import useStylesPipeline from "../../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../../hooks/useStylesPipeline";
+import Text from "../../../utils/Text";
+import "./BubbleDotted.scss";
+import { BubbleDottedProps } from "./BubbleDotted.types";
 
 let BubbleDotted = (props: BubbleDottedProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -49,6 +49,9 @@ let BubbleDotted = (props: BubbleDottedProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b bubble-dotted-throbber"

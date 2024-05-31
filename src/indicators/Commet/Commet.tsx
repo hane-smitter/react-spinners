@@ -1,10 +1,10 @@
 import React, { useCallback, useRef } from "react";
 
-import { CommetProps } from "./Commet.types";
-import "./Commet.scss";
-import Text from "../../utils/Text";
-import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../hooks/useStylesPipeline";
+import Text from "../../utils/Text";
+import "./Commet.scss";
+import { CommetProps } from "./Commet.types";
 
 const Commet = (props: CommetProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -61,6 +61,9 @@ const Commet = (props: CommetProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b commet-throbber"

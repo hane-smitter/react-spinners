@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { SlabProps } from "./Slab.types";
-import "./Slab.scss";
-import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
+import "./Slab.scss";
+import { SlabProps } from "./Slab.types";
 
 const Slab = (props: SlabProps) => {
 	// Styles
@@ -51,6 +51,9 @@ const Slab = (props: SlabProps) => {
 				...slabColorStyles,
 				...styles
 			}}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span className="rli-d-i-b slab-indicator">
 				<span className="slabs-wrapper">

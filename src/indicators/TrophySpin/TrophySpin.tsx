@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { TwistProps } from "./TrophySpin.types";
-import "./TrophySpin.scss";
-import Text from "../../utils/Text";
-import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../hooks/useStylesPipeline";
+import Text from "../../utils/Text";
+import "./TrophySpin.scss";
+import { TwistProps } from "./TrophySpin.types";
 
 const TrophySpin = (props: TwistProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -50,6 +50,9 @@ const TrophySpin = (props: TwistProps) => {
 					...twistColorStyles
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span className="rli-d-i-b trophy-spin-indicator" style={{ ...styles }}>
 				<span className="blade"></span>

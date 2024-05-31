@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { FourSquareProps } from "./FourSquare.types";
-import "./FourSquare.scss";
-import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
+import "./FourSquare.scss";
+import { FourSquareProps } from "./FourSquare.types";
 
 const FourSquare = (props: FourSquareProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -61,6 +61,9 @@ const FourSquare = (props: FourSquareProps) => {
 					...(easingFn && { "--rli-animation-function": easingFn })
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className={`rli-d-i-b foursquare-throbber`}

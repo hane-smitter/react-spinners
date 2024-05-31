@@ -2,11 +2,11 @@
 
 import React, { useCallback, useRef } from "react";
 
-import { MosaicProps } from "./Mosaic.types";
-import "./Mosaic.scss";
-import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
+import "./Mosaic.scss";
+import { MosaicProps } from "./Mosaic.types";
 
 const Mosaic = (props: MosaicProps) => {
 	const elemRef = useRef<HTMLSpanElement | null>(null);
@@ -56,6 +56,9 @@ const Mosaic = (props: MosaicProps) => {
 					...tesseraeColorStyles
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span
 				className="rli-d-i-b mosaic-throbber"

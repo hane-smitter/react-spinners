@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import colorParse from "tinycolor2";
 
-import { BlinkBlurProps } from "./BlinkBlur.types";
-import "./BlinkBlur.scss";
-import { defaultColor } from "../variables";
-import useStylesPipeline from "../../hooks/useStylesPipeline";
 import useAnimationPacer from "../../hooks/useAnimationPacer";
+import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
+import { defaultColor } from "../variables";
+import "./BlinkBlur.scss";
+import { BlinkBlurProps } from "./BlinkBlur.types";
 
 const DEFAULT_COLOR: colorParse.ColorFormats.RGBA =
 	colorParse(defaultColor).toRgb();
@@ -77,6 +77,9 @@ const BlinkBlur = (props: BlinkBlurProps) => {
 					...glidingBlinkColorStyles
 				} as React.CSSProperties
 			}
+			role="status"
+			aria-live="polite"
+			aria-label="Loading"
 		>
 			<span className="rli-d-i-b blink-blur-indicator" style={{ ...styles }}>
 				<span
