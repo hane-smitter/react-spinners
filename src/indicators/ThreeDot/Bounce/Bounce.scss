@@ -1,0 +1,97 @@
+@use "sass:string";
+@use "sass:list";
+
+@use "../../../scss/variables" as defaults;
+@use "../../../scss/mixins" as sharedMixins;
+
+.bounce-rli-bounding-box {
+	font-size: defaults.$fontSizer;
+	width: 12.5em; // 200px
+	height: 3.75em; // 60px
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+
+	background-color: crimson;
+
+	.circle {
+		width: 1.25em; // 20px
+		height: 1.25em; // 20px
+		position: absolute;
+		border-radius: 50%;
+		background-color: #fff;
+		left: 15%;
+		transform-origin: 50%;
+		animation: circle 0.5s alternate infinite cubic-bezier(0.74, 0.1, 0.74, 1);
+
+		// Debugging
+		background-color: darkorange;
+
+		&:nth-child(2) {
+			left: 45%;
+			animation-delay: 0.2s;
+		}
+		&:nth-child(3) {
+			left: auto;
+			right: 15%;
+			animation-delay: 0.3s;
+		}
+	}
+
+	.shadow {
+		width: 1.25em; // 20px
+		height: 0.25em; // 4px
+		border-radius: 50%;
+		background-color: rgba(0, 0, 0, 0.5);
+		position: absolute;
+		top: 62px;
+		transform-origin: 50%;
+		z-index: -1;
+		left: 15%;
+		filter: blur(1px);
+		animation: shadow 0.5s alternate infinite cubic-bezier(0.74, 0.1, 0.74, 1); //ease-in-out
+
+		&:nth-child(4) {
+			left: 45%;
+			animation-delay: 0.2s;
+		}
+		&:nth-child(5) {
+			left: auto;
+			right: 15%;
+			animation-delay: 0.3s;
+		}
+	}
+}
+
+@keyframes circle {
+	0% {
+		top: 0%;
+	}
+	60% {
+		height: 1.25em;
+		border-radius: 50%;
+		transform: scaleX(1);
+	}
+	100% {
+		top: 100%;
+		height: 0.3125em; // 5px
+		transform: scaleX(1.7); // approx: 34px(X growth)
+		// border-radius: 50px 50px 25px 25px;
+	}
+}
+
+@keyframes shadow {
+	0% {
+		transform: scaleX(0.2);
+		opacity: 0.2;
+	}
+	60% {
+		transform: scaleX(1);
+		opacity: 0.6;
+	}
+	100% {
+		transform: scaleX(1.5);
+		opacity: 0.8;
+	}
+}
