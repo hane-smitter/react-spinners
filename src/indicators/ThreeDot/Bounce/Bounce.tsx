@@ -10,9 +10,9 @@ import { BounceProps } from "./Bounce.types";
 import { defaultColor as DEFAULT_COLOR } from "../../variables";
 import arrayRepeat from "../../../utils/arrayRepeat";
 
-const TDWindmillColorPhases: Array<string> = Array.from(
+const TDBounceColorPhases: Array<string> = Array.from(
 	{ length: 4 },
-	(_, idx) => `--TD-windmill-phase${idx + 1}-color`
+	(_, idx) => `--TD-bounce-phase${idx + 1}-color`
 );
 
 const Bounce = (props: BounceProps) => {
@@ -21,7 +21,7 @@ const Bounce = (props: BounceProps) => {
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
-	const DEFAULT_ANIMATION_DURATION = "1.2s"; // Animation's default duration
+	const DEFAULT_ANIMATION_DURATION = "0.5s"; // Animation's default duration
 	const { animationPeriod } = useAnimationPacer(
 		props?.speedPlus,
 		DEFAULT_ANIMATION_DURATION
@@ -29,11 +29,24 @@ const Bounce = (props: BounceProps) => {
 
 	/* Color SETTINGS - Set color of the loading indicator */
 	const colorProp: string | string[] = props?.color ?? "";
-	const brickStackColorStyles: React.CSSProperties =
+	const bounceColorStyles: React.CSSProperties =
 		stylesObjectFromColorProp(colorProp);
 
 	return (
-		<span className="rli-d-i-b bounce-rli-bounding-box">
+		<span
+			className="rli-d-i-b bounce-rli-bounding-box"
+			style={
+				{
+					...(fontSize && { fontSize }),
+					...(animationPeriod && {
+						"--rli-animation-duration": animationPeriod
+					}),
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...bounceColorStyles,
+					...styles
+				} as React.CSSProperties
+			}
+		>
 			<span className="wrapper">
 				<span className="group">
 					<span className="rli-d-i-b  dot"></span>
@@ -46,6 +59,13 @@ const Bounce = (props: BounceProps) => {
 					<span className="rli-d-i-b  shadow"></span>
 				</span>
 			</span>
+
+			<Text
+				staticText
+				text={props?.text}
+				textColor={props?.textColor}
+				style={{ marginTop: "2px" }}
+			/>
 		</span>
 	);
 };
@@ -63,13 +83,13 @@ function stylesObjectFromColorProp(
 	if (colorProp instanceof Array) {
 		const colorArr: string[] = arrayRepeat(
 			colorProp,
-			TDWindmillColorPhases.length
+			TDBounceColorPhases.length
 		);
 
 		for (let idx = 0; idx < colorArr.length; idx++) {
 			if (idx >= 4) break;
 
-			stylesObject[TDWindmillColorPhases[idx]] = colorArr[idx];
+			stylesObject[TDBounceColorPhases[idx]] = colorArr[idx];
 		}
 
 		return stylesObject;
@@ -78,26 +98,28 @@ function stylesObjectFromColorProp(
 	try {
 		if (typeof colorProp !== "string") throw new Error("Color String expected");
 
-		for (let i = 0; i < TDWindmillColorPhases.length; i++) {
-			stylesObject[TDWindmillColorPhases[i]] = colorProp;
+		for (let i = 0; i < TDBounceColorPhases.length; i++) {
+			stylesObject[TDBounceColorPhases[i]] = colorProp;
 		}
 	} catch (error: unknown) {
-		error instanceof Error
-			? console.warn(
-					`[${
-						error.message
-					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
-						colorProp
-					)}`
-			  )
-			: console.warn(
-					`${JSON.stringify(
-						colorProp
-					)} received in <ThreeDot variant="windmill" /> indicator cannot be processed. Using default instead!`
-			  );
+		if (process.env.NODE_ENV !== "production") {
+			error instanceof Error
+				? console.warn(
+						`[${
+							error.message
+						}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+							colorProp
+						)}`
+				  )
+				: console.warn(
+						`${JSON.stringify(
+							colorProp
+						)} received in <ThreeDot variant="bounce" /> indicator cannot be processed. Using default instead!`
+				  );
+		}
 
-		for (let i = 0; i < TDWindmillColorPhases.length; i++) {
-			stylesObject[TDWindmillColorPhases[i]] = DEFAULT_COLOR;
+		for (let i = 0; i < TDBounceColorPhases.length; i++) {
+			stylesObject[TDBounceColorPhases[i]] = DEFAULT_COLOR;
 		}
 	}
 

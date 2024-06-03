@@ -19,7 +19,7 @@ const ThreeDot = (props: ThreeDotProps) => {
 	) : componentVariant === "bob" ? (
 		<Bob {...props} />
 	) : componentVariant === "bounce" ? (
-		<Bounce />
+		<Bounce {...props} />
 	) : null;
 };
 
