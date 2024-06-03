@@ -4,62 +4,114 @@
 @use "../../../scss/variables" as defaults;
 @use "../../../scss/mixins" as sharedMixins;
 
+$animationDuration: 0.5s;
+$dotsWrapperWidth: 12.5em; // 200px
+$dotsWrapperHeight: 3.75em; // 60px
+
+// $dotSize: 1.25em; // 20px
+$dotSize: 1.1em;
+$dotSpacing: calc($dotSize * 0.5);
+$shadowHeight: calc($dotSize / 5); // 4px
+
 .bounce-rli-bounding-box {
 	font-size: defaults.$fontSizer;
-	width: 12.5em; // 200px
-	height: 3.75em; // 60px
+	display: inline-block;
+	// padding bottom = height of shadow + offsetTop(calc. from applied style top 101%)
+	padding-bottom: calc($shadowHeight + ($dotsWrapperHeight * 0.01));
+
 	position: absolute;
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -50%);
 
-	background-color: crimson;
+	// background-color: crimson;
+	// space(0.625em) -> dot(1.25em) -> space(0.625em) -> dot(1.25em) -> space(0.625em) -> dot(1.25em) -> space(0.625em) -----> 2.5 + 3.75
 
-	.circle {
-		width: 1.25em; // 20px
-		height: 1.25em; // 20px
-		position: absolute;
-		border-radius: 50%;
-		background-color: #fff;
-		left: 15%;
-		transform-origin: 50%;
-		animation: circle 0.5s alternate infinite cubic-bezier(0.74, 0.1, 0.74, 1);
+	.wrapper {
+		--dot1-delay: #{0s};
+		--dot1-x-offset: #{$dotSpacing};
+
+		--dot2-delay: #{calc(($animationDuration + $animationDuration * 0.75) * -1)};
+		--dot2-x-offset: #{calc($dotSpacing * 2 + $dotSize)};
+
+		--dot3-delay: #{calc(($animationDuration + $animationDuration * 0.5) * -1)};
+		--dot3-x-offset: #{calc($dotSpacing * 3 + $dotSize * 2)};
+
+		// width: $dotsWrapperWidth;
+		width: calc($dotSize * 3 + $dotSpacing * 4);
+		height: $dotsWrapperHeight;
+		position: relative;
+		display: block;
 
 		// Debugging
-		background-color: darkorange;
+		background-color: dodgerblue;
 
-		&:nth-child(2) {
-			left: 45%;
-			animation-delay: 0.2s;
-		}
-		&:nth-child(3) {
-			left: auto;
-			right: 15%;
-			animation-delay: 0.3s;
-		}
-	}
+		.group {
+			display: block;
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
 
-	.shadow {
-		width: 1.25em; // 20px
-		height: 0.25em; // 4px
-		border-radius: 50%;
-		background-color: rgba(0, 0, 0, 0.5);
-		position: absolute;
-		top: 62px;
-		transform-origin: 50%;
-		z-index: -1;
-		left: 15%;
-		filter: blur(1px);
-		animation: shadow 0.5s alternate infinite cubic-bezier(0.74, 0.1, 0.74, 1); //ease-in-out
+			// display: flex;
+			// justify-content: space-around;
+			// align-items: center;
 
-		&:nth-child(4) {
-			left: 45%;
-			animation-delay: 0.2s;
-		}
-		&:nth-child(5) {
-			left: auto;
-			right: 15%;
-			animation-delay: 0.3s;
+			.dot {
+				width: $dotSize;
+				height: $dotSize;
+				position: absolute;
+				border-radius: 50%;
+				background-color: #fff;
+				// left: 15%;
+				// margin: 0 $dotSpacing;
+				transform-origin: 50%;
+				animation: circle $animationDuration alternate infinite cubic-bezier(0.74, 0.1, 0.74, 1);
+
+				// Debugging
+				background-color: darkorange;
+
+				&:nth-of-type(1) {
+					left: var(--dot1-x-offset);
+					// left: 0;
+					animation-delay: var(--dot1-delay);
+				}
+				&:nth-of-type(2) {
+					left: var(--dot2-x-offset);
+					animation-delay: var(--dot2-delay);
+				}
+				&:nth-of-type(3) {
+					left: var(--dot3-x-offset);
+					animation-delay: var(--dot3-delay);
+				}
+			}
+
+			.shadow {
+				width: $dotSize;
+				height: $shadowHeight;
+				border-radius: 50%;
+				background-color: rgba(0, 0, 0, 0.5);
+				position: absolute;
+				top: 101%;
+				transform-origin: 50%;
+				z-index: -1;
+				filter: blur(0.6px);
+				animation: shadow $animationDuration alternate infinite cubic-bezier(0.74, 0.1, 0.74, 1); //ease-in-out
+
+				&:nth-of-type(1) {
+					left: var(--dot1-x-offset);
+					animation-delay: var(--dot1-delay);
+				}
+				&:nth-of-type(2) {
+					left: var(--dot2-x-offset);
+					animation-delay: var(--dot2-delay);
+				}
+				&:nth-of-type(3) {
+					left: var(--dot3-x-offset);
+					animation-delay: var(--dot3-delay);
+				}
+			}
 		}
 	}
 }
@@ -75,9 +127,8 @@
 	}
 	100% {
 		top: 100%;
-		height: 0.3125em; // 5px
-		transform: scaleX(1.7); // approx: 34px(X growth)
-		// border-radius: 50px 50px 25px 25px;
+		height: $shadowHeight;
+		transform: scaleX(1.5);
 	}
 }
 
@@ -87,7 +138,7 @@
 		opacity: 0.2;
 	}
 	60% {
-		transform: scaleX(1);
+		// transform: scaleX(1);
 		opacity: 0.6;
 	}
 	100% {

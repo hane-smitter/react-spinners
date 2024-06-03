@@ -34,12 +34,18 @@ const Bounce = (props: BounceProps) => {
 
 	return (
 		<span className="rli-d-i-b bounce-rli-bounding-box">
-			<span className="rli-d-i-b  circle"></span>
-			<span className="rli-d-i-b  circle"></span>
-			<span className="rli-d-i-b  circle"></span>
-			<span className="rli-d-i-b  shadow"></span>
-			<span className="rli-d-i-b  shadow"></span>
-			<span className="rli-d-i-b  shadow"></span>
+			<span className="wrapper">
+				<span className="group">
+					<span className="rli-d-i-b  dot"></span>
+					<span className="rli-d-i-b  dot"></span>
+					<span className="rli-d-i-b  dot"></span>
+				</span>
+				<span className="group">
+					<span className="rli-d-i-b  shadow"></span>
+					<span className="rli-d-i-b  shadow"></span>
+					<span className="rli-d-i-b  shadow"></span>
+				</span>
+			</span>
 		</span>
 	);
 };
