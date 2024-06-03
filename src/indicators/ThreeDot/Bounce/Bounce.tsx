@@ -49,14 +49,14 @@ const Bounce = (props: BounceProps) => {
 		>
 			<span className="wrapper">
 				<span className="group">
-					<span className="rli-d-i-b  dot"></span>
-					<span className="rli-d-i-b  dot"></span>
-					<span className="rli-d-i-b  dot"></span>
+					<span className="rli-d-i-b dot"></span>
+					<span className="rli-d-i-b dot"></span>
+					<span className="rli-d-i-b dot"></span>
 				</span>
 				<span className="group">
-					<span className="rli-d-i-b  shadow"></span>
-					<span className="rli-d-i-b  shadow"></span>
-					<span className="rli-d-i-b  shadow"></span>
+					<span className="rli-d-i-b shadow"></span>
+					<span className="rli-d-i-b shadow"></span>
+					<span className="rli-d-i-b shadow"></span>
 				</span>
 			</span>
 

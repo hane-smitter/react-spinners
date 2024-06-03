@@ -16,6 +16,7 @@ $shadowHeight: calc($dotSize / 5);
 
 $bounceAnimation: string.unique-id();
 $shadowAnimation: string.unique-id();
+$bounceColoringAnimation: string.unique-id();
 
 // Sass list with variable names that color the animation
 // NOTE: These names should match with ones in Javascript(React component)
@@ -49,11 +50,6 @@ $coloringPropertyNames: (
 	// padding bottom = height of shadow + offsetTop(calc. from applied style top 101%)
 	padding-bottom: calc($shadowHeight + ($dotsWrapperHeight * 0.01));
 
-	// position: absolute;
-	// left: 50%;
-	// top: 50%;
-	// transform: translate(-50%, -50%);
-
 	.wrapper {
 		--dot1-delay: #{0s};
 		--dot1-x-offset: #{$dotSpacing};
@@ -68,6 +64,7 @@ $coloringPropertyNames: (
 		height: $dotsWrapperHeight;
 		position: relative;
 		display: block;
+		margin: 0 auto; // When 'text' is long, it remains centered
 
 		// Debugging
 		// background-color: dodgerblue;
@@ -80,10 +77,6 @@ $coloringPropertyNames: (
 			bottom: 0;
 			left: 0;
 
-			// display: flex;
-			// justify-content: space-around;
-			// align-items: center;
-
 			.dot {
 				width: $dotSize;
 				height: $dotSize;
@@ -91,20 +84,21 @@ $coloringPropertyNames: (
 				border-radius: 50%;
 				background-color: TDBounceColorVar();
 				transform-origin: 50%;
-				animation: $bounceAnimation $animationDuration alternate infinite $animationFn;
+				animation:
+					$animationDuration $animationFn alternate infinite $bounceAnimation,
+					calc($animationDuration * 4) $animationFn infinite $bounceColoringAnimation;
 
 				&:nth-of-type(1) {
 					left: var(--dot1-x-offset);
-					// left: 0;
-					animation-delay: var(--dot1-delay);
+					animation-delay: var(--dot1-delay), 0s;
 				}
 				&:nth-of-type(2) {
 					left: var(--dot2-x-offset);
-					animation-delay: var(--dot2-delay);
+					animation-delay: var(--dot2-delay), 0s;
 				}
 				&:nth-of-type(3) {
 					left: var(--dot3-x-offset);
-					animation-delay: var(--dot3-delay);
+					animation-delay: var(--dot3-delay), 0s;
 				}
 			}
 
@@ -118,7 +112,7 @@ $coloringPropertyNames: (
 				transform-origin: 50%;
 				z-index: -1;
 				filter: blur(1px);
-				animation: $shadowAnimation $animationDuration alternate infinite $animationFn;
+				animation: $animationDuration $animationFn alternate infinite $shadowAnimation;
 
 				&:nth-of-type(1) {
 					left: var(--dot1-x-offset);
@@ -182,5 +176,33 @@ $animationDurationName: (#{defaults.$animationDurationVarName});
 	100% {
 		transform: scaleX(1.5);
 		opacity: 0.6;
+	}
+}
+
+@keyframes #{$bounceColoringAnimation} {
+	0%,
+	100% {
+		background-color: TDBounceColorVar(1);
+	}
+	20% {
+		background-color: TDBounceColorVar(1);
+	}
+	25% {
+		background-color: TDBounceColorVar(2);
+	}
+	45% {
+		background-color: TDBounceColorVar(2);
+	}
+	50% {
+		background-color: TDBounceColorVar(3);
+	}
+	70% {
+		background-color: TDBounceColorVar(3);
+	}
+	75% {
+		background-color: TDBounceColorVar(4);
+	}
+	95% {
+		background-color: TDBounceColorVar(4);
 	}
 }
