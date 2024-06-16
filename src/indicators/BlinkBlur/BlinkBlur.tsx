@@ -22,7 +22,7 @@ const BlinkBlur = (props: BlinkBlurProps) => {
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
-	const DEFAULT_ANIMATION_DURATION = "2s"; // Animation's default duration
+	const DEFAULT_ANIMATION_DURATION = "1.4s"; // Animation's default duration
 	const { animationPeriod } = useAnimationPacer(
 		props?.speedPlus,
 		DEFAULT_ANIMATION_DURATION
@@ -56,7 +56,7 @@ const BlinkBlur = (props: BlinkBlurProps) => {
 				<span className="blink-blur-shape blink-blur-shape3"></span>
 				<span className="blink-blur-shape blink-blur-shape4"></span>
 				<span className="blink-blur-shape blink-blur-shape5"></span>
-				<span className="blink-blur-shape blink-blur-shape6"></span>
+				{/* <span className="blink-blur-shape blink-blur-shape6"></span> */}
 			</span>
 
 			<Text

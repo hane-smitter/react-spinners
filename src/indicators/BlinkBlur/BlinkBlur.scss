@@ -4,11 +4,9 @@
 @use "../../scss/variables" as defaults;
 @use "../../scss/mixins" as sharedMixins;
 
-$fallbackAnimationDuration: 2s; // This time value should be in sync with JS(React component)
-$animationDuration: var(
-	#{defaults.$animationDurationVarName},
-	$fallbackAnimationDuration
-);
+$fallbackAnimationDuration: 1.4s; // This time value should be in sync with JS(React component)
+$animationDuration: var(#{defaults.$animationDurationVarName}, $fallbackAnimationDuration);
+// $animationDuration: 1.2s;
 
 $animationFn: var(#{defaults.$animationEasingVarName}, linear);
 
@@ -73,24 +71,57 @@ $coloringPropertyNames: (
 			animation-timing-function: $animationFn;
 			animation-iteration-count: infinite;
 
+			// $animationDuration - The time one shape takes to complete a full cycle of its animation.
+			// We have 6 shapes
+			// Each shape to kick off animation after some delay and visually creating a waterfall pattern.
+			// &.blink-blur-shape1 {
+			// 	animation-delay: calc($animationDuration / $numOfShapes * -5);
+			// }
+			// &.blink-blur-shape2 {
+			// 	animation-delay: calc($animationDuration / $numOfShapes * -4);
+			// }
+			// &.blink-blur-shape3 {
+			// 	animation-delay: calc($animationDuration / $numOfShapes * -3);
+			// }
+			// &.blink-blur-shape4 {
+			// 	animation-delay: calc($animationDuration / $numOfShapes * -2);
+			// }
+			// &.blink-blur-shape5 {
+			// 	animation-delay: calc($animationDuration / $numOfShapes * -1);
+			// }
+			// &.blink-blur-shape6 {
+			// 	animation-delay: calc($animationDuration / $numOfShapes * 0);
+			// }
+			$numOfShapes: 5;
+			$offsetStart: 0.5; // 50% of $animationDuration
+			// $offsetRemaining: calc(1 - $offsetStart);
+			$offsetRatioPerShape: calc(
+				$offsetStart / $numOfShapes
+			); // ($numOfShapes - 1) since first shape take a fixed proportion and leaves behind proportion to share among the remaining shapes
+
 			&.blink-blur-shape1 {
-				animation-delay: calc($animationDuration / $numOfShapes * -5);
+				animation-delay: calc(
+					$animationDuration * $offsetStart * -1
+				); // VERY FIRST shape that takes `$offset` amount from animation time
 			}
 			&.blink-blur-shape2 {
-				animation-delay: calc($animationDuration / $numOfShapes * -4);
+				animation-delay: calc(($animationDuration * ($offsetRatioPerShape * 4) * -1));
 			}
 			&.blink-blur-shape3 {
-				animation-delay: calc($animationDuration / $numOfShapes * -3);
+				// animation-delay: calc($animationDuration / $numOfShapes * -3);
+				animation-delay: calc(($animationDuration * ($offsetRatioPerShape * 3) * -1));
 			}
 			&.blink-blur-shape4 {
-				animation-delay: calc($animationDuration / $numOfShapes * -2);
+				// animation-delay: calc($animationDuration / $numOfShapes * -2);
+				animation-delay: calc(($animationDuration * ($offsetRatioPerShape * 2) * -1));
 			}
 			&.blink-blur-shape5 {
-				animation-delay: calc($animationDuration / $numOfShapes * -1);
+				// animation-delay: calc($animationDuration / $numOfShapes * -1);
+				animation-delay: calc(($animationDuration * ($offsetRatioPerShape * 1) * -1));
 			}
-			&.blink-blur-shape6 {
-				animation-delay: calc($animationDuration / $numOfShapes * 0);
-			}
+			// &.blink-blur-shape6 {
+			// 	animation-delay: calc($animationDuration / $numOfShapes * 0);
+			// }
 		}
 	}
 }
@@ -115,9 +146,10 @@ $animationDurationName: (#{defaults.$animationDurationVarName});
 @keyframes #{$shiftingBlinkBlur} {
 	100%,
 	0% {
-		opacity: 0.4;
-		filter: blur(0.075em) drop-shadow(0 0 0.625em);
-		transform: skewX(var(--x-deg)) scale(1.45);
+		opacity: 0.3;
+		// filter: blur(0.075em) drop-shadow(0 0 0.625em); // 0.625em = 10px
+		filter: blur(0.0675em) drop-shadow(0 0 0.1em); // 1px
+		transform: skewX(var(--x-deg)) scale(1.3, 1.6);
 	}
 
 	// --Cause blink--
@@ -136,8 +168,8 @@ $animationDurationName: (#{defaults.$animationDurationVarName});
 
 	50% {
 		opacity: 1;
-		filter: blur(0em) drop-shadow(0 0 0);
-		transform: skewX(var(--x-deg)) scale(1);
+		filter: blur(0em) drop-shadow(0 0 0em);
+		transform: skewX(var(--x-deg)) scale(1, 1);
 	}
 }
 
