@@ -18,7 +18,7 @@ $atomHeight: $atomWidth;
 $electronPathOpacity: 0.18; // The faint orbit path the electron travels around
 $electronApparentWindOpacity: 0.85; // The wind trail of the speeding/travelling electron
 
-$nucleusGlow: string.unique-id();
+$nucleusTextureColoring: string.unique-id();
 $electronSpinAnimation: string.unique-id();
 $orbitSpinAnimation: string.unique-id();
 $atomColoring: string.unique-id();
@@ -27,14 +27,9 @@ $atomColoringOpacityLevel_2: string.unique-id();
 
 // Sass list with variable names that color the animation
 // NOTE: These names should match with ones in Javascript(React component)
-$coloringPropertyNames: (
-	"--atom-phase1-rgb",
-	"--atom-phase2-rgb",
-	"--atom-phase3-rgb",
-	"--atom-phase4-rgb"
-);
+$coloringPropertyNames: ("--atom-phase1-rgb", "--atom-phase2-rgb", "--atom-phase3-rgb", "--atom-phase4-rgb");
 
-@mixin fontColor($phaseNum: null, $alpha: 1) {
+@function genColor($phaseNum, $alpha) {
 	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
 	$rgbColor: rgba(var($varName), $alpha);
 
@@ -45,12 +40,14 @@ $coloringPropertyNames: (
 		$rgbColor: rgba(var($newVarName, var($varName)), $alpha);
 	}
 
-	color: $rgbColor;
+	@return $rgbColor;
+}
+@mixin fontColor($phaseNum: null, $alpha: 1) {
+	color: genColor($phaseNum, $alpha);
 }
 
 .atom-rli-bounding-box {
-	--atom-phase1-rgb: #{$defaultColorRedChannel}, #{$defaultColorGreenChannel},
-		#{$defaultColorBlueChannel};
+	--atom-phase1-rgb: #{$defaultColorRedChannel}, #{$defaultColorGreenChannel}, #{$defaultColorBlueChannel};
 
 	// color: RGBVarChannels();
 	@include fontColor();
@@ -86,12 +83,16 @@ $coloringPropertyNames: (
 			height: $dimension;
 			margin: auto;
 			border-radius: 50%;
-			background-color: currentColor;
+			background-image: radial-gradient(
+				circle at 35% 15%,
+				#{genColor(1, 0.1)},
+				#{genColor(1, 0.3)} 37%,
+				#{genColor(1, 1)} 100%
+			);
+			animation: calc($animationDuration * 4) $animationFn infinite $nucleusTextureColoring;
 		}
 		&::before {
-			filter: blur(0.125em) drop-shadow(0px 0px 0.375em currentColor)
-				drop-shadow(0px 0px 0.75em currentColor);
-			animation: $animationDuration $animationFn infinite $nucleusGlow;
+			filter: drop-shadow(0px 0px 0.0625em currentColor);
 		}
 
 		.electron-orbit {
@@ -115,8 +116,7 @@ $coloringPropertyNames: (
 
 			animation:
 				$animationDuration $animationFn infinite $orbitSpinAnimation,
-				calc($animationDuration * 4) $animationFn infinite
-					$atomColoringOpacityLevel_1;
+				calc($animationDuration * 4) $animationFn infinite $atomColoringOpacityLevel_1;
 
 			// Electron track/path
 			&::after {
@@ -128,8 +128,7 @@ $coloringPropertyNames: (
 				left: 0;
 				border-radius: 50%;
 				@include fontColor(null, $electronPathOpacity);
-				animation: calc($animationDuration * 4) $animationFn infinite
-					$atomColoringOpacityLevel_2;
+				animation: calc($animationDuration * 4) $animationFn infinite $atomColoringOpacityLevel_2;
 				border: 0.125em solid currentColor;
 			}
 
@@ -149,8 +148,8 @@ $coloringPropertyNames: (
 				margin: 0 auto;
 				@include fontColor();
 				box-shadow:
-					0px 0px 0.125em 0.0625em currentColor,
-					0px 0px 1.25em 0.125em currentColor;
+					0px 0px 0.0625em 0.0625em currentColor,
+					0px 0px 0.0625em 0.125em currentColor;
 				background-color: currentColor;
 				transform: rotateY(-70deg);
 				animation:
@@ -161,27 +160,22 @@ $coloringPropertyNames: (
 			&:nth-of-type(1) {
 				--orbit-vector-factor: -1;
 
-				transform: rotateY(65deg)
-					rotateX(calc(54deg * var(--orbit-vector-factor)));
+				transform: rotateY(65deg) rotateX(calc(54deg * var(--orbit-vector-factor)));
 			}
 			&:nth-of-type(2) {
 				--orbit-vector-factor: 1;
 
-				transform: rotateY(65deg)
-					rotateX(calc(54deg * var(--orbit-vector-factor)));
+				transform: rotateY(65deg) rotateX(calc(54deg * var(--orbit-vector-factor)));
 			}
 			&:nth-of-type(3) {
 				--orbit-vector-factor: 0;
 
-				transform: rotateY(65deg)
-					rotateX(calc(54deg * var(--orbit-vector-factor)));
+				transform: rotateY(65deg) rotateX(calc(54deg * var(--orbit-vector-factor)));
 
 				// --------Animation ahead into time <START--------
-				animation-delay: calc($animationDuration * 0.5 * -1),
-					calc($animationDuration * 4 * -1); // No delay applied to coloring animation
+				animation-delay: calc($animationDuration * 0.5 * -1), calc($animationDuration * 4 * -1); // No delay applied to coloring animation
 				&::before {
-					animation-delay: calc($animationDuration * 0.5 * -1),
-						calc($animationDuration * 4 * -1); // No delay applied to coloring animation
+					animation-delay: calc($animationDuration * 0.5 * -1), calc($animationDuration * 4 * -1); // No delay applied to coloring animation
 				}
 				// --------Animation ahead into time <END--------
 
@@ -227,12 +221,10 @@ $animationDurationName: (#{defaults.$animationDurationVarName});
 
 @keyframes #{$orbitSpinAnimation} {
 	from {
-		transform: rotateY(70deg) rotateX(calc(54deg * var(--orbit-vector-factor)))
-			rotateZ(0deg);
+		transform: rotateY(70deg) rotateX(calc(54deg * var(--orbit-vector-factor))) rotateZ(0deg);
 	}
 	to {
-		transform: rotateY(70deg) rotateX(calc(54deg * var(--orbit-vector-factor)))
-			rotateZ(360deg);
+		transform: rotateY(70deg) rotateX(calc(54deg * var(--orbit-vector-factor))) rotateZ(360deg);
 	}
 }
 @keyframes #{$electronSpinAnimation} {
@@ -243,13 +235,71 @@ $animationDurationName: (#{defaults.$animationDurationVarName});
 		transform: rotateY(-70deg) rotateX(-360deg);
 	}
 }
-@keyframes #{$nucleusGlow} {
+@keyframes #{$nucleusTextureColoring} {
 	100%,
 	0% {
-		opacity: 1;
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(1, 0.1)},
+			#{genColor(1, 0.3)} 37%,
+			#{genColor(1, 1)} 100%
+		);
+	}
+	20% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(1, 0.1)},
+			#{genColor(1, 0.3)} 37%,
+			#{genColor(1, 1)} 100%
+		);
+	}
+	25% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(2, 0.1)},
+			#{genColor(2, 0.3)} 37%,
+			#{genColor(2, 1)} 100%
+		);
+	}
+	45% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(2, 0.1)},
+			#{genColor(2, 0.3)} 37%,
+			#{genColor(2, 1)} 100%
+		);
 	}
 	50% {
-		opacity: 0.2;
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(3, 0.1)},
+			#{genColor(3, 0.3)} 37%,
+			#{genColor(3, 1)} 100%
+		);
+	}
+	70% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(3, 0.1)},
+			#{genColor(3, 0.3)} 37%,
+			#{genColor(3, 1)} 100%
+		);
+	}
+	75% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(4, 0.1)},
+			#{genColor(4, 0.3)} 37%,
+			#{genColor(4, 1)} 100%
+		);
+	}
+	95% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(4, 0.1)},
+			#{genColor(4, 0.3)} 37%,
+			#{genColor(4, 1)} 100%
+		);
 	}
 }
 
