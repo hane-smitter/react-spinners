@@ -4,11 +4,11 @@
 @use "../../scss/variables" as defaults;
 @use "../../scss/mixins" as sharedMixins;
 
-$fallbackAnimationDuration: 1.4s; // This time value should be in sync with JS(React component)
+$fallbackAnimationDuration: 1.2s; // This time value should be in sync with JS(React component)
 $animationDuration: var(#{defaults.$animationDurationVarName}, $fallbackAnimationDuration);
 // $animationDuration: 1.2s;
 
-$animationFn: var(#{defaults.$animationEasingVarName}, linear);
+$animationFn: var(#{defaults.$animationEasingVarName}, ease-in);
 
 $numOfShapes: 6;
 $shapeWidth: 1.8em;
@@ -147,9 +147,9 @@ $animationDurationName: (#{defaults.$animationDurationVarName});
 	100%,
 	0% {
 		opacity: 0.3;
-		// filter: blur(0.075em) drop-shadow(0 0 0.625em); // 0.625em = 10px
-		filter: blur(0.0675em) drop-shadow(0 0 0.1em); // 1px
-		transform: skewX(var(--x-deg)) scale(1.3, 1.6);
+		filter: blur(0.0675em) drop-shadow(0 0 0.0625em);
+		transform: skewX(var(--x-deg)) scale(1.2, 1.45);
+		// transform: skewX(var(--x-deg)) scale(1.2);
 	}
 
 	// --Cause blink--
