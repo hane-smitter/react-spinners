@@ -1,8 +1,8 @@
 # react-loading-indicators
 
-A library of usable and wonderful _loading indicators_ to communicate a behind scenes progress to system users.
+A kit of wonderful _loading indicators_ to portray behind scene progress to the waiting system users.
 
-Built with Typescript. Compatible with **react version >=16.8.0**(since hooks).
+Built with Typescript. Type safety and improved DX guaranteed.
 
 ## A demo for your insights
 
@@ -32,22 +32,11 @@ npm install react-loading-indicators
 
 ```
 
-> #### Heads Up 📢
->
-> The following components were renamed:
->
-> - ~~`<CircularProgress />`~~ - `<OrbitProgress />`
-> - ~~`<Seek />`~~ - `<ThreeDot />`
-> - ~~`<GlidingBlink />`~~ - `<BlinkBlur />`
-> - ~~`<Twist />`~~ - `<TrophySpin />`
-> - ~~`<Pulse />`~~ - `<LifeLine />`
-
 ## Examples
 
 ### Importing a loading indicator
 
 ```jsx
-import React from "react";
 import { Atom } from "react-loading-indicators";
 /* 
 | OR directly pull it 😎
@@ -74,8 +63,8 @@ export default Loading;
 
 ### Lighter build
 
-This library is fairly small. However, you might be turbo-charged to make bundle size of your project as small as possible.<br />
-You can directly include a loading indicator you want to ensure it is the only thing included from the library:
+This library is kept at fairly small. You have an option to even shrink further what you include from this library.<br />
+For this, you can directly pull a loading indicator you want; so it is the only thing included from this library:
 
 ```jsx
 import React from "react";
@@ -119,13 +108,13 @@ Each of these components will accept the following _optional props_.
 | variant | `string` |
 
 `<OrbitProgress />` supports the following variants: **`dotted`**, **`spokes`**, **`disc`**, **`split-disc`**, **`track-disc`**. Defaults to `disc`.<br />
-`<ThreeDot />` has the following variants: **`pulsate`**, **`windmill`**, **`bob`**, **`brick-stack`**. Defaults to `pulsate`.<br />
+`<ThreeDot />` has the following variants: **`pulsate`**, **`bounce`**, **`bob`**, **`brick-stack`**. Defaults to `pulsate`.<br />
 You can have an interactive run-through of the variants in the [DEMO](https://react-loading-indicators.netlify.app/) site.
 
 ### How to resize
 
-You can resize a spinner to fit into your needs with the `size` prop that accepts predefined string input.<br>
-If this is not enough, you can give a loading indicator a `fontSize` property via the `style` prop. The style prop is an object that allows you to add your own css. Including `fontSize` in the style object will _evenly_ alter the animation's size, e.g
+You can resize a loading indicator to fit into your needs with the `size` prop that accepts predefined string values.<br>
+If this is not enough for size customization, specifying a `fontSize` property via the `style` prop allows you to shrink size further. The style prop is an object that allows you to add your own CSS to element wrapping the loading animation. A valid value for the [`fontSize` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-size#values) will _evenly_ alter the animation's size, <i>for example</i>:
 
 ```jsx
 const Loading = () => <ThreeDot style={{ fontSize: "8px" }} />;
