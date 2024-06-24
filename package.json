@@ -5,12 +5,14 @@
 	"scripts": {
 		"prebuild": "rm -rf dist",
 		"build": "rollup -c",
-		"postbuild": "rm -rf dist/esm/types && rm -rf dist/cjs/types",
+		"postbuild": "rm -rf dist/esm/types && rm -rf dist/cjs/types && cp package.json dist",
 		"checkVersion": "node scripts/versionExistsCheck.cjs",
 		"test": "echo 'no tests yet'",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"prepublishOnly": "npm run build && npm run test",
+		"prepack": "node ../scripts/preparePkgRoot.cjs",
+		"deploy": "npm run build && cd dist && npm publish",
+		"deploy-dry-run": "npm run build && cd dist && npm publish --dry-run",
 		"format": "prettier --ignore-path .gitignore --write \"src/**/*.ts\" \"src/**/*.js\""
 	},
 	"license": "MIT",
@@ -89,7 +91,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/hane-smitter/react-loading-indicator"
+		"url": "git+https://github.com/hane-smitter/react-loading-indicator.git"
 	},
 	"homepage": "https://react-loading-indicators.netlify.app/",
 	"dependencies": {

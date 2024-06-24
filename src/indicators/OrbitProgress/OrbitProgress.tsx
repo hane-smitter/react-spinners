@@ -1,6 +1,6 @@
 import React from "react";
 
-import { OrbitProgressProps } from "./OrbitProgress.types";
+import type { OrbitProgressProps } from "./OrbitProgress.types";
 import { Disc } from "./Disc";
 import { Dotted } from "./Dotted";
 import { Spokes } from "./Spokes";
