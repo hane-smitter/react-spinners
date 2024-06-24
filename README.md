@@ -1,6 +1,6 @@
 # react-loading-indicators
 
-A kit of wonderful _loading indicators_ to portray behind scene progress to the waiting system users.
+A kit of elegant _loading indicators_ to enhance waiting experience of users when your system has something to do in the background for a while.
 
 Built with Typescript. Type safety and improved DX guaranteed.
 
@@ -40,7 +40,7 @@ npm install react-loading-indicators
 import { Atom } from "react-loading-indicators";
 /* 
 | OR directly pull it 😎
-| import Atom from "react-loading-indicators/dist/Atom";
+| import Atom from "react-loading-indicators/Atom";
 */
 
 const Loading = () => <Atom text="Loading..." />;
@@ -64,11 +64,11 @@ export default Loading;
 ### Lighter build
 
 This library is kept at fairly small. You have an option to even shrink further what you include from this library.<br />
-For this, you can directly pull a loading indicator you want; so it is the only thing included from this library:
+You can directly pull a loading indicator you want:
 
 ```jsx
 import React from "react";
-import OrbitProgress from "react-loading-indicators/dist/OrbitProgress";
+import OrbitProgress from "react-loading-indicators/OrbitProgress";
 
 const Loading = () => (
 	<OrbitProgress variant="track-disc" color="crimson" size="small" />
@@ -86,7 +86,7 @@ Each of these components will accept the following _optional props_.
 |   size    |       `string`        |        medium         |                                            small, medium, large                                             |
 |   color   |  `string` or `array`  |       limegreen       |                                              CSS color values                                               |
 |   style   |       `object`        |        `null`         |                                CSS styles(<small>in Reactjs format</small>)                                 |
-|   text    | `string` or `boolean` |        `false`        |                                         Boolean value or any string                                         |
+|   text    | `string` or `boolean` |        `false`        |                                           Boolean value or string                                           |
 | textColor |       `string`        |      `undefined`      |                                              CSS color values                                               |
 | speedPlus |       `number`        |          `0`          |                                    Number in the range `-5` through `5`                                     |
 |  easing   |       `string`        | default ease function | CSS [easing function](https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function, "Animation easing") |
@@ -95,7 +95,7 @@ Each of these components will accept the following _optional props_.
 
 - `size` - Sets the size of the loading indicator.
 - `color` - Sets the color of the loading indicator.
-- `style` - Applies CSS styles to the loading indicator
+- `style` - Applies CSS to the loading indicator. This will style the outer element that wraps an indicator.
 - `text` - Displays message in the loading indicator.
 - `textColor` - Sets the color of text message in the loading indicator.
 - `speedPlus` - Controls speed of animation. _Negative_ values slows down. _Positive_ numbers speeds up animation. `0` is normal speed.
@@ -114,7 +114,7 @@ You can have an interactive run-through of the variants in the [DEMO](https://re
 ### How to resize
 
 You can resize a loading indicator to fit into your needs with the `size` prop that accepts predefined string values.<br>
-If this is not enough for size customization, specifying a `fontSize` property via the `style` prop allows you to shrink size further. The style prop is an object that allows you to add your own CSS to element wrapping the loading animation. A valid value for the [`fontSize` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-size#values) will _evenly_ alter the animation's size, <i>for example</i>:
+For more size customization, you can specify a `fontSize` property in the `style` prop. A valid value for the [`fontSize` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-size#values) will _evenly_ alter the animation's size, <i>for example</i>:
 
 ```jsx
 const Loading = () => <ThreeDot style={{ fontSize: "8px" }} />;
