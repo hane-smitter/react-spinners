@@ -1,6 +1,6 @@
 name: Publish to NPM
 on:
-  # this will trigger on git tags
+  # this will trigger on git tags pushed
   release:
     types: [created]
 jobs:
