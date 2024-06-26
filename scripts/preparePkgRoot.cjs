@@ -5,7 +5,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-console.log("process.cwd --> ", process.cwd());
+// console.log("process.cwd --> ", process.cwd());
 const pkgJson = require("../package.json");
 
 function run() {
@@ -23,7 +23,7 @@ function run() {
 	}
 
 	const tarballPkgJsonPath = path.resolve(process.cwd(), "./package.json");
-	console.log({ tarballPkgJsonPath });
+	// console.log({ tarballPkgJsonPath });
 	fs.writeFileSync(
 		tarballPkgJsonPath,
 		Buffer.from(JSON.stringify(pkgJson, null, 2), "utf-8")
