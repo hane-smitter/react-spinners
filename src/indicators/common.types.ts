@@ -8,15 +8,18 @@ type Easing =
 	| "cubic-bezier(0.0, 0.0, 0.58, 1.0)"
 	| "cubic-bezier(0.42, 0.0, 0.58, 1.0)"
 	| "linear(0, 1)"
-	| "steps(4, end)";
+	| "steps(4, end)"
+	| (string & {});
 
 export interface CommonProps {
 	/**
-	 * Sets color of the indicator/throbber
+	 * Sets color of the indicator.
+	 *
+	 * When specifying alpha channel in **RGB** color format, it's recommended to explicitly use **RGBA**.
 	 */
 	color?: string | string[];
 	/**
-	 * Sets size of the indicator/throbber
+	 * Sets size of the indicator
 	 */
 	size?: "small" | "medium" | "large";
 	/**
@@ -34,7 +37,7 @@ export interface CommonProps {
 	 */
 	speedPlus?: -5 | -4 | -3 | -2 | -1 | 0 | 1 | 2 | 3 | 4 | 5;
 	/**  
-	 CSS easing function, e.g `linear`, `ease-in`
+	 Animation easing function, e.g `linear`, `ease-in`
 	 *	@see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function | MDN Docs}
 	 */
 	easing?: Easing;

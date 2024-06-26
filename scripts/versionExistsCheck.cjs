@@ -3,27 +3,27 @@ const packageJson = require("../package.json");
 const chalk = require("chalk");
 
 // const command = "[ \"$(npm view .@${npm_package_version})\" == \"\" ] && exit 0";
-const command = `npm view ${packageJson.name}@${packageJson.version}`;
+const command = `npm view ${packageJson.name}@${packageJson.version} --json`;
 
-exec(command, (error, stdout, stderr) => {
-	// console.log(process.cwd());
-	if (error) {
-		// console.log(`Command error: ${error.message}`);
-		console.log(chalk.bgRed("Oops error:") + " " + error.message);
-		process.exit(1);
-	}
-	if (stderr) {
+exec(command, (_error, stdout, stderr) => {
+	const jsonErrStr = stdout; // expected to be a JSON string due to --json passed to command
+	const { error: err } = JSON.parse(jsonErrStr) || {};
+
+	// console.log({ error: !!error, stdout: !!stdout, stderr: !!stderr });
+
+	if (stderr && err && err.code === "E404") {
+		// When no package version is found, then it okay to publish this version
+		process.exitCode = 0;
+		console.log(chalk.greenBright("This is a NEW Version number!"));
+	} else if (stderr) {
+		// To identify an stdout error that occured whose code was not 'E404'
+		process.exitCode = 2;
 		console.log(chalk.bgRed("stderr:") + " " + stderr);
-		process.exit(2);
-		// return;
-	}
-	// console.log(`stdout: ${stdout}`);
-	if (stdout == "") {
-		console.log(chalk.greenBright("New package Version!"));
-		process.exit(0);
 	} else {
-		console.log(chalk.red("This package Version already exists!"));
-		// console.log(`stdout: ${stdout}`);
-		process.exit(3);
+		// if command resolves sucessfully, definitely a vesrion of this package already exists
+		process.exitCode = 1;
+		console.log(chalk.red("Package Version already exists!"));
 	}
+
+	process.exit();
 });

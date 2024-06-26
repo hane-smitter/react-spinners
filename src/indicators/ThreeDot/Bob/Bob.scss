@@ -1,83 +1,184 @@
-@use "../../../scss/variables" as defaults;
+@use "sass:string";
+@use "sass:list";
 
-// Radial graient syntax: radial-gradient( [ <ending-shape> || <size> ]? [ at <position> ]? , <color-stop-list> )
-$animationDuration: var(--rli-animation-duration, 1.2s);
-$animationFn: var(--rli-animation-function, linear);
-$dot-width: 0.96em;
+@use "../../../scss/variables" as defaults;
+@use "../../../scss/mixins" as sharedMixins;
+
+$fallbackAnimationDuration: 1.2s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
+
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
+$dot-width: 1.1em;
+
+$bobMovement: string.unique-id();
+$bobColoringAnim: string.unique-id();
+
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--TD-bob-phase1-color",
+	"--TD-bob-phase2-color",
+	"--TD-bob-phase3-color",
+	"--TD-bob-phase4-color"
+);
+
+@function TDBobColorVar($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
+
+	@return $cssVar;
+}
 
 @mixin dot($dotNo) {
-    $dotColor: currentColor;
-
-    @if ($dotNo) {
-        $dotColor: var(--bob-dot#{$dotNo}-color, currentColor);
-    }
-
-    background: radial-gradient(circle at center, $dotColor 0% 58%, rgba(0, 0, 0, 0) 68%) center/100% 50% no-repeat;
+	background: radial-gradient(
+			circle closest-side at center,
+			currentColor 0% 92%,
+			rgba(0, 0, 0, 0) calc(92% + 1px)
+		)
+		50% 50%/100% 50% no-repeat;
 }
 
 .bob-rli-bounding-box {
-    box-sizing: border-box;
-    font-size: defaults.$fontSizer;
-    display: inline-block;
-    color: defaults.$defaultColor;
+	--TD-bob-phase1-color: #{defaults.$defaultColor};
 
-    .bob-indicator {
-        // width = dot1: 2.5em + spacing: 1.25em + dot2: 2.5em + spacing: 1.25em + dot3: 2.5em
-        width: calc($dot-width * 3 + (($dot-width / 2) * 2));
-        height: calc($dot-width * 2);
-        position: relative;
-        display: block;
-        margin: 0 auto;
+	box-sizing: border-box;
+	font-size: defaults.$fontSizer;
+	display: inline-block;
+	color: TDBobColorVar();
 
-        .bobbing,
-        .bobbing::before,
-        .bobbing::after {
-            width: $dot-width;
-            height: 100%;
-            display: grid;
+	.bob-indicator {
+		// width = dot1: 2.5em + spacing: 1.25em + dot2: 2.5em + spacing: 1.25em + dot3: 2.5em
+		width: calc($dot-width * 3 + (($dot-width * 0.5) * 2));
+		height: calc($dot-width * 2);
+		position: relative;
+		display: block;
+		margin: 0 auto;
 
-            animation-name: bobMovement;
-            animation-duration: $animationDuration;
-            animation-iteration-count: infinite;
-            animation-timing-function: $animationFn;
-            animation-delay: calc(var(--delay, 0) * 0.4s);
-        }
-        .bobbing::before,
-        .bobbing::after {
-            content: "";
-            grid-area: 1/1;
-        }
-        .bobbing {
-            --delay: -0.5;
+		.bobbing,
+		.bobbing::before,
+		.bobbing::after {
+			width: $dot-width;
+			height: 100%;
+			display: grid;
 
-            @include dot(1);
-        }
-        .bobbing::before {
-            --delay: 0;
-            transform: translateX(150%);
+			// animation-name: $bobMovement, $bobColoringAnim;
+			// animation-duration: $animationDuration;
+			// animation-iteration-count: infinite;
+			// animation-timing-function: $animationFn;
+			// animation-delay: calc(var(--delay, 0) * 0.4s);
 
-            @include dot(2);
-        }
-        .bobbing::after {
-            --delay: 0.5;
-            transform: translateX(300%);
+			animation:
+				$animationDuration $animationFn var(--delay) infinite $bobMovement,
+				calc($animationDuration * 4) $animationFn var(--delay) infinite
+					$bobColoringAnim;
+		}
+		.bobbing::before,
+		.bobbing::after {
+			content: "";
+			grid-area: 1/1;
+		}
+		.bobbing {
+			// --delay: -0.15;
+			--delay: #{calc($animationDuration * 0.12 * -1)}; // 10% into keyframe animation
 
-            @include dot(3);
-        }
-    }
+			@include dot(1);
+		}
+		.bobbing::before {
+			// --delay: 0;
+			--delay: #{calc($animationDuration * 0)};
+
+			transform: translateX(150%);
+
+			@include dot(2);
+		}
+		.bobbing::after {
+			// --delay: 0.5;
+			--delay: #{calc($animationDuration * 0.12)};
+
+			transform: translateX(300%);
+
+			@include dot(3);
+		}
+	}
 }
 
-@keyframes bobMovement {
-    20% {
-        background-position: 50% 0%;
-    }
-    40% {
-        background-position: 50% 100%;
-    }
-    60% {
-        background-position: 50% 25%;
-    }
-    80% {
-        background-position: 50% 50%;
-    }
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$bobMovement} {
+	100%,
+	0% {
+		background-position: 50% 50%;
+	}
+	15% {
+		background-position: 50% 10%;
+	}
+	30% {
+		background-position: 50% 100%;
+	}
+	40% {
+		background-position: 50% 0%;
+	}
+	// 70% {
+	// 	background-position: 50% 60%;
+	// }
+	50% {
+		background-position: 50% 90%;
+	}
+	70% {
+		background-position: 50% 10%;
+	}
+	98% {
+		background-position: 50% 50%;
+	}
+}
+@keyframes #{$bobColoringAnim} {
+	100%,
+	0% {
+		color: TDBobColorVar(1);
+	}
+	22% {
+		color: TDBobColorVar(1);
+	}
+	25% {
+		color: TDBobColorVar(2);
+	}
+	47% {
+		color: TDBobColorVar(2);
+	}
+	50% {
+		color: TDBobColorVar(3);
+	}
+	72% {
+		color: TDBobColorVar(3);
+	}
+	75% {
+		color: TDBobColorVar(4);
+	}
+	97% {
+		color: TDBobColorVar(4);
+	}
 }

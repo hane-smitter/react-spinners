@@ -1,87 +1,175 @@
+@use "sass:string";
+@use "sass:list";
+
 @use "../../../scss/variables" as defaults;
+@use "../../../scss/mixins" as sharedMixins;
 
-$animationDuration: var(--rli-animation-duration, 1.3s);
-$animationFn: var(--rli-animation-function, ease-in-out);
-$dot-width: 0.96em;
+$fallbackAnimationDuration: 1.2s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
 
-.pulsate-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  display: inline-block;
-  box-sizing: border-box;
-  color: defaults.$defaultColor;
+$animationFn: var(#{defaults.$animationEasingVarName}, ease-in-out);
+$dot-width: 1.1em;
 
-  .pulsate-indicator {
-    width: 5em;
-    height: 1.5em;
-    text-align: center;
-    position: relative;
-    z-index: 0;
+$dotPulsateAnim: string.unique-id();
+$pulsateColoring: string.unique-id();
 
-    display: flex;
-    justify-content: center;
-    column-gap: 0.12em;
-    align-items: center;
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--TD-pulsate-phase1-color",
+	"--TD-pulsate-phase2-color",
+	"--TD-pulsate-phase3-color",
+	"--TD-pulsate-phase4-color"
+);
 
-    .pulsate-bounce {
-      width: $dot-width;
-      height: $dot-width;
-      background-color: currentColor;
+@function TDPulsateColorVar($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
 
-      border-radius: 50%;
-      display: inline-block;
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
 
-      animation-name: pulsateDotBlink;
-      animation-duration: $animationDuration;
-      animation-iteration-count: infinite;
-      animation-timing-function: $animationFn;
-      animation-fill-mode: both;
-    }
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
 
-    .pulsate-bounce1 {
-      animation-delay: -0.32s;
-      background-color: var(--pulsateDot1-color, currentColor);
-    }
-
-    .pulsate-bounce2 {
-      animation-delay: -0.16s;
-      background-color: var(--pulsateDot2-color, currentColor);
-    }
-    .pulsate-bounce3 {
-      animation-delay: 0s;
-      background-color: var(--pulsateDot3-color, currentColor);
-    }
-  }
-
-  .pulsate-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    // font-weight: 500;
-    width: 80%;
-    text-transform: uppercase;
-    text-align: center;
-    font-size: 0.6em;
-    letter-spacing: 0.5px;
-    font-family: sans-serif;
-    mix-blend-mode: difference;
-    // filter: invert(1);
-
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    z-index: -2;
-  }
+	@return $cssVar;
 }
 
-@keyframes pulsateDotBlink {
-  0%,
-  80%,
-  100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
-  }
+.pulsate-rli-bounding-box {
+	--TD-pulsate-phase1-color: #{defaults.$defaultColor};
+
+	font-size: defaults.$fontSizer;
+	display: inline-block;
+	box-sizing: border-box;
+	color: TDPulsateColorVar();
+
+	.pulsate-indicator {
+		// width: 5em;
+		// height: 1.5em;
+		width: calc($dot-width * 3 + (($dot-width * 0.5) * 2));
+		height: $dot-width;
+		text-align: center;
+		position: relative;
+		z-index: 0;
+
+		display: flex;
+		justify-content: space-between;
+		flex-wrap: nowrap;
+		// column-gap: 0.12em;
+		align-items: center;
+
+		// .pulsate-bounce {
+		// 	width: $dot-width;
+		// 	height: $dot-width;
+		// 	background-color: currentColor;
+
+		// 	border-radius: 50%;
+		// 	display: inline-block;
+
+		// 	animation: $dotPulsateAnim $animationDuration $animationFn infinite;
+		// }
+
+		.pulsate-dot {
+			width: $dot-width;
+			height: $dot-width;
+			border-radius: 50%;
+			background-color: TDPulsateColorVar();
+			transform: scale(0);
+
+			animation:
+				$animationDuration $animationFn var(--delay) infinite $dotPulsateAnim,
+				calc($animationDuration * 4) $animationFn var(--delay) infinite
+					$pulsateColoring;
+
+			&:nth-of-type(1) {
+				--delay: #{calc($animationDuration * 0.15 * -1)};
+			}
+			&:nth-of-type(2) {
+				--delay: #{calc($animationDuration * 0)};
+			}
+			&:nth-of-type(3) {
+				--delay: #{calc($animationDuration * 0.15)};
+			}
+		}
+	}
+
+	.pulsate-text {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		// font-weight: 500;
+		width: 80%;
+		text-transform: uppercase;
+		text-align: center;
+		font-size: 0.6em;
+		letter-spacing: 0.5px;
+		font-family: sans-serif;
+		mix-blend-mode: difference;
+
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+
+		z-index: -2;
+	}
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$dotPulsateAnim} {
+	0%,
+	90%,
+	100% {
+		transform: scale(0);
+	}
+	40% {
+		transform: scale(1);
+	}
+}
+
+@keyframes #{$pulsateColoring} {
+	0%,
+	100% {
+		background-color: TDPulsateColorVar(1);
+	}
+	24.9% {
+		background-color: TDPulsateColorVar(1);
+	}
+	25% {
+		background-color: TDPulsateColorVar(2);
+	}
+	49.9% {
+		background-color: TDPulsateColorVar(2);
+	}
+	50% {
+		background-color: TDPulsateColorVar(3);
+	}
+	74.9% {
+		background-color: TDPulsateColorVar(3);
+	}
+	75% {
+		background-color: TDPulsateColorVar(4);
+	}
+	99.9% {
+		background-color: TDPulsateColorVar(4);
+	}
 }

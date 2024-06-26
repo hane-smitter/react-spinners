@@ -1,3 +1,3 @@
-import { CommonProps } from "../../common.types";
+import { OrbitProgressProps } from "../OrbitProgress.types";
 
-export interface TrackDiscProps extends CommonProps {}
+export interface TrackDiscProps extends OrbitProgressProps {}

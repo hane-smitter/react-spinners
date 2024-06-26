@@ -1,138 +1,222 @@
-@use "../../scss/variables" as defaults;
+@use "sass:string";
+@use "sass:list";
+@use "sass:math";
 
-$animationDuration: var(--rli-animation-duration, 1s);
-$animationFn: var(--rli-animation-function, cubic-bezier(0.05, 0.28, 0.79, 0.98));
+@use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
+@use "../../scss/utils" as fns;
+
+$fallbackAnimationDuration: 1s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
+
+$animationFn: var(
+	#{defaults.$animationEasingVarName},
+	cubic-bezier(0.05, 0.28, 0.79, 0.98)
+);
 $rotateSquareAnimDuration: $animationDuration;
 
-// $expandSquareAnimDuration: 1s;
-// $rotateSquareAnimDuration: 1s;
+$spinAnimation: string.unique-id();
+$expandAnimation: string.unique-id();
+$fourSquareColoring: string.unique-id();
+
+$squareWidth: 2.5em;
+$squareHeight: $squareWidth; // Height same as width
+
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--four-square-phase1-color",
+	"--four-square-phase2-color",
+	"--four-square-phase3-color",
+	"--four-square-phase4-color"
+);
+
+@mixin fontColor($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
+
+	color: $cssVar;
+}
 
 .foursquare-rli-bounding-box {
-    box-sizing: border-box;
-    display: inline-block;
-    font-size: defaults.$fontSizer;
-    overflow: visible;
+	--four-square-phase1-color: #{defaults.$defaultColor};
 
-    .foursquare-throbber {
-        --dimension-unit: 4;
+	font-size: defaults.$fontSizer;
+	box-sizing: border-box;
+	@include fontColor();
+	display: inline-block;
+	overflow: hidden;
 
-        height: calc(var(--dimension-unit) * 1em);
-        width: calc(var(--dimension-unit) * 1em);
-        color: defaults.$defaultColor;
-        font-size: 1em;
-        // Create stacking context and relative positioning
-        position: relative;
-        z-index: 0;
+	.foursquare-indicator {
+		// Foursquare indicator will contain an a part of animation that expands an element by: $squareWidth * 0.5
+		// So largest width of animated element will be: $squareWidth + $squareWidth * 0.5
+		// This expanded expanded element when rotated, its edges will overflow the containing parent i.e this element(.foursquare-indicator)
+		// To make all content fit inside, we set the length to the calculated hypotenuse from the triangle of the expanding element, and when it is at its widest dimensions
+		$biggestWidth: $squareWidth + $squareWidth * 0.5;
+		$biggestHeight: $squareHeight + $squareHeight * 0.5;
+		$size: math.sqrt(
+			math.pow(fns.stripUnit($biggestWidth), 2) +
+				math.pow(fns.stripUnit($biggestHeight), 2)
+		); // FORMULA calculating hypot. of right-angled triangle
 
-        .squares-container {
-            height: inherit;
-            width: inherit;
-            color: currentColor;
-            position: relative;
-            animation: fourSquareExpand $animationDuration $animationFn infinite;
-            transform: rotate(45deg);
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
+		// Multiply by 1em to assign `em` units that was initially stripped
+		height: calc($size * 1em);
+		width: calc($size * 1em);
+		position: relative;
+		display: block;
 
-        .foursquare-text {
-            mix-blend-mode: difference;
-            // filter: invert(3%);
+		.squares-container {
+			// Note: Properties below also create stacking context
+			position: absolute;
+			z-index: 0;
 
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-30%, -50%);
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			margin: auto;
+			height: $squareHeight;
+			width: $squareWidth;
+			color: inherit;
+			will-change: color, width, height;
+			transform: rotate(45deg);
+			animation:
+				$animationDuration $animationFn infinite $expandAnimation,
+				calc($animationDuration * 4) $animationFn infinite $fourSquareColoring;
 
-            z-index: -2;
-        }
+			.square {
+				position: absolute;
+				width: calc($squareWidth / 2);
+				height: calc($squareHeight / 2);
+				border-radius: 0.1875em;
+				background-color: currentColor;
 
-        .square {
-            position: absolute;
-            width: calc(var(--dimension-unit) / 2 * 1em);
-            height: calc(var(--dimension-unit) / 2 * 1em);
-            border-radius: 3px;
-            background-color: currentColor;
+				animation: $spinAnimation $animationDuration $animationFn both infinite;
 
-            animation-name: fourSquareSquareSpin;
-            animation-duration: $rotateSquareAnimDuration;
-            animation-timing-function: $animationFn;
-            animation-fill-mode: both;
-            animation-iteration-count: infinite;
+				&.square1 {
+					top: 0;
+					left: 0;
+				}
 
-            &.square1 {
-                background-color: var(--square1-color, currentColor);
-                top: 0;
-                left: 0;
-            }
+				&.square2 {
+					top: 0;
+					right: 0;
+				}
 
-            &.square2 {
-                background-color: var(--square2-color, currentColor);
-                top: 0;
-                right: 0;
-            }
+				&.square3 {
+					bottom: 0;
+					left: 0;
+				}
 
-            &.square3 {
-                background-color: var(--square3-color, currentColor);
-                bottom: 0;
-                left: 0;
-            }
-
-            &.square4 {
-                background-color: var(--square4-color, currentColor);
-                bottom: 0;
-                right: 0;
-            }
-        }
-    }
+				&.square4 {
+					bottom: 0;
+					right: 0;
+				}
+			}
+		}
+	}
 }
 
-@keyframes fourSquareExpand {
-    0% {
-        width: calc(var(--dimension-unit) * 1em);
-        height: calc(var(--dimension-unit) * 1em);
-    }
-
-    10% {
-        width: calc(var(--dimension-unit) * 1em);
-        height: calc(var(--dimension-unit) * 1em);
-    }
-
-    50% {
-        width: calc(var(--dimension-unit) * 1em + 2em);
-        height: calc(var(--dimension-unit) * 1em + 2em);
-    }
-
-    90% {
-        width: calc(var(--dimension-unit) * 1em);
-        height: calc(var(--dimension-unit) * 1em);
-    }
-
-    100% {
-        width: calc(var(--dimension-unit) * 1em);
-        height: calc(var(--dimension-unit) * 1em);
-    }
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
 }
 
-@keyframes fourSquareSquareSpin {
-    0% {
-        transform: rotate(0deg);
-    }
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
 
-    10% {
-        transform: rotate(0deg);
-    }
+@keyframes #{$expandAnimation} {
+	0% {
+		width: $squareWidth;
+		height: $squareHeight;
+	}
 
-    50% {
-        transform: rotate(90deg);
-    }
+	10% {
+		width: $squareWidth;
+		height: $squareHeight;
+	}
 
-    90% {
-        transform: rotate(90deg);
-    }
+	50% {
+		width: calc($squareWidth + $squareWidth * 0.5);
+		height: calc($squareHeight + $squareHeight * 0.5);
+	}
 
-    100% {
-        transform: rotate(90deg);
-    }
+	90% {
+		width: $squareWidth;
+		height: $squareHeight;
+	}
+
+	100% {
+		width: $squareWidth;
+		height: $squareHeight;
+	}
+}
+
+@keyframes #{$spinAnimation} {
+	0% {
+		transform: rotateZ(0deg);
+	}
+
+	10% {
+		transform: rotateZ(0deg);
+	}
+
+	50% {
+		transform: rotateZ(90deg);
+	}
+
+	90% {
+		transform: rotateZ(90deg);
+	}
+
+	100% {
+		transform: rotateZ(90deg);
+	}
+}
+
+@keyframes #{$fourSquareColoring} {
+	100%,
+	0% {
+		@include fontColor(1);
+	}
+	20% {
+		@include fontColor(1);
+	}
+	25% {
+		@include fontColor(2);
+	}
+	45% {
+		@include fontColor(2);
+	}
+	50% {
+		@include fontColor(3);
+	}
+	70% {
+		@include fontColor(3);
+	}
+	75% {
+		@include fontColor(4);
+	}
+	95% {
+		@include fontColor(4);
+	}
 }

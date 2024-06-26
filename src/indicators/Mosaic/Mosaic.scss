@@ -1,98 +1,171 @@
+@use "sass:string";
+@use "sass:list";
+
 @use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
 
-$animationDuration: var(--rli-animation-duration, 1.3s);
-$animationFn: var(--rli-animation-function, ease-in-out);
+$fallbackAnimationDuration: 1.5s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
+
+$animationFn: var(#{defaults.$animationEasingVarName}, ease-in-out);
 $interval: var(--mosaic-skip-interval, 0.1s);
+$colorVarsNum: 4; // Number of coloring variables
 
-.mosaic-rli-bounding-box {
-  box-sizing: border-box;
-  font-size: defaults.$fontSizer;
-  color: defaults.$defaultColor;
+$mosaicAnimate: string.unique-id();
+$mosaicColoring: string.unique-id();
 
-  .mosaic-throbber {
-    width: 5em;
-    height: 5em;
-    color: currentColor;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-areas:
-      "a b c"
-      "d e f"
-      "g h i";
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--mosaic-phase1-color",
+	"--mosaic-phase2-color",
+	"--mosaic-phase3-color",
+	"--mosaic-phase4-color"
+);
 
-    //create stacking context
-    position: relative;
-    z-index: 0;
+@function mosaicColorVar($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
 
-    .mosaic-cube-text {
-      mix-blend-mode: difference;
-      // filter: invert(1);
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
 
-      position: absolute;
-      top: 105%;
-      left: 50%;
-      transform: translateX(-50%);
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
 
-      z-index: -2;
-    }
-
-    .mosaic-cube {
-      background-color: currentColor;
-
-      animation-name: mosaicAnimate;
-      animation-duration: $animationDuration;
-      animation-timing-function: $animationFn;
-      animation-iteration-count: infinite;
-    }
-
-    .mosaic-cube1 {
-      animation-delay: calc($interval * 2);
-      grid-area: a;
-    }
-    .mosaic-cube2 {
-      animation-delay: calc($interval * 3);
-      grid-area: b;
-    }
-    .mosaic-cube3 {
-      grid-area: c;
-      animation-delay: calc($interval * 4);
-    }
-    .mosaic-cube4 {
-      grid-area: d;
-      animation-delay: calc($interval * 1);
-    }
-    .mosaic-cube5 {
-      grid-area: e;
-      animation-delay: calc($interval * 2);
-    }
-    .mosaic-cube6 {
-      grid-area: f;
-      animation-delay: calc($interval * 3);
-    }
-    .mosaic-cube7 {
-      grid-area: g;
-      animation-delay: 0s;
-    }
-    .mosaic-cube8 {
-      grid-area: h;
-      animation-delay: calc($interval * 1);
-    }
-    .mosaic-cube9 {
-      grid-area: i;
-      animation-delay: calc($interval * 2);
-    }
-  }
+	@return $cssVar;
 }
 
-@keyframes mosaicAnimate {
-  0%,
-  70%,
-  100% {
-    transform: scale(1, 1);
-    transform: scale3D(1, 1, 1);
-  }
-  35% {
-    transform: scale(0, 0);
-    transform: scale3D(0, 0, 1);
-  }
+.mosaic-rli-bounding-box {
+	--mosaic-phase1-color: #{defaults.$defaultColor};
+
+	box-sizing: border-box;
+	font-size: defaults.$fontSizer;
+	color: mosaicColorVar();
+
+	.mosaic-indicator {
+		width: 5em;
+		height: 5em;
+		color: currentColor;
+		display: grid;
+		gap: 0.125em;
+		grid-template-columns: repeat(3, 1fr);
+		grid-template-areas:
+			"a b c"
+			"d e f"
+			"g h i";
+
+		//create stacking context
+		position: relative;
+		z-index: 0;
+
+		.mosaic-cube-text {
+			mix-blend-mode: difference;
+			// filter: invert(1);
+
+			position: absolute;
+			top: 105%;
+			left: 50%;
+			transform: translateX(-50%);
+
+			z-index: -2;
+		}
+
+		.mosaic-cube {
+			background-color: mosaicColorVar();
+
+			animation-name: $mosaicAnimate, $mosaicColoring;
+			animation-duration: $animationDuration,
+				calc($animationDuration * $colorVarsNum);
+			animation-timing-function: $animationFn;
+			animation-iteration-count: infinite;
+		}
+
+		.mosaic-cube1 {
+			animation-delay: calc($interval * 2);
+			grid-area: a;
+		}
+		.mosaic-cube2 {
+			animation-delay: calc($interval * 3);
+			grid-area: b;
+		}
+		.mosaic-cube3 {
+			grid-area: c;
+			animation-delay: calc($interval * 4);
+		}
+		.mosaic-cube4 {
+			grid-area: d;
+			animation-delay: calc($interval * 1);
+		}
+		.mosaic-cube5 {
+			grid-area: e;
+			animation-delay: calc($interval * 2);
+		}
+		.mosaic-cube6 {
+			grid-area: f;
+			animation-delay: calc($interval * 3);
+		}
+		.mosaic-cube7 {
+			grid-area: g;
+			animation-delay: 0s;
+		}
+		.mosaic-cube8 {
+			grid-area: h;
+			animation-delay: calc($interval * 1);
+		}
+		.mosaic-cube9 {
+			grid-area: i;
+			animation-delay: calc($interval * 2);
+		}
+	}
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$mosaicAnimate} {
+	0%,
+	60%,
+	100% {
+		// transform: scale(1, 1);
+		transform: scale3D(1, 1, 1);
+	}
+	30% {
+		// transform: scale(0, 0);
+		transform: scale3D(0, 0, 1);
+	}
+}
+
+@keyframes #{$mosaicColoring} {
+	100%,
+	0% {
+		background-color: mosaicColorVar(1);
+	}
+	25% {
+		background-color: mosaicColorVar(2);
+	}
+	50% {
+		background-color: mosaicColorVar(3);
+	}
+	75% {
+		background-color: mosaicColorVar(4);
+	}
 }

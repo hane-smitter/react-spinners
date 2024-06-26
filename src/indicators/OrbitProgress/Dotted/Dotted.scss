@@ -1,139 +1,161 @@
-@use "../../../scss/variables" as defaults;
+@use "sass:string";
+@use "sass:list";
 
-$animationDuration: var(--rli-animation-duration, 1.2s);
-$animationFn: var(--rli-animation-function, ease-in-out);
+@use "../../../scss/variables" as defaults;
+@use "../../../scss/mixins" as sharedMixins;
+
+$fallbackAnimationDuration: 1.2s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
+
+$animationFn: var(#{defaults.$animationEasingVarName}, ease-in-out);
 $numberOfDots: 12;
 
-.dot-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  box-sizing: border-box;
-  display: inline-block;
+// Animation names
+$fadeDots: string.unique-id();
+$dottedProgressColoring: string.unique-id();
 
-  .fading-dot-throbber {
-    width: 5em;
-    height: 5em;
-    color: defaults.$defaultColor;
-    display: inline-block;
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--OP-dotted-phase1-color",
+	"--OP-dotted-phase2-color",
+	"--OP-dotted-phase3-color",
+	"--OP-dotted-phase4-color"
+);
 
-    // Create stacking context
-    position: relative;
-    z-index: 0;
+@function dottedColorPhase($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
 
-    .fading-dot-text {
-      mix-blend-mode: difference;
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
 
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
 
-      z-index: -2;
-    }
-
-    .fading-dot-matter {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-
-      transform: rotate(calc((var(--elem-pos) - 1) * calc(360deg / $numberOfDots)));
-
-      &::before {
-        content: "";
-        display: block;
-        margin: 0 auto;
-        width: 15%;
-        height: 15%;
-        background-color: currentColor;
-        border-radius: 50%;
-
-        animation-name: fadeDots;
-        animation-duration: $animationDuration;
-        animation-iteration-count: infinite;
-        animation-timing-function: $animationFn;
-        animation-fill-mode: both;
-        // Algorithm: duration/total_dots * dot_pos
-        animation-delay: calc(($animationDuration / $numberOfDots) * ($numberOfDots - (var(--elem-pos) - 1)) * -1);
-      }
-    }
-
-    // .fading-dot2 {
-    //   transform: rotate(30deg);
-    // }
-    // .fading-dot3 {
-    //   transform: rotate(60deg);
-    // }
-    // .fading-dot4 {
-    //   transform: rotate(90deg);
-    // }
-    // .fading-dot5 {
-    //   transform: rotate(120deg);
-    // }
-    // .fading-dot6 {
-    //   transform: rotate(150deg);
-    // }
-    // .fading-dot7 {
-    //   transform: rotate(180deg);
-    // }
-    // .fading-dot8 {
-    //   transform: rotate(210deg);
-    // }
-    // .fading-dot9 {
-    //   transform: rotate(240deg);
-    // }
-    // .fading-dot10 {
-    //   transform: rotate(270deg);
-    // }
-    // .fading-dot11 {
-    //   transform: rotate(300deg);
-    // }
-    // .fading-dot12 {
-    //   transform: rotate(330deg);
-    // }
-    // .fading-dot2:before {
-    //   animation-delay: -1.1s;
-    // }
-    // .fading-dot3:before {
-    //   animation-delay: -1s;
-    // }
-    // .fading-dot4:before {
-    //   animation-delay: -0.9s;
-    // }
-    // .fading-dot5:before {
-    //   animation-delay: -0.8s;
-    // }
-    // .fading-dot6:before {
-    //   animation-delay: -0.7s;
-    // }
-    // .fading-dot7:before {
-    //   animation-delay: -0.6s;
-    // }
-    // .fading-dot8:before {
-    //   animation-delay: -0.5s;
-    // }
-    // .fading-dot9:before {
-    //   animation-delay: -0.4s;
-    // }
-    // .fading-dot10:before {
-    //   animation-delay: -0.3s;
-    // }
-    // .fading-dot11:before {
-    //   animation-delay: -0.2s;
-    // }
-    // .fading-dot12:before {
-    //   animation-delay: -0.1s;
-    // }
-  }
+	@return $cssVar;
 }
 
-@keyframes fadeDots {
-  0%,
-  39%,
-  100% {
-    opacity: 0;
-  }
-  40% {
-    opacity: 1;
-  }
+.OP-dotted-rli-bounding-box {
+	--OP-dotted-phase1-color: #{defaults.$defaultColor};
+
+	font-size: defaults.$fontSizer;
+	box-sizing: border-box;
+	display: inline-block;
+
+	.OP-dotted-indicator {
+		width: 5em;
+		height: 5em;
+		color: dottedColorPhase();
+		display: inline-block;
+
+		// Create stacking context
+		position: relative;
+		z-index: 0;
+
+		.OP-dotted-text {
+			mix-blend-mode: difference;
+
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+
+			z-index: -2;
+		}
+		.dot-shape-holder {
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			right: 0;
+
+			& .dot {
+				display: block;
+				margin: 0 auto;
+				width: 15%;
+				height: 15%;
+				background-color: currentColor;
+				border-radius: 50%;
+
+				animation:
+					$animationDuration $animationFn infinite $fadeDots,
+					calc($animationDuration * 4) $animationFn infinite
+						$dottedProgressColoring;
+			}
+
+			@for $j from 1 through $numberOfDots {
+				$rotationDeg: calc($j - 1) * calc(360deg / $numberOfDots);
+				$animationDelay: calc(
+					($animationDuration / $numberOfDots) * ($numberOfDots - ($j - 1)) * -1
+				);
+
+				&:nth-of-type(#{$j}) {
+					transform: rotate($rotationDeg);
+				}
+				&:nth-of-type(#{$j}) .dot {
+					animation-delay: $animationDelay;
+				}
+			}
+		}
+	}
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$fadeDots} {
+	0%,
+	39%,
+	100% {
+		opacity: 0;
+	}
+	40% {
+		opacity: 1;
+	}
+}
+@keyframes #{$dottedProgressColoring} {
+	100%,
+	0% {
+		background-color: dottedColorPhase(1);
+	}
+	22% {
+		background-color: dottedColorPhase(1);
+	}
+	25% {
+		background-color: dottedColorPhase(2);
+	}
+	47% {
+		background-color: dottedColorPhase(2);
+	}
+	50% {
+		background-color: dottedColorPhase(3);
+	}
+	72% {
+		background-color: dottedColorPhase(3);
+	}
+	75% {
+		background-color: dottedColorPhase(4);
+	}
+	97% {
+		background-color: dottedColorPhase(4);
+	}
 }

@@ -1,2 +1,2 @@
 import { CommonProps } from "../common.types";
-export interface TwistProps extends CommonProps {}
+export interface TrophySpinProps extends CommonProps {}

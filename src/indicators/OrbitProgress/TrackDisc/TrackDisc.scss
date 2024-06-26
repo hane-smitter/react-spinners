@@ -1,102 +1,162 @@
+@use "sass:string";
+@use "sass:list";
+
 @use "../../../scss/variables" as defaults;
+@use "../../../scss/mixins" as sharedMixins;
 
-$animationDuration: var(--rli-animation-duration, 1s);
-$animationFn: var(--rli-animation-function, linear);
+$fallbackAnimationDuration: 1s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
 
-.track-disc-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  display: inline-block;
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
+$annulusTrackOpacity: 0.22;
 
-  .track-disc-throbber {
-    width: 5em;
-    height: 5em;
-    color: defaults.$defaultColor;
-    display: inline-block;
+$annulusTrackSpin: string.unique-id();
+$annulusTrackColoring: string.unique-id();
 
-    // create stacking context
-    position: relative;
-    z-index: 0;
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$trackColoringNames: (
+	"--OP-annulus-track-phase1-color",
+	"--OP-annulus-track-phase2-color",
+	"--OP-annulus-track-phase3-color",
+	"--OP-annulus-track-phase4-color"
+);
+$sectorColoringNames: (
+	"--OP-annulus-sector-phase1-color",
+	"--OP-annulus-sector-phase2-color",
+	"--OP-annulus-sector-phase3-color",
+	"--OP-annulus-sector-phase4-color"
+);
 
-    .track-disc-ring {
-      width: 100%;
-      height: 100%;
-      border-width: 0.38em;
-      border-style: solid;
-      border-radius: 50%;
-      border-color: var(--track-path-color, #eeeeee);
-      border-top-color: currentColor;
-      box-sizing: border-box;
+@function annulusRingColorVars($phaseNum: null, $applyTo: "sector") {
+	$listNames: $sectorColoringNames;
+	@if ($applyTo != "sector") {
+		$listNames: $trackColoringNames;
+	}
 
-      animation-name: trackDiscSpin;
-      animation-duration: $animationDuration;
-      animation-timing-function: $animationFn;
-      animation-iteration-count: infinite;
-    }
+	$varName: string.unquote(list.nth($listNames, 1));
+	$cssVar: var($varName);
 
-    .track-disc-text {
-      mix-blend-mode: difference;
-      // filter: invert(3%);
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($listNames, $phaseNum));
 
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
 
-      z-index: -2;
-
-      // background-color: blue;
-    }
-  }
+	@return $cssVar;
 }
 
-@keyframes trackDiscSpin {
-  to {
-    transform: rotate(1turn);
-  }
+@mixin applyColor($num) {
+	border-color: annulusRingColorVars($num, "track");
+	border-top-color: annulusRingColorVars($num);
 }
 
-/* 
+.OP-annulus-sector-track-rli-bounding-box {
+	--OP-annulus-track-phase1-color: #{rgba(
+			defaults.$defaultColor,
+			$annulusTrackOpacity
+		)}; // sass specific rgba
+	--OP-annulus-sector-phase1-color: #{defaults.$defaultColor};
 
-$spinner-color: red !default;
-$spinner-background-color: #eee !default;
-$spinner-stroke: 2px !default;
-$spinner-diameter: 40px !default;
-$spinner-sides: 1 !default;
+	font-size: defaults.$fontSizer;
+	display: inline-block;
 
-@mixin spinner(
-  $color: $spinner-color,
-  $background-color: $spinner-background-color,
-  $stroke: $spinner-stroke,
-  $diameter: $spinner-diameter,
-  $sides: $spinner-sides
-) {
-  border: $stroke solid $background-color;
-  font-size: $diameter;
-  width: 1em;
-  height: 1em;
-  border-radius: .5em;
-  @include box-sizing(border-box);
-  -webkit-animation: spin 1s linear infinite;
-  -moz-animation: spin 1s linear infinite;
-  animation: spin 1s linear infinite;
-  border-top-color: $color;
-  @if $sides >= 2 {
-    border-right-color: $color;
-  }
-  @if $sides >= 3 {
-    border-bottom-color: $color;
-  }
+	.OP-annulus-sector-track-indicator {
+		width: 5em;
+		height: 5em;
+		color: annulusRingColorVars();
+		display: inline-block;
+
+		// create stacking context
+		position: relative;
+		z-index: 0;
+
+		.annulus-track-ring {
+			width: 100%;
+			height: 100%;
+			border-width: 0.34em;
+			border-style: solid;
+			border-radius: 50%;
+			box-sizing: border-box;
+			@include applyColor(1);
+
+			animation:
+				$animationDuration $animationFn infinite $annulusTrackSpin,
+				calc($animationDuration * 4) $animationFn infinite $annulusTrackColoring;
+		}
+
+		.OP-annulus-sector-text {
+			mix-blend-mode: difference;
+			// filter: invert(3%);
+
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+
+			z-index: -2;
+
+			// background-color: blue;
+		}
+	}
 }
 
-.spinner {
-  @include spinner();
+// Register coloring CSS properties (for Track and Sector)
+@include sharedMixins.registerCustomProperties($trackColoringNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{rgba(defaults.$defaultColor, $annulusTrackOpacity)};
+}
+@include sharedMixins.registerCustomProperties($sectorColoringNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
 }
 
-@keyframes spin {
-  to {
-    @include transform(rotate(360deg));
-  }
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
 }
 
+@keyframes #{$annulusTrackSpin} {
+	to {
+		transform: rotate(1turn);
+	}
+}
 
-*/
+@keyframes #{$annulusTrackColoring} {
+	100%,
+	0% {
+		@include applyColor(1);
+	}
+	18% {
+		@include applyColor(1);
+	}
+	25% {
+		@include applyColor(2);
+	}
+	43% {
+		@include applyColor(2);
+	}
+	50% {
+		@include applyColor(3);
+	}
+	68% {
+		@include applyColor(3);
+	}
+	75% {
+		@include applyColor(4);
+	}
+	93% {
+		@include applyColor(4);
+	}
+}

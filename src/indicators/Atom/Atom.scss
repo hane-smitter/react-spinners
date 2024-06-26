@@ -1,160 +1,390 @@
 @use "sass:color";
+@use "sass:string";
+@use "sass:list";
+
 @use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
 
-$defaultColorRedChannel: color.red(defaults.$defaultColor);
-$defaultColorGreenChannel: color.green(defaults.$defaultColor);
-$defaultColorBlueChannel: color.blue(defaults.$defaultColor);
+$atomColor: defaults.$defaultColor;
+$fallbackAnimationDuration: 1s; // This time value should be in sync with JS(React component)
+$animationDuration: var(#{defaults.$animationDurationVarName}, $fallbackAnimationDuration);
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
 
-$atomSpinDuration: var(--rli-animation-duration, 1.8s); // ratio -> 0.2625(2.1 / 8)
-$atomSpinPathDuration: calc($atomSpinDuration / 0.2625);
-$animationFn: var(--rli-animation-function, linear);
+$defaultColorRedChannel: color.red($atomColor);
+$defaultColorGreenChannel: color.green($atomColor);
+$defaultColorBlueChannel: color.blue($atomColor);
+$atomWidth: 6em;
+$atomHeight: $atomWidth;
+$electronPathOpacity: 0.18; // The faint orbit path the electron travels around
+$electronApparentWindOpacity: 0.85; // The wind trail of the speeding/travelling electron
 
-$colorInversionDegree: 200; // 0 - 255
+$nucleusTextureColoring: string.unique-id();
+$electronSpinAnimation: string.unique-id();
+$orbitSpinAnimation: string.unique-id();
+$atomColoring: string.unique-id();
+$atomColoringOpacityLevel_1: string.unique-id();
+$atomColoringOpacityLevel_2: string.unique-id();
+
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: ("--atom-phase1-rgb", "--atom-phase2-rgb", "--atom-phase3-rgb", "--atom-phase4-rgb");
+
+@function genColor($phaseNum, $alpha) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$rgbColor: rgba(var($varName), $alpha);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$rgbColor: rgba(var($newVarName, var($varName)), $alpha);
+	}
+
+	@return $rgbColor;
+}
+@mixin fontColor($phaseNum: null, $alpha: 1) {
+	color: genColor($phaseNum, $alpha);
+}
 
 .atom-rli-bounding-box {
-  --color-r: #{$defaultColorRedChannel};
-  --color-g: #{$defaultColorGreenChannel};
-  --color-b: #{$defaultColorBlueChannel};
+	--atom-phase1-rgb: #{$defaultColorRedChannel}, #{$defaultColorGreenChannel}, #{$defaultColorBlueChannel};
 
-  font-size: defaults.$fontSizer;
-  position: relative;
-  color: rgb(var(--color-r), var(--color-g), var(--color-b));
-  text-align: unset;
+	// color: RGBVarChannels();
+	@include fontColor();
+	font-size: defaults.$fontSizer;
+	position: relative;
+	text-align: unset;
 
-  // Create stacking context
-  isolation: isolate;
+	// Create stacking context
+	isolation: isolate;
 
-  .atom-throbber {
-    $box-width: 5em;
-    $box-height: 5em;
+	.atom-indicator {
+		width: $atomWidth;
+		height: $atomHeight;
 
-    // create stacking context + relative positioning
-    position: relative;
-    z-index: 1;
+		position: relative;
+		perspective: $atomWidth;
+		overflow: hidden;
+		@include fontColor();
+		animation: calc($animationDuration * 4) $animationFn infinite $atomColoring;
 
-    width: $box-width;
-    height: $box-height;
-    transform: perspective(500px) rotateX(-24deg) rotateY(20deg) rotateZ(30deg);
-    transform-style: preserve-3d;
+		// nucleus
+		&::after,
+		&::before {
+			$dimension: calc($atomWidth * 0.08);
 
-    & .inner {
-      width: 100%;
-      height: 100%;
-      -webkit-transform-style: preserve-3d;
-      transform-style: preserve-3d;
-      animation: atomSpin $atomSpinDuration $animationFn infinite;
-      display: inline-block;
-      transform-origin: center center;
-      position: relative;
+			content: "";
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			width: $dimension;
+			height: $dimension;
+			margin: auto;
+			border-radius: 50%;
+			background-image: radial-gradient(
+				circle at 35% 15%,
+				#{genColor(1, 0.1)},
+				#{genColor(1, 0.3)} 37%,
+				#{genColor(1, 1)} 100%
+			);
+			animation: calc($animationDuration * 4) $animationFn infinite $nucleusTextureColoring;
+		}
+		&::before {
+			filter: drop-shadow(0px 0px 0.0625em currentColor);
+		}
 
-      & .orbit:nth-of-type(1) {
-        --orbit-color: var(--disc3-color);
-        animation: rotate $atomSpinPathDuration $animationFn infinite;
-      }
-      & .orbit:nth-of-type(2) {
-        --orbit-color: var(--disc2-color);
-        animation: rotateAtomDisc2 $atomSpinPathDuration $animationFn infinite;
-      }
-      & .orbit:nth-of-type(3) {
-        --orbit-color: var(--disc1-color);
-        animation: rotateAtomDisc3 $atomSpinPathDuration $animationFn infinite;
-      }
+		.electron-orbit {
+			$dimension: calc($atomWidth * 0.8);
 
-      $orbit-border-width: 0.3em;
-      & .orbit {
-        position: absolute;
-        // width: 100%;
-        // height: 98%;
-        border-radius: 50%;
-        border: $orbit-border-width solid var(--orbit-color, currentColor);
-        display: inline-block;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 2%;
-      }
+			@include fontColor(null, $electronApparentWindOpacity);
+			border: 0;
+			border-left: 0.4em solid currentColor;
+			box-sizing: border-box;
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			margin: auto;
+			width: $dimension;
+			height: $dimension;
+			background-color: transparent;
+			border-radius: 50%;
+			transform-style: preserve-3d;
 
-      & .orbit.nucleus-holder {
-        // width: $box-width;
-        // height: $box-height;
-        border: $orbit-border-width solid transparent;
+			animation:
+				$animationDuration $animationFn infinite $orbitSpinAnimation,
+				calc($animationDuration * 4) $animationFn infinite $atomColoringOpacityLevel_1;
 
-        & .nucleus {
-          $nucleus-dimension: 0.8em;
-          --color-invert-r: calc(#{$colorInversionDegree} - var(--color-r));
-          --color-invert-g: calc(#{$colorInversionDegree} - var(--color-g));
-          --color-invert-b: calc(#{$colorInversionDegree} - var(--color-b));
+			// Electron track/path
+			&::after {
+				content: "";
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				border-radius: 50%;
+				@include fontColor(null, $electronPathOpacity);
+				animation: calc($animationDuration * 4) $animationFn infinite $atomColoringOpacityLevel_2;
+				border: 0.125em solid currentColor;
+			}
 
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: $nucleus-dimension;
-          height: $nucleus-dimension;
-          display: inline-block;
-          border-radius: 50%;
-          background-color: currentColor;
-          // box-shadow: inset 0 0 calc($nucleus-dimension / 6) #fff,
-          //   inset calc($nucleus-dimension / 6) 0 calc($nucleus-dimension / 3.75) #f0f,
-          //   inset calc($nucleus-dimension / 6 * -1) 0 calc($nucleus-dimension / 3.75) #0ff,
-          //   inset calc($nucleus-dimension / 6) 0 $nucleus-dimension #f0f,
-          //   inset calc($nucleus-dimension / 6 * -1) 0 $nucleus-dimension #0ff, 0 0 calc($nucleus-dimension / 6) #fff,
-          //   calc($nucleus-dimension / 30 * -1) 0 calc($nucleus-dimension / 3.75) #f0f,
-          //   calc($nucleus-dimension / 30) 0 calc($nucleus-dimension / 3.75) #0ff;
-          box-shadow: inset 0 0 calc($nucleus-dimension / 6) rgba(var(--color-r), var(--color-g), var(--color-b), 0.16),
-            inset calc($nucleus-dimension / 6) 0 calc($nucleus-dimension / 3.75)
-              rgb(var(--color-invert-r), var(--color-invert-g), var(--color-invert-b), 1),
-            inset calc($nucleus-dimension / 6 * -1) 0 calc($nucleus-dimension / 3.75)
-              rgb(var(--color-invert-g), var(--color-invert-r), var(--color-invert-b), 1),
-            inset calc($nucleus-dimension / 6) 0 $nucleus-dimension
-              rgb(var(--color-invert-r), var(--color-invert-g), var(--color-invert-b), 1),
-            inset calc($nucleus-dimension / 6 * -1) 0 $nucleus-dimension
-              rgb(var(--color-invert-g), var(--color-invert-r), var(--color-invert-b), 1),
-            0 0 calc($nucleus-dimension / 6) rgba(var(--color-r), var(--color-g), var(--color-b), 0.16),
-            calc($nucleus-dimension / 30 * -1) 0 calc($nucleus-dimension / 1.35)
-              rgb(var(--color-invert-r), var(--color-invert-g), var(--color-invert-b), 0.44),
-            calc($nucleus-dimension / 30) 0 calc($nucleus-dimension / 1.35)
-              rgb(var(--color-invert-g), var(--color-invert-r), var(--color-invert-b), 0.44);
-        }
-      }
-    }
-  }
+			// electron
+			&::before {
+				$dimension: calc($atomWidth * 0.032);
 
-  .atom-text {
-    color: currentColor;
-    mix-blend-mode: difference;
-    width: unset;
-    display: block;
-  }
+				content: "";
+				width: $dimension;
+				height: $dimension;
+				position: absolute;
+				border-radius: 50%;
+				top: calc($dimension * 0.5 * -1);
+				right: 0;
+				bottom: 0;
+				left: 0;
+				margin: 0 auto;
+				@include fontColor();
+				box-shadow:
+					0px 0px 0.0625em 0.0625em currentColor,
+					0px 0px 0.0625em 0.125em currentColor;
+				background-color: currentColor;
+				transform: rotateY(-70deg);
+				animation:
+					$animationDuration $animationFn infinite $electronSpinAnimation,
+					calc($animationDuration * 4) $animationFn infinite $atomColoring;
+			}
+
+			&:nth-of-type(1) {
+				--orbit-vector-factor: -1;
+
+				transform: rotateY(65deg) rotateX(calc(54deg * var(--orbit-vector-factor)));
+			}
+			&:nth-of-type(2) {
+				--orbit-vector-factor: 1;
+
+				transform: rotateY(65deg) rotateX(calc(54deg * var(--orbit-vector-factor)));
+			}
+			&:nth-of-type(3) {
+				--orbit-vector-factor: 0;
+
+				transform: rotateY(65deg) rotateX(calc(54deg * var(--orbit-vector-factor)));
+
+				// --------Animation ahead into time <START--------
+				animation-delay: calc($animationDuration * 0.5 * -1), calc($animationDuration * 4 * -1); // No delay applied to coloring animation
+				&::before {
+					animation-delay: calc($animationDuration * 0.5 * -1), calc($animationDuration * 4 * -1); // No delay applied to coloring animation
+				}
+				// --------Animation ahead into time <END--------
+
+				// --------Animation shorter time <START--------
+				// animation-duration: calc($animationDuration * 0.75),
+				// 	calc($animationDuration * 0.75 * 4);
+				// &::before {
+				// 	animation-duration: calc($animationDuration * 0.75),
+				// 		calc($animationDuration * 0.75 * 4);
+				// }
+				// --------Animation shorter time <END--------
+			}
+		}
+	}
+
+	.atom-text {
+		color: currentColor;
+		mix-blend-mode: difference;
+		width: unset;
+		display: block;
+	}
 }
 
-/* @keyframes spin-atom {
-  0% {
-    transform: rotateX(360deg) rotateY(0deg);
-  }
-  100% {
-    transform: rotateX(0deg) rotateY(360deg);
-  }
-} */
-@keyframes atomSpin {
-  to {
-    transform: rotate(1turn);
-  }
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<number>#";
+	inherits: true;
+	initial-value:
+		#{$defaultColorRedChannel},
+		#{$defaultColorGreenChannel},
+		#{$defaultColorBlueChannel};
 }
 
-@keyframes rotateAtomDisc2 {
-  from {
-    transform: rotateX(90deg) rotateZ(0deg);
-  }
-  to {
-    transform: rotateX(90deg) rotateZ(360deg);
-  }
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: Won't register custom property for animation easing function since it has a data type syntax that is not supported by CSS @property syntax
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
 }
-@keyframes rotateAtomDisc3 {
-  from {
-    transform: rotateY(90deg) rotateZ(0deg);
-  }
-  to {
-    transform: rotateY(90deg) rotateZ(360deg);
-  }
+
+@keyframes #{$orbitSpinAnimation} {
+	from {
+		transform: rotateY(70deg) rotateX(calc(54deg * var(--orbit-vector-factor))) rotateZ(0deg);
+	}
+	to {
+		transform: rotateY(70deg) rotateX(calc(54deg * var(--orbit-vector-factor))) rotateZ(360deg);
+	}
+}
+@keyframes #{$electronSpinAnimation} {
+	from {
+		transform: rotateY(-70deg) rotateX(0deg);
+	}
+	to {
+		transform: rotateY(-70deg) rotateX(-360deg);
+	}
+}
+@keyframes #{$nucleusTextureColoring} {
+	100%,
+	0% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(1, 0.1)},
+			#{genColor(1, 0.3)} 37%,
+			#{genColor(1, 1)} 100%
+		);
+	}
+	20% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(1, 0.1)},
+			#{genColor(1, 0.3)} 37%,
+			#{genColor(1, 1)} 100%
+		);
+	}
+	25% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(2, 0.1)},
+			#{genColor(2, 0.3)} 37%,
+			#{genColor(2, 1)} 100%
+		);
+	}
+	45% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(2, 0.1)},
+			#{genColor(2, 0.3)} 37%,
+			#{genColor(2, 1)} 100%
+		);
+	}
+	50% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(3, 0.1)},
+			#{genColor(3, 0.3)} 37%,
+			#{genColor(3, 1)} 100%
+		);
+	}
+	70% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(3, 0.1)},
+			#{genColor(3, 0.3)} 37%,
+			#{genColor(3, 1)} 100%
+		);
+	}
+	75% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(4, 0.1)},
+			#{genColor(4, 0.3)} 37%,
+			#{genColor(4, 1)} 100%
+		);
+	}
+	95% {
+		background-image: radial-gradient(
+			circle at 35% 15%,
+			#{genColor(4, 0.1)},
+			#{genColor(4, 0.3)} 37%,
+			#{genColor(4, 1)} 100%
+		);
+	}
+}
+
+// It is easier animating the value of a css variable(--some-name), but animation of a property name is buggy in firefox
+// and requires some bit of extra hack in chrome
+// There option left is to animate CSS property, e.g color. Disadvantage of this approach is it requires more animatiion frames
+// since some sections of the animation have different opacity for there color.
+@keyframes #{$atomColoring} {
+	100%,
+	0% {
+		@include fontColor(1);
+	}
+	20% {
+		@include fontColor(1);
+	}
+	25% {
+		@include fontColor(2);
+	}
+	45% {
+		@include fontColor(2);
+	}
+	50% {
+		@include fontColor(3);
+	}
+	70% {
+		@include fontColor(3);
+	}
+	75% {
+		@include fontColor(4);
+	}
+	95% {
+		@include fontColor(4);
+	}
+}
+@keyframes #{$atomColoringOpacityLevel_1} {
+	100%,
+	0% {
+		@include fontColor(1, $electronApparentWindOpacity);
+	}
+	20% {
+		@include fontColor(1, $electronApparentWindOpacity);
+	}
+	25% {
+		@include fontColor(2, $electronApparentWindOpacity);
+	}
+	45% {
+		@include fontColor(2, $electronApparentWindOpacity);
+	}
+	50% {
+		@include fontColor(3, $electronApparentWindOpacity);
+	}
+	70% {
+		@include fontColor(3, $electronApparentWindOpacity);
+	}
+	75% {
+		@include fontColor(4, $electronApparentWindOpacity);
+	}
+	95% {
+		@include fontColor(4, $electronApparentWindOpacity);
+	}
+}
+@keyframes #{$atomColoringOpacityLevel_2} {
+	100%,
+	0% {
+		@include fontColor(1, $electronPathOpacity);
+	}
+	20% {
+		@include fontColor(1, $electronPathOpacity);
+	}
+	25% {
+		@include fontColor(2, $electronPathOpacity);
+	}
+	45% {
+		@include fontColor(2, $electronPathOpacity);
+	}
+	50% {
+		@include fontColor(3, $electronPathOpacity);
+	}
+	70% {
+		@include fontColor(3, $electronPathOpacity);
+	}
+	75% {
+		@include fontColor(4, $electronPathOpacity);
+	}
+	95% {
+		@include fontColor(4, $electronPathOpacity);
+	}
 }

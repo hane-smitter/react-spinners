@@ -1,35 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryFn, StoryObj } from "@storybook/react";
+
 import OrbitProgress from "./OrbitProgress";
+import { developmentColorStr, developmentColorArr } from "../variables";
 
 export default {
 	title: "rli/OrbitProgress",
 	component: OrbitProgress
-} as ComponentMeta<typeof OrbitProgress>;
+} as Meta<typeof OrbitProgress>;
 
-const Template: ComponentStory<typeof OrbitProgress> = args => (
-	<OrbitProgress {...args} />
-);
+type OPIndicatorStory = StoryObj<typeof OrbitProgress>;
 
-export const Primary = Template.bind({});
+export const Primary: OPIndicatorStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: OPIndicatorStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: OPIndicatorStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: OPIndicatorStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };

@@ -1,0 +1,208 @@
+@use "sass:string";
+@use "sass:list";
+
+@use "../../../scss/variables" as defaults;
+@use "../../../scss/mixins" as sharedMixins;
+
+$fallbackAnimationDuration: 0.5s; // This time value should be in sync with JS(React component)
+$animationDuration: var(#{defaults.$animationDurationVarName}, $fallbackAnimationDuration);
+
+$animationFn: var(#{defaults.$animationEasingVarName}, cubic-bezier(0.74, 0.1, 0.74, 1));
+
+$dotsWrapperHeight: 3.125em; // width is calculated from size of content.
+$dotSize: 1.1em;
+$dotSpacing: calc($dotSize * 0.5);
+$shadowHeight: calc($dotSize / 5);
+
+$bounceAnimation: string.unique-id();
+$shadowAnimation: string.unique-id();
+$bounceColoringAnimation: string.unique-id();
+
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--TD-bounce-phase1-color",
+	"--TD-bounce-phase2-color",
+	"--TD-bounce-phase3-color",
+	"--TD-bounce-phase4-color"
+);
+
+@function TDBounceColorVar($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
+
+	@return $cssVar;
+}
+
+.bounce-rli-bounding-box {
+	--TD-bounce-phase1-color: #{defaults.$defaultColor};
+
+	font-size: defaults.$fontSizer;
+	color: TDBounceColorVar();
+	display: inline-block;
+	// padding bottom = height of shadow + offsetTop(calc. from applied style top 101%)
+	padding-bottom: calc($shadowHeight + ($dotsWrapperHeight * 0.01));
+
+	.wrapper {
+		--dot1-delay: #{0s};
+		--dot1-x-offset: #{$dotSpacing};
+
+		--dot2-delay: #{calc(($animationDuration + $animationDuration * 0.75) * -1)};
+		--dot2-x-offset: #{calc($dotSpacing * 2 + $dotSize)};
+
+		--dot3-delay: #{calc(($animationDuration + $animationDuration * 0.5) * -1)};
+		--dot3-x-offset: #{calc($dotSpacing * 3 + $dotSize * 2)};
+
+		width: calc($dotSize * 3 + $dotSpacing * 4);
+		height: $dotsWrapperHeight;
+		position: relative;
+		display: block;
+		margin: 0 auto; // When 'text' is long, it remains centered
+
+		// Debugging
+		// background-color: dodgerblue;
+
+		.group {
+			display: block;
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+
+			.dot {
+				width: $dotSize;
+				height: $dotSize;
+				position: absolute;
+				border-radius: 50%;
+				background-color: TDBounceColorVar();
+				transform-origin: 50%;
+				animation:
+					$animationDuration $animationFn alternate infinite $bounceAnimation,
+					calc($animationDuration * 4) $animationFn infinite $bounceColoringAnimation;
+
+				&:nth-of-type(1) {
+					left: var(--dot1-x-offset);
+					animation-delay: var(--dot1-delay), 0s;
+				}
+				&:nth-of-type(2) {
+					left: var(--dot2-x-offset);
+					animation-delay: var(--dot2-delay), 0s;
+				}
+				&:nth-of-type(3) {
+					left: var(--dot3-x-offset);
+					animation-delay: var(--dot3-delay), 0s;
+				}
+			}
+
+			.shadow {
+				width: $dotSize;
+				height: $shadowHeight;
+				border-radius: 50%;
+				background-color: rgba(0, 0, 0, 0.5);
+				position: absolute;
+				top: 101%;
+				transform-origin: 50%;
+				z-index: -1;
+				filter: blur(1px);
+				animation: $animationDuration $animationFn alternate infinite $shadowAnimation;
+
+				&:nth-of-type(1) {
+					left: var(--dot1-x-offset);
+					animation-delay: var(--dot1-delay);
+				}
+				&:nth-of-type(2) {
+					left: var(--dot2-x-offset);
+					animation-delay: var(--dot2-delay);
+				}
+				&:nth-of-type(3) {
+					left: var(--dot3-x-offset);
+					animation-delay: var(--dot3-delay);
+				}
+			}
+		}
+	}
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$bounceAnimation} {
+	0% {
+		top: 0%;
+	}
+	60% {
+		height: 1.25em;
+		border-radius: 50%;
+		transform: scaleX(1);
+	}
+	100% {
+		top: 100%;
+		height: $shadowHeight;
+		transform: scaleX(1.5);
+		filter: blur(0.4px);
+	}
+}
+
+@keyframes #{$shadowAnimation} {
+	0% {
+		transform: scaleX(0.2);
+		opacity: 0.2;
+	}
+	60% {
+		// transform: scaleX(1);
+		opacity: 0.4;
+	}
+	100% {
+		transform: scaleX(1.5);
+		opacity: 0.6;
+	}
+}
+
+@keyframes #{$bounceColoringAnimation} {
+	0%,
+	100% {
+		background-color: TDBounceColorVar(1);
+	}
+	20% {
+		background-color: TDBounceColorVar(1);
+	}
+	25% {
+		background-color: TDBounceColorVar(2);
+	}
+	45% {
+		background-color: TDBounceColorVar(2);
+	}
+	50% {
+		background-color: TDBounceColorVar(3);
+	}
+	70% {
+		background-color: TDBounceColorVar(3);
+	}
+	75% {
+		background-color: TDBounceColorVar(4);
+	}
+	95% {
+		background-color: TDBounceColorVar(4);
+	}
+}

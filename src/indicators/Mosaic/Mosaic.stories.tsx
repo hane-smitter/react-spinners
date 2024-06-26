@@ -1,33 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
+
 import Mosaic from "./Mosaic";
+import { developmentColorArr, developmentColorStr } from "../variables";
 
 export default {
 	title: "rli/Mosaic",
 	component: Mosaic
-} as ComponentMeta<typeof Mosaic>;
+} as Meta<typeof Mosaic>;
 
-const Template: ComponentStory<typeof Mosaic> = args => <Mosaic {...args} />;
+type MosaicStory = StoryObj<typeof Mosaic>;
 
-export const Primary = Template.bind({});
+export const Primary: MosaicStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: MosaicStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: MosaicStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: MosaicStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };

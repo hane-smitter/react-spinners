@@ -1,26 +1,125 @@
-@use "../../scss/variables" as defaults;
+@use "sass:string";
+@use "sass:list";
 
-// `animation duration` and `animation function(easing function)` are set from javascript
+@use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
+
+$fallbackAnimationDuration: 2s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
+
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
+
+$lifelineMove: string.unique-id();
+$lifelineColoring: string.unique-id();
+$lifeLineTotalPathLength: 1010.1312255859375; // SVG fixed length
+
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--life-line-phase1-color",
+	"--life-line-phase2-color",
+	"--life-line-phase3-color",
+	"--life-line-phase4-color"
+);
+
+@function lifelineColorVar($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
+
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
+
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
+
+	@return $cssVar;
+}
 
 .lifeline-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  isolation: isolate;
+	--life-line-phase1-color: #{defaults.$defaultColor};
 
-  .lifeline-throbber {
-    color: defaults.$defaultColor;
-    position: relative;
-    text-align: center;
+	font-size: defaults.$fontSizer;
+	isolation: isolate;
+	color: lifelineColorVar();
 
-    svg.rli-lifeline-svg {
-      visibility: hidden;
-      overflow: hidden;
-    }
+	.lifeline-indicator {
+		position: relative;
+		text-align: center;
 
-    .lifeline-text {
-      color: currentColor;
-      mix-blend-mode: difference;
-      width: unset;
-      display: block;
-    }
-  }
+		// svg.rli-lifeline-svg {
+		// 	visibility: hidden;
+		// 	overflow: hidden;
+		// }
+
+		path.rli-lifeline {
+			stroke-dasharray: calc($lifeLineTotalPathLength * 0.5 * 0.94)
+				calc($lifeLineTotalPathLength * 0.5 * 0.06);
+			// animation: name duration timing-function delay iteration-count direction fill-mode;
+			animation:
+				$animationDuration $animationFn infinite $lifelineMove,
+				calc($animationDuration * 4) $animationFn infinite $lifelineColoring;
+		}
+	}
+
+	.lifeline-text {
+		color: currentColor;
+		mix-blend-mode: difference;
+		width: unset;
+		display: block;
+	}
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$lifelineMove} {
+	to {
+		stroke-dashoffset: calc($lifeLineTotalPathLength * -1);
+	}
+}
+
+@keyframes #{$lifelineColoring} {
+	100%,
+	0% {
+		color: lifelineColorVar(1);
+	}
+	20% {
+		color: lifelineColorVar(1);
+	}
+	25% {
+		color: lifelineColorVar(2);
+	}
+	45% {
+		color: lifelineColorVar(2);
+	}
+	50% {
+		color: lifelineColorVar(3);
+	}
+	70% {
+		color: lifelineColorVar(3);
+	}
+	75% {
+		color: lifelineColorVar(4);
+	}
+	95% {
+		color: lifelineColorVar(4);
+	}
 }

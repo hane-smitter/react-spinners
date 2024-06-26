@@ -1,58 +1,142 @@
+@use "sass:string";
+@use "sass:list";
+
 @use "../../../scss/variables" as defaults;
+@use "../../../scss/mixins" as sharedMixins;
 
-$animationDuration: var(--rli-animation-duration, 1.2s);
-$animationFn: var(--rli-animation-function, linear);
+$fallbackAnimationDuration: 1.2s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
 
-.split-disc-rli-bounding-box {
-  font-size: defaults.$fontSizer;
-  box-sizing: border-box;
-  display: inline-block;
+$animationFn: var(#{defaults.$animationEasingVarName}, linear);
 
-  .split-disc-throbber {
-    width: 5em;
-    height: 5em;
-    display: inline-block;
+// Animation names
+$annulusSplitsSpin: string.unique-id();
+$annulusSplitsColoring: string.unique-id();
 
-    // create stacking context
-    position: relative;
-    z-index: 0;
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--OP-annulus-dual-sectors-phase1-color",
+	"--OP-annulus-dual-sectors-phase2-color",
+	"--OP-annulus-dual-sectors-phase3-color",
+	"--OP-annulus-dual-sectors-phase4-color"
+);
 
-    color: defaults.$defaultColor;
+@function annulusSplitColorPhase($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
 
-    .split-disc-ring {
-      box-sizing: border-box;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border-width: 0.38em;
-      border-style: solid;
-      border-color: var(--split1-color, var(--splits-color, currentColor)) transparent
-        var(--split2-color, var(--splits-color, currentColor)) transparent;
-      background-color: transparent;
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
 
-      animation-name: splitDiscSpin;
-      animation-duration: $animationDuration;
-      animation-timing-function: $animationFn;
-      animation-iteration-count: infinite;
-    }
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
 
-    .split-disc-text {
-      mix-blend-mode: difference;
-
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-
-      z-index: -2;
-    }
-  }
+	@return $cssVar;
 }
-@keyframes splitDiscSpin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+
+.OP-annulus-dual-sectors-rli-bounding-box {
+	--OP-annulus-dual-sectors-phase1-color: #{defaults.$defaultColor};
+
+	font-size: defaults.$fontSizer;
+	box-sizing: border-box;
+	display: inline-block;
+
+	.OP-annulus-dual-sectors-indicator {
+		width: 5em;
+		height: 5em;
+		display: inline-block;
+
+		// create stacking context
+		position: relative;
+		z-index: 0;
+
+		color: annulusSplitColorPhase();
+
+		.annulus-sectors {
+			box-sizing: border-box;
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			border-width: 0.34em;
+			border-style: solid;
+			border-color: annulusSplitColorPhase(1) transparent
+				annulusSplitColorPhase(1) transparent;
+			background-color: transparent;
+
+			animation:
+				$animationDuration $animationFn infinite $annulusSplitsSpin,
+				calc($animationDuration * 4) $animationFn infinite
+					$annulusSplitsColoring;
+		}
+
+		.OP-annulus-dual-sectors-text {
+			mix-blend-mode: difference;
+
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+
+			z-index: -2;
+		}
+	}
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$annulusSplitsSpin} {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes #{$annulusSplitsColoring} {
+	100%,
+	0% {
+		border-color: annulusSplitColorPhase(1) transparent;
+	}
+	20% {
+		border-color: annulusSplitColorPhase(1) transparent;
+	}
+	25% {
+		border-color: annulusSplitColorPhase(2) transparent;
+	}
+	45% {
+		border-color: annulusSplitColorPhase(2) transparent;
+	}
+	50% {
+		border-color: annulusSplitColorPhase(3) transparent;
+	}
+	70% {
+		border-color: annulusSplitColorPhase(3) transparent;
+	}
+	75% {
+		border-color: annulusSplitColorPhase(4) transparent;
+	}
+	95% {
+		border-color: annulusSplitColorPhase(4) transparent;
+	}
 }

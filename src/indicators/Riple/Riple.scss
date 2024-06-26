@@ -1,79 +1,164 @@
+@use "sass:string";
+@use "sass:list";
+
 @use "../../scss/variables" as defaults;
+@use "../../scss/mixins" as sharedMixins;
 
-$animationDuration: var(--rli-animation-duration, 1s);
-$animationFn: var(--rli-animation-function, cubic-bezier(0, 0.2, 0.8, 1));
+$fallbackAnimationDuration: 1s; // This time value should be in sync with JS(React component)
+$animationDuration: var(
+	#{defaults.$animationDurationVarName},
+	$fallbackAnimationDuration
+);
 
-.riple-rli-bounding-box {
-  box-sizing: border-box;
-  font-size: defaults.$fontSizer;
-  display: inline-block;
+$animationFn: var(#{defaults.$animationEasingVarName}, cubic-bezier(0, 0.2, 0.8, 1));
 
-  .riple-throbber {
-    display: inline-block;
-    width: 5em;
-    height: 5em;
-    color: defaults.$defaultColor;
-    // background-color: gray;
+$rippling: string.unique-id();
+$rippleColoring: string.unique-id();
 
-    // Create stacking context
-    position: relative;
-    z-index: 0;
+// Sass list with variable names that color the animation
+// NOTE: These names should match with ones in Javascript(React component)
+$coloringPropertyNames: (
+	"--riple-phase1-color",
+	"--riple-phase2-color",
+	"--riple-phase3-color",
+	"--riple-phase4-color"
+);
 
-    .riple-text {
-      mix-blend-mode: difference;
-      // filter: invert(1);
+@function ripleColorVar($phaseNum: null) {
+	$varName: string.unquote(list.nth($coloringPropertyNames, 1));
+	$cssVar: var($varName);
 
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+	@if ($phaseNum and $phaseNum != 1) {
+		$newVarName: string.unquote(list.nth($coloringPropertyNames, $phaseNum));
 
-      z-index: -2;
-    }
+		// Explicitly add fallback since @property support is still catching up
+		$cssVar: var($newVarName, var($varName));
+	}
 
-    .riple {
-      --border-width: 0.25em;
-      position: absolute;
-      border-width: var(--border-width);
-      border-style: solid;
-      border-color: currentColor;
-      opacity: 1;
-      border-radius: 50%;
-      animation: rippling $animationDuration $animationFn infinite;
-    }
-    .riple:nth-child(2) {
-      animation-delay: -0.5s;
-    }
-  }
+	@return $cssVar;
 }
 
-@keyframes rippling {
-  0% {
-    top: calc(50% - var(--border-width));
-    left: calc(50% - var(--border-width));
-    right: calc(50% - var(--border-width));
-    bottom: calc(50% - var(--border-width));
-    opacity: 0;
-  }
-  4.9% {
-    top: calc(50% - var(--border-width));
-    left: calc(50% - var(--border-width));
-    right: calc(50% - var(--border-width));
-    bottom: calc(50% - var(--border-width));
-    opacity: 0;
-  }
-  5% {
-    top: calc(50% - var(--border-width));
-    left: calc(50% - var(--border-width));
-    right: calc(50% - var(--border-width));
-    bottom: calc(50% - var(--border-width));
-    opacity: 1;
-  }
-  100% {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0;
-  }
+.riple-rli-bounding-box {
+	--riple-phase1-color: #{defaults.$defaultColor};
+
+	box-sizing: border-box;
+	font-size: defaults.$fontSizer;
+	display: inline-block;
+	color: ripleColorVar();
+
+	.riple-indicator {
+		display: inline-block;
+		width: 5em;
+		height: 5em;
+		// color: defaults.$defaultColor;
+		// background-color: gray;
+
+		// Create stacking context
+		position: relative;
+		z-index: 0;
+
+		.riple-text {
+			mix-blend-mode: difference;
+			// filter: invert(1);
+
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+
+			z-index: -2;
+		}
+
+		.riple {
+			--border-width: 0.25em;
+			position: absolute;
+			border: var(--border-width) solid ripleColorVar();
+			opacity: 1;
+			border-radius: 50%;
+			will-change: top, right, left, bottom, border-color;
+			animation:
+				$animationDuration $animationFn infinite $rippling,
+				calc($animationDuration * 4) $animationFn infinite $rippleColoring;
+		}
+		.riple:nth-of-type(2) {
+			// animation-delay: -0.5s;
+			animation-delay: calc($animationDuration / 2 * -1);
+		}
+	}
+}
+
+// Register coloring CSS properties
+@include sharedMixins.registerCustomProperties($coloringPropertyNames) {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: #{defaults.$defaultColor};
+}
+
+// Sass list
+$animationDurationName: (#{defaults.$animationDurationVarName});
+// Register CSS custom property for variable with animation Duration
+// NOTE: We wont register custom property for animation easing function since it has a syntax that is not yet supported by CSS @property
+@include sharedMixins.registerCustomProperties($animationDurationName) {
+	syntax: "<time>";
+	inherits: true;
+	initial-value: $fallbackAnimationDuration;
+}
+
+@keyframes #{$rippling} {
+	0% {
+		top: calc(50% - var(--border-width));
+		left: calc(50% - var(--border-width));
+		right: calc(50% - var(--border-width));
+		bottom: calc(50% - var(--border-width));
+		opacity: 0;
+	}
+	4.9% {
+		top: calc(50% - var(--border-width));
+		left: calc(50% - var(--border-width));
+		right: calc(50% - var(--border-width));
+		bottom: calc(50% - var(--border-width));
+		opacity: 0;
+	}
+	5% {
+		top: calc(50% - var(--border-width));
+		left: calc(50% - var(--border-width));
+		right: calc(50% - var(--border-width));
+		bottom: calc(50% - var(--border-width));
+		opacity: 1;
+	}
+	100% {
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		opacity: 0;
+	}
+}
+
+@keyframes #{$rippleColoring } {
+	100%,
+	0% {
+		border-color: ripleColorVar(1);
+	}
+	24.9% {
+		border-color: ripleColorVar(1);
+	}
+	25% {
+		border-color: ripleColorVar(2);
+	}
+	49.9% {
+		border-color: ripleColorVar(2);
+	}
+	50% {
+		border-color: ripleColorVar(3);
+	}
+	74.9% {
+		border-color: ripleColorVar(3);
+	}
+	75% {
+		border-color: ripleColorVar(4);
+	}
+	99.9% {
+		border-color: ripleColorVar(4);
+	}
 }

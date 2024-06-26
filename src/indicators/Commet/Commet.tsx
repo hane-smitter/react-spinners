@@ -1,15 +1,24 @@
-import React, { useCallback, useRef } from "react";
+"use strict";
+
+import React from "react";
 
 import useAnimationPacer from "../../hooks/useAnimationPacer";
 import useStylesPipeline from "../../hooks/useStylesPipeline";
 import Text from "../../utils/Text";
 import "./Commet.scss";
 import { CommetProps } from "./Commet.types";
+import arrayRepeat from "../../utils/arrayRepeat";
+import { defaultColor as DEFAULT_COLOR } from "../variables";
+
+// NOTE: Below variables should match with ones set in sass file
+const commetColorPhases: Array<string> = Array.from(
+	{ length: 4 },
+	(_, idx) => `--commet-phase${idx + 1}-color`
+);
 
 const Commet = (props: CommetProps) => {
-	const elemRef = useRef<HTMLSpanElement | null>(null);
 	// Styles
-	let { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
+	const { styles, fontSize } = useStylesPipeline(props?.style, props?.size);
 
 	// Animation speed and smoothing control
 	const easingFn: string | undefined = props?.easing;
@@ -20,34 +29,9 @@ const Commet = (props: CommetProps) => {
 	);
 
 	// color SETTINGS
-	// If Color property is a string, that is the color of all rings
-	// If color property is an array, that is color for each rings
-	const colorReset = useCallback(
-		function () {
-			if (elemRef.current) {
-				// e.g --ring1-color
-				const cssColorVars: Array<string> = Array.from(
-					{ length: 2 },
-					(item, idx) => {
-						const num: number = idx + 1;
-						const cssPropName: string = `--${"ring" + num + "-"}color`;
-						return cssPropName;
-					}
-				);
-
-				elemRef.current?.style.removeProperty("color");
-				for (let i = 0; i < cssColorVars.length; i++) {
-					elemRef.current?.style.removeProperty(cssColorVars[i]);
-				}
-			}
-		},
-		[elemRef.current]
-	);
-	let colorProp: string | string[] = props?.color ?? "";
-	const ringColorStyles: React.CSSProperties = stylesObjectFromColorProp(
-		colorProp,
-		colorReset
-	);
+	const colorProp: string | string[] = props?.color ?? "";
+	const commetColorStyles: React.CSSProperties =
+		stylesObjectFromColorProp(colorProp);
 
 	return (
 		<span
@@ -58,72 +42,82 @@ const Commet = (props: CommetProps) => {
 					...(animationPeriod && {
 						"--rli-animation-duration": animationPeriod
 					}),
-					...(easingFn && { "--rli-animation-function": easingFn })
+					...(easingFn && { "--rli-animation-function": easingFn }),
+					...commetColorStyles,
+					...styles
 				} as React.CSSProperties
 			}
 			role="status"
 			aria-live="polite"
 			aria-label="Loading"
 		>
-			<span
-				className="rli-d-i-b commet-throbber"
-				ref={elemRef}
-				style={{
-					...ringColorStyles,
-					...styles
-				}}
-			>
+			<span className="rli-d-i-b commet-indicator">
+				<span className="rli-d-i-b commet-box">
+					<span className="rli-d-i-b commet-trail trail1"></span>
+					<span className="rli-d-i-b  commetball-box"></span>
+				</span>
+				<span className="rli-d-i-b commet-box">
+					<span className="rli-d-i-b commet-trail trail2"></span>
+					<span className="rli-d-i-b commetball-box"></span>
+				</span>
+
 				<Text
 					className="commet-text"
 					text={props?.text}
 					textColor={props?.textColor}
 				/>
-
-				<span className="rli-d-i-b ring-wrapper ring1">
-					<span className="rli-d-i-b ring "></span>
-					<span className="rli-d-i-b ringball-holder"></span>
-				</span>
-				<span className="rli-d-i-b ring-wrapper ring2">
-					<span className="rli-d-i-b ring "></span>
-					<span className="rli-d-i-b ringball-holder"></span>
-				</span>
 			</span>
 		</span>
 	);
 };
 
-export default React.memo(Commet);
+export default Commet;
 
 /**
- * Creates a style object with props that color the throbber/spinner
+ * Creates a style object with props that color the loading indicator
  */
 function stylesObjectFromColorProp(
-	colorProp: string | string[],
-	resetToDefaultColors: () => void
+	colorProp: string | string[]
 ): React.CSSProperties {
 	const stylesObject: any = {};
 
-	if (!colorProp) {
-		resetToDefaultColors();
-		return stylesObject;
-	}
-
 	if (colorProp instanceof Array) {
-		const arrLength = colorProp.length;
+		const colorArr: string[] = arrayRepeat(colorProp, commetColorPhases.length);
 
-		stylesObject["color"] = colorProp[0];
+		for (let idx = 0; idx < colorArr.length; idx++) {
+			if (idx >= 4) break;
 
-		for (let idx = 0; idx < arrLength; idx++) {
-			if (idx >= 2) break;
-			let currentItem = `ring${idx + 1}`;
-
-			stylesObject[`--${currentItem}-color`] = colorProp[idx];
+			stylesObject[commetColorPhases[idx]] = colorArr[idx];
 		}
 
 		return stylesObject;
 	}
 
-	stylesObject["color"] = colorProp;
+	try {
+		if (typeof colorProp !== "string") throw new Error("Color String expected");
+
+		for (let i = 0; i < commetColorPhases.length; i++) {
+			stylesObject[commetColorPhases[i]] = colorProp;
+		}
+	} catch (error: unknown) {
+		error instanceof Error
+			? console.warn(
+					`[${
+						error.message
+					}]: Received "${typeof colorProp}" instead with value, ${JSON.stringify(
+						colorProp
+					)}`
+			  )
+			: console.warn(
+					`${JSON.stringify(
+						colorProp
+					)} received in <Commet /> indicator cannot be processed. Using default instead!`
+			  );
+
+		for (let i = 0; i < commetColorPhases.length; i++) {
+			stylesObject[commetColorPhases[i]] = DEFAULT_COLOR;
+		}
+	}
 
 	return stylesObject;
 }

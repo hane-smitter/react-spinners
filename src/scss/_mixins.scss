@@ -1,25 +1,53 @@
 %text-typography {
-    // white-space: nowrap;
-    // overflow: hidden;
-    // text-overflow: ellipsis;
-    // // font-weight: 500;
-    // width: 80%;
-    // text-transform: uppercase;
-    // text-align: center;
-    // font-size: 0.6em;
-    // letter-spacing: 0.5px;
-    // font-family: system-ui, -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir", "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans", "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu", "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
+	// white-space: nowrap;
+	// overflow: hidden;
+	// text-overflow: ellipsis;
+	// // font-weight: 500;
+	// width: 80%;
+	// text-transform: uppercase;
+	// text-align: center;
+	// font-size: 0.6em;
+	// letter-spacing: 0.5px;
+	// font-family: system-ui, -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir", "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans", "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu", "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-weight: 600;
-    width: 90%;
-    text-transform: uppercase;
-    text-align: center;
-    font-size: 0.7em;
-    letter-spacing: 0.5px;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir", "Segoe UI", "Lucida Grande",
-        "Helvetica Neue", "Helvetica", "Fira Sans", "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu",
-        "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-weight: 600;
+	width: 90%;
+	text-transform: uppercase;
+	text-align: center;
+	font-size: 0.7em;
+	letter-spacing: 0.5px;
+	font-family:
+		system-ui,
+		-apple-system,
+		BlinkMacSystemFont,
+		"Avenir Next",
+		"Avenir",
+		"Segoe UI",
+		"Lucida Grande",
+		"Helvetica Neue",
+		"Helvetica",
+		"Fira Sans",
+		"Roboto",
+		"Noto",
+		"Droid Sans",
+		"Cantarell",
+		"Oxygen",
+		"Ubuntu",
+		"Franklin Gothic Medium",
+		"Century Gothic",
+		"Liberation Sans",
+		sans-serif;
+}
+
+// This registers CSS custom properties using the @ rule
+// `indicatorColorVars` should be a list of strings intended to be the name of the CSS custom properties.
+@mixin registerCustomProperties($indicatorColorVars: ()) {
+	@each $var in $indicatorColorVars {
+		@property #{$var} {
+			@content;
+		}
+	}
 }

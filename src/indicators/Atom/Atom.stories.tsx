@@ -1,33 +1,33 @@
-import React from "react";
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
+
 import Atom from "./Atom";
+import { developmentColorStr, developmentColorArr } from "../variables";
 
 export default {
 	title: "rli/Atom",
 	component: Atom
-} as ComponentMeta<typeof Atom>;
+} as Meta<typeof Atom>;
 
-const Template: ComponentStory<typeof Atom> = args => <Atom {...args} />;
+type AtomStory = StoryObj<typeof Atom>;
 
-export const Primary = Template.bind({});
+export const Primary: AtomStory = {};
 
-export const Secondary = Template.bind({});
-Secondary.args = {
-	color: "#b7ac9a",
-	text: true
+export const Secondary: AtomStory = {
+	args: {
+		color: developmentColorStr,
+		text: true
+	}
 };
 
-export const Small = Template.bind({});
-Small.args = {
-	size: "small"
+export const MultiColored: AtomStory = {
+	args: {
+		color: developmentColorArr
+	}
 };
 
-export const Medium = Template.bind({});
-Medium.args = {
-	size: "medium"
-};
-
-export const Large = Template.bind({});
-Large.args = {
-	size: "large"
+export const CustomText: AtomStory = {
+	args: {
+		text: "Fairly Long text passed",
+		color: "#64CCC5"
+	}
 };
