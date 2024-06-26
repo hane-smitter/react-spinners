@@ -18,16 +18,18 @@ jobs:
         with:
           ref: stem
 
-      - name: Check if version to publish exists
-        run: npm run checkVersion
-
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: "20.x"
           registry-url: "https://registry.npmjs.org"
+
       - name: Install dependencies 📥
         run: npm ci
+
+      - name: Check if version to publish exists
+        run: npm run checkVersion
+
       # - name: Build & Test package 🔧
       #   run: npm run build && npm run test
       # The package will be built and tested automatically before a publish
