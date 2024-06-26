@@ -1,4 +1,4 @@
-# x.x.x
+# 1.0.0
 
 - All components can animate between colors when provided with an array in `color` prop.
 - Default color is used when invalid color is passed.
