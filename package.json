@@ -1,7 +1,7 @@
 {
 	"name": "react-loading-indicators",
 	"version": "0.2.38",
-	"description": "Simply elegant light-weight loading indicators for react applications",
+	"description": "Kit of elegant loading indicators for react applications",
 	"scripts": {
 		"prebuild": "rm -rf dist",
 		"build": "rollup -c",
@@ -11,8 +11,10 @@
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
 		"prepack": "node ../scripts/preparePkgRoot.cjs",
-		"deploy": "npm run build && cd dist && npm publish",
-		"deploy-dry-run": "npm run build && cd dist && npm publish --dry-run",
+		"predeploy": "npm run build",
+		"deploy": "cd dist && npm publish",
+		"predeploy-dry-run": "npm run build",
+		"deploy-dry-run": "cd dist && npm publish --dry-run",
 		"format": "prettier --ignore-path .gitignore --write \"src/**/*.ts\" \"src/**/*.js\""
 	},
 	"license": "MIT",

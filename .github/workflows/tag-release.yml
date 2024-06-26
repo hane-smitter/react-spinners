@@ -2,9 +2,14 @@
 name: "Create Tagged Release"
 
 on:
-  push:
-    tags:
-      - "v*"
+  # push:
+  #   tags:
+  #     - "v*"
+  workflow_run:
+    workflows: [Publish to NPM]
+    types:
+      - completed
+    branches: [stem]
 
 jobs:
   tagged-release:
@@ -12,10 +17,10 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
-      # Only create release tags for stem branch
-      - name: Check if is production branch
-        if: ${{ endsWith(github.event.base_ref, 'stem') == false }}
-        run: exit -1
+      # Only proceed if previous job was a successful NPM publishment
+      - name: Halt if depended workflow failed
+        if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+        run: exit 2
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -27,11 +32,8 @@ jobs:
           node-version: "20.x"
       - name: Install dependencies 📥
         run: npm ci
-      - name: Check if current version already exists
-        run: npm run checkVersion
       - name: Build & Test package 🔧
         run: npm run build && npm run test
-      
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
